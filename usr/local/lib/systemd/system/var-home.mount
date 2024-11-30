@@ -1,0 +1,16 @@
+[Unit]
+Description=Temporary Directory /var/home
+ConditionPathIsSymbolicLink=!/var/home
+DefaultDependencies=no
+Conflicts=umount.target
+Before=local-fs.target umount.target
+After=swap.target
+
+[Mount]
+What=tmpfs
+Where=/var/home
+Type=tmpfs
+Options=defaults,noatime,nosuid,nodev,size=5%%
+
+[Install]
+WantedBy=local-fs.target
