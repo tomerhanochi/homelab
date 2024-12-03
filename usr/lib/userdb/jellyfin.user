@@ -1,0 +1,7 @@
+{
+  "disposition": "system",
+  "gid": 800,
+  "homeDirectory": "/var/lib/jellyfin",
+  "uid": 800,
+  "userName": "jellyfin"
+}

@@ -1,0 +1,10 @@
+{
+  "privileged": {
+    "hashedPassword": [
+      "$y$j9T$PvnGgUhJCReA3jV9G80t60$9De5rceJhu5N9BTFXmrVcY0Fav1HahVCw.wPYIy0dOC"
+    ],
+    "sshAuthorizedKeys": [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDlb2guzuFJrjNoc+WJnl1dRqcU2CQTGJC0w0KrQWIWN"
+    ]
+  }
+}
