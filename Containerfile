@@ -12,5 +12,5 @@ RUN systemctl enable var-home.mount
 
 COPY /usr/lib/userdb /usr/lib/userdb
 
-COPY /usr/share/factory /usr/share/factory
 COPY /usr/lib/tmpfiles.d /usr/lib/tmpfiles.d
+COPY /usr/share/factory /usr/share/factory
