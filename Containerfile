@@ -10,8 +10,7 @@ RUN authselect select systemd
 COPY /usr/lib/systemd/system /usr/lib/systemd/system
 RUN systemctl enable var-home.mount
 
-RUN dnf install --assumeyes bat eza fzf git ripgrep zoxide zsh && dnf remove --assumeyes qemu-* sssd-* && dnf clean all
+COPY /usr/lib/userdb /usr/lib/userdb
 
 COPY /usr/share/factory /usr/share/factory
-COPY /usr/lib/userdb /usr/lib/userdb
 COPY /usr/lib/tmpfiles.d /usr/lib/tmpfiles.d
