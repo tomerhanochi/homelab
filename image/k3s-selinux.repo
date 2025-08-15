@@ -1,6 +1,0 @@
-[k3s-selinux]
-name=K3S SELinux
-baseurl=https://rpm.rancher.io/k3s/stable/common/centos/9/noarch
-enabled=1
-gpgcheck=1
-gpgkey=https://rpm.rancher.io/public.key

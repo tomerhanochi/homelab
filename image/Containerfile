@@ -1,37 +1,44 @@
 FROM docker.io/rancher/k3s:v1.33.3-k3s1 AS k3s
-FROM quay.io/fedora/fedora-bootc:42 as builder
+FROM quay.io/fedora-testing/fedora-bootc:42-minimal
 
-RUN \
-  --mount=type=bind,source=k3s-selinux.repo,target=/etc/yum.repos.d/k3s-selinux.repo,ro \
-  --mount=type=bind,source=bootc-base-image-manifest.yaml,target=/usr/share/doc/bootc-base-imagectl/manifests/custom.yaml,ro \
-  --mount=type=cache,target=/var/cache/dnf,sharing=locked \
-  --mount=type=cache,target=/var/lib/dnf,sharing=locked \
-  <<EOFRUN
-set -eux -o pipefail;
-
-/usr/libexec/bootc-base-imagectl build-rootfs \
-  --manifest=custom \
-  --sysusers \
-  /rootfs
-EOFRUN
-
-FROM scratch
-COPY --from=builder /rootfs /
 COPY --from=k3s --chown=root --chmod=755 /bin/k3s /usr/local/bin/k3s
 COPY /usr /usr
 
-##############################
-######### SETUP K3S ##########
-##############################
-
-RUN <<EOFRUN
+#########################
+######### SETUP #########
+#########################
+RUN \
+  --mount=type=tmpfs,target=/var/cache \
+  --mount=type=tmpfs,target=/var/lib \
+  --mount=type=tmpfs,target=/var/log \
+  --mount=type=cache,target=/var/cache/dnf \
+  --mount=type=cache,target=/var/lib/dnf \
+  <<EOFRUN
 set -euxo pipefail;
 
+###############
+#---- K3S ----#
+###############
 # k3s is a multicall binary, and can function as multiple tools depending on the name its called with (similar to busybox).
 for tool in kubectl crictl ctr; do
   ln -sf /usr/local/bin/k3s "/usr/local/bin/${tool}";
 done
 
+####################
+#---- PACKAGES ----#
+####################
+dnf \
+  --repofrompath=k3s-selinux,https://rpm.rancher.io/k3s/stable/common/centos/9/noarch \
+  --setopt=k3s-selinux.gpgcheck=1 \
+  --setopt=k3s-selinux.gpgkey=https://rpm.rancher.io/public.key \
+  --assumeyes \
+  --disablerepo='*' \
+  --enablerepo='fedora,updates,k3s-selinux' \
+  install NetworkManager openssh-server firewalld k3s-selinux;
+
+####################
+#---- FIREWALL ----#
+####################
 # Enable access to the API server
 firewall-offline-cmd --add-service=kube-apiserver;
 # Enable internal communication between pods
@@ -39,25 +46,13 @@ firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16;
 # Enable internal communication between services
 firewall-offline-cmd --zone=trusted --add-source=10.43.0.0/16;
 
-##############################
-########### SYSTEMD ##########
-##############################
+###################
+#---- SYSTEMD ----#
+###################
 systemctl enable var-home.mount k3s.service
-
-##############################
-######### VALIDATION #########
-##############################
-bootc container lint
 EOFRUN
 
-# Define required labels for this bootc image to be recognized as such.
-LABEL containers.bootc 1
-LABEL ostree.bootable 1
-
-# https://pagure.io/fedora-kiwi-descriptions/pull-request/52
-ENV container=oci
-
-# Optional labels that only apply when running this image as a container. These keep the default entry point running under systemd.
-STOPSIGNAL SIGRTMIN+3
-
-CMD ["/sbin/init"]
+##########################
+####### VALIDATION #######
+##########################
+RUN bootc container lint
