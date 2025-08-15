@@ -1,7 +1,0 @@
-{
-  "disposition": "regular",
-  "gid": 1000,
-  "homeDirectory": "/var/home/core",
-  "uid": 1000,
-  "userName": "core"
-}

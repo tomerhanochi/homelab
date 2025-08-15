@@ -1,0 +1,30 @@
+include:
+  - minimal.yaml
+
+repos:
+  - fedora
+  - updates
+  - k3s-selinux
+
+packages:
+  - NetworkManager
+  - openssh-server
+  - firewalld
+  - k3s-selinux
+
+postprocess:
+  - |
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    mkdir -p /usr/lib/ostree
+    cat > /usr/lib/ostree/prepare-root.conf << EOF
+    [composefs]
+    enabled = verity
+
+    [sysroot]
+    readonly = true
+
+    [etc]
+    transient = true
+    EOF
