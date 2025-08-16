@@ -22,7 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: redhat-actions/podman-login@v1 # Also creates $HOME/.docker/config.json, which is used by Cosign for authentication.
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
