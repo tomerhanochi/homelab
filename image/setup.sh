@@ -19,7 +19,7 @@ dnf \
   --assumeyes \
   --disablerepo='*' \
   --enablerepo='fedora,updates,k3s-selinux' \
-  install NetworkManager openssh-server firewalld k3s-selinux;
+  install polkit NetworkManager openssh-server firewalld k3s-selinux;
 
 ####################
 #---- FIREWALL ----#
