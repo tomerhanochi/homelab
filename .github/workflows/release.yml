@@ -61,7 +61,7 @@ jobs:
         run: |-
           set -euxo pipefail
 
-          sudo podman login ${{ env.REGISTRY }} -u "${{ github.actor }}" -p "${{ secrets.REGISTRY_PASSWORD }}"
+          sudo podman login ${{ env.REGISTRY }} -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
 
           while read tag; do
             sudo podman push "${{ steps.build.outputs.id }}" "${tag}";
