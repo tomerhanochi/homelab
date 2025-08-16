@@ -1,0 +1,6 @@
+// Allows the 'core' user to manage systemd units, and thus use run0.
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.systemd1.manage-units" && subject.user == "core") {
+        return polkit.Result.YES;
+    }
+});
