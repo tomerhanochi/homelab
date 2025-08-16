@@ -53,7 +53,7 @@ jobs:
             /usr/libexec/bootc-base-imagectl rechunk "${unchunked_image}" "${rechunked_image}";
 
           while read tag; do
-            sudo podman tag "${rechunked_image}" "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${tag}";
+            sudo podman tag "${rechunked_image}" ${tag}";
           done <<<"$(echo -en "${{ steps.meta.outputs.tags }}")";
 
           echo "digest=$(podman image inspect "${rechunked_image}" -f '{{ .Digest }}')" >> "${GITHUB_OUTPUT}"
@@ -61,9 +61,7 @@ jobs:
         id: push
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ${{ env.IMAGE }}
           tags: ${{ steps.meta.outputs.tags }}
-          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
       - name: Generate artifact attestation
