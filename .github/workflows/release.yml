@@ -32,8 +32,8 @@ jobs:
       - name: Build OCI image
         id: build
         uses: redhat-actions/buildah-build@v2
+        working-directory: ./image
         with:
-          context: ./image
           containerfiles: Containerfile
           image: intermediate
           labels: ${{ steps.meta.outputs.labels }}
