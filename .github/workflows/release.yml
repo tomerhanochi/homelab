@@ -53,7 +53,7 @@ jobs:
             /usr/libexec/bootc-base-imagectl rechunk "${unchunked_image}" "${rechunked_image}";
 
           while read tag; do
-            sudo podman tag "${rechunked_image}" ${tag}";
+            sudo podman tag "${rechunked_image}" "${tag}";
           done <<<"$(echo -en "${{ steps.meta.outputs.tags }}")";
 
           echo "digest=$(podman image inspect "${rechunked_image}" -f '{{ .Digest }}')" >> "${GITHUB_OUTPUT}"
