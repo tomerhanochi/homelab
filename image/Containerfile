@@ -7,13 +7,8 @@ COPY /usr /usr
 #########################
 ######### SETUP #########
 #########################
-RUN \
-  --mount=type=tmpfs,target=/var/cache \
-  --mount=type=tmpfs,target=/var/lib \
-  --mount=type=tmpfs,target=/var/log \
-  --mount=type=cache,target=/var/cache/dnf \
-  --mount=type=cache,target=/var/lib/dnf \
-  <<EOFRUN
+# Mount temporary filesystem to remove need for cleanup
+RUN --mount=type=tmpfs,target=/var <<EOFRUN
 set -euxo pipefail;
 
 ###############
