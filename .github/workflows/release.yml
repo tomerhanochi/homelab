@@ -59,7 +59,6 @@ jobs:
             quay.io/fedora/fedora-bootc:latest \
             /usr/libexec/bootc-base-imagectl rechunk "${unchunked_image}" "${rechunked_image}";
 
-          echo "digest=$(sudo podman image inspect "${rechunked_image}" -f '{{ .Digest }}')" >> "${GITHUB_OUTPUT}"
           echo "id=$(sudo podman image inspect "${rechunked_image}" -f '{{ .Id }}')" >> "${GITHUB_OUTPUT}"
       - name: Push OCI image
         id: push
@@ -68,11 +67,13 @@ jobs:
           set -euxo pipefail
 
           while read tag; do
-            sudo podman push "${{ steps.build.outputs.id }}" "${tag}";
+            sudo podman push --digestfile=/tmp/digestfile "${{ steps.build.outputs.id }}" "${tag}";
           done <<<"$(echo -en "${{ steps.meta.outputs.tags }}")";
+
+          echo "digest=$(cat /tmp/digestfile)" >> "${GITHUB_OUTPUT}"
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
