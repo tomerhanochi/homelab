@@ -55,9 +55,9 @@ selinux: true
 protect-kernel-defaults: true
 secrets-encryption: true
 kube-apiserver-arg:
-  - "enable-admission-plugins=NodeRestriction,EventRateLimit"
-  - "admission-control-config-file=/usr/lib/rancher/k3s/server/server/admissionconfigurations/pod-security.yaml"
-  - "audit-policy-file=/usr/lib/rancher/k3s/server/manifests/server/policies/audit.yaml"
+  - "enable-admission-plugins=NodeRestriction"
+  - "admission-control-config-file=/usr/lib/rancher/k3s/server/admissionconfigurations/pod-security.yaml"
+  - "audit-policy-file=/usr/lib/rancher/k3s/server/policies/audit.yaml"
   - "audit-log-path=/var/log/rancher/k3s/audit.log"
   - "audit-log-maxage=30"
   - "audit-log-maxbackup=10"
