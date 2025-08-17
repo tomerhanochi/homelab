@@ -4,7 +4,14 @@ set -euxo pipefail;
 ###############
 #---- K3S ----#
 ###############
-# k3s is a multicall binary, and can function as multiple tools depending on the name its called with (similar to busybox).
+# Taken from https://github.com/k3s-io/k3s/blob/master/install.sh#L371
+K3S_VERSION=$(curl -w '%{url_effective}' -L -s -S https://update.k3s.io/v1-release/channels/stable -o /dev/null | sed -e 's|.*/||');
+curl \
+  -sfL "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3s" \
+  -o /usr/local/bin/kind;
+chmod +x /usr/local/bin/kind;
+
+# Taken from https://github.com/k3s-io/k3s/blob/master/install.sh#L757
 for tool in kubectl crictl ctr; do
   ln -sf /usr/local/bin/k3s "/usr/local/bin/${tool}";
 done

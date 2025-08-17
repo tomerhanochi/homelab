@@ -1,7 +1,5 @@
-FROM docker.io/rancher/k3s:v1.33.3-k3s1 AS k3s
 FROM quay.io/fedora-testing/fedora-bootc:42-minimal
 
-COPY --from=k3s --chown=root --chmod=755 /bin/k3s /usr/local/bin/k3s
 COPY /usr /usr
 
 RUN \
