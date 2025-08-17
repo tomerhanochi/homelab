@@ -8,8 +8,8 @@ set -euxo pipefail;
 K3S_VERSION=$(curl -w '%{url_effective}' -L -s -S https://update.k3s.io/v1-release/channels/stable -o /dev/null | sed -e 's|.*/||');
 curl \
   -sfL "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3s" \
-  -o /usr/local/bin/kind;
-chmod +x /usr/local/bin/kind;
+  -o /usr/local/bin/k3s;
+chmod +x /usr/local/bin/k3s;
 
 # Taken from https://github.com/k3s-io/k3s/blob/master/install.sh#L757
 for tool in kubectl crictl ctr; do
