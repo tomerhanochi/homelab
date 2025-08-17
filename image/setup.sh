@@ -42,3 +42,5 @@ firewall-offline-cmd --zone=trusted --add-source=10.43.0.0/16;
 #---- SYSTEMD ----#
 ###################
 systemctl enable var-home.mount k3s.service
+
+systemctl set-default multi-user.target
