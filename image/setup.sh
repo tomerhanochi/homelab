@@ -24,8 +24,8 @@ dnf \
 ####################
 #---- FIREWALL ----#
 ####################
-# Enable access to the API server
-firewall-offline-cmd --add-service=kube-apiserver;
+# Enable access to all control plane components
+firewall-offline-cmd --add-service=kube-control-plane;
 # Enable internal communication between pods
 firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16;
 # Enable internal communication between services
