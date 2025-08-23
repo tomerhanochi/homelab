@@ -25,6 +25,8 @@ disable-cloud-controller: true
 disable-helm-controller: true
 # Disable network policy controller as cilium brings its own.
 disable-network-policy: true
+# Disable kube-proxy as cillium provides a replacement.
+disable-kube-proxy: true
 # Disable flannel as cillium is installed.
 flannel-backend: "none"
 

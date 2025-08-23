@@ -26,17 +26,7 @@ dnf \
   --assumeyes \
   --disablerepo='*' \
   --enablerepo='fedora,updates,k3s-selinux' \
-  install audit firewalld k3s-selinux NetworkManager openssh-server polkit;
-
-####################
-#---- FIREWALL ----#
-####################
-# Enable access to all control plane components
-firewall-offline-cmd --add-service=kube-control-plane;
-# Enable internal communication between pods
-firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16;
-# Enable internal communication between services
-firewall-offline-cmd --zone=trusted --add-source=10.43.0.0/16;
+  install audit k3s-selinux NetworkManager openssh-server polkit;
 
 ###################
 #---- SYSTEMD ----#
