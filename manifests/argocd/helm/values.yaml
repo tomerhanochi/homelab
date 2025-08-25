@@ -1,0 +1,48 @@
+---
+namespaceOverride: argocd
+
+crds:
+  install: true
+
+createAggregateRoles: true
+createClusterRoles: true
+
+global:
+  logging:
+    format: json
+    level: info
+
+  networkPolicy:
+    create: true
+    defaultDenyIngress: true
+
+configs:
+  cm:
+    url: https://argocd.glb.svc.tomerhanochi.com
+    additionalUrls:
+      - https://argocd.int.svc.tomerhanochi.com
+    application.resourceTrackingMethod: annotation
+    oidc.config: |-
+      name: sso
+      issuer: https://sso.glb.svc.tomerhanochi.com
+      clientID: argocd
+      clientSecret: $oidc.sso.clientSecret
+      requestedIDTokenClaims:
+        groups:
+          essential: true
+      requestedScopes:
+        - openid
+        - profile
+        - email
+
+  params:
+    server.insecure: true
+
+  secret:
+    createSecret: false
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false
