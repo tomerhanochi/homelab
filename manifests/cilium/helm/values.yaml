@@ -30,11 +30,14 @@ hubble:
   enabled: false
 
 bandwidthManager:
-  enabled: true
+  enabled: false
 
 operator:
   enabled: true
   replicas: 1
 
 envoy:
+  enabled: true
+
+gatewayAPI:
   enabled: true
