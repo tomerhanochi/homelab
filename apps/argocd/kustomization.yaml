@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - applicationset.yaml
   - namespace.yaml
-  - secret.yaml
 
 generators:
   - ./secret-generator.yaml
