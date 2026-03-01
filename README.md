@@ -20,7 +20,7 @@ Follow [this guide](https://bootc-dev.github.io/bootc/bootc-install.html) on how
   helm repo add cilium https://helm.cilium.io;
   helm repo add argocd https://argoproj.github.io/argo-helm;
   helm repo update;
-  
+
   # Install Cilium
   helm template --values manifests/cilium/helm/values.yaml cilium cilium/cilium | kubectl --config "${kubeconfig}" apply -Rf manifests/cilium/vanilla -f -;
 

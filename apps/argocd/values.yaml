@@ -22,6 +22,11 @@ configs:
     additionalUrls:
       - https://argocd.int.svc.tomerhanochi.com
     application.resourceTrackingMethod: annotation
+    kustomize.buildOptions: >-
+      --enable-helm
+      --enable-alpha-plugins
+      --enable-exec
+      --network
     oidc.config: |-
       name: sso
       issuer: https://sso.glb.svc.tomerhanochi.com
@@ -40,6 +45,31 @@ configs:
 
   secret:
     createSecret: false
+
+repoServer:
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+  volumeMounts:
+    - mountPath: /usr/local/bin/kustomize
+      name: custom-tools
+      subPath: kustomize
+    - mountPath: /usr/local/bin/ksops
+      name: custom-tools
+      subPath: ksops
+  initContainers:
+    - name: install-ksops
+      image: viaductoss/ksops:v4.4.1
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          echo "Installing KSOPS..."
+          cp /usr/local/bin/ksops /custom-tools/
+          cp /usr/local/bin/kustomize /custom-tools/
+          echo "Done."
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
 
 dex:
   enabled: false

@@ -1,3 +1,4 @@
+---
 # https://docs.k3s.io/security/hardening-guide#pod-security
 apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
