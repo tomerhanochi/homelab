@@ -50,10 +50,8 @@ jobs:
 
           sudo podman build \
             --tag "${unchunked_image}" \
-            $(echo -en "${{ steps.meta.outputs.labels }}" | \
-              xargs -i echo '--label={}') \
-            $(echo -en "${{ steps.meta.outputs.annotations }}" | \
-              xargs -i echo '--annotation={}') \
+            $(echo -en "${{ steps.meta.outputs.labels }}" | xargs -i echo '--label={}') \
+            $(echo -en "${{ steps.meta.outputs.annotations }}" | xargs -i echo '--annotation={}') \
             ./image
 
           sudo podman run \
@@ -62,11 +60,9 @@ jobs:
             --security-opt=label=disable \
             --volume /var/lib/containers:/var/lib/containers:z \
             quay.io/fedora/fedora-bootc:latest \
-            /usr/libexec/bootc-base-imagectl rechunk \
-              "${unchunked_image}" "${rechunked_image}";
+            /usr/libexec/bootc-base-imagectl rechunk "${unchunked_image}" "${rechunked_image}";
 
-          echo "id=$(sudo podman image inspect "${rechunked_image}" \
-            -f '{{ .Id }}')" >> "${GITHUB_OUTPUT}"
+          echo "id=$(sudo podman image inspect "${rechunked_image}" -f '{{ .Id }}')" >> "${GITHUB_OUTPUT}"
       - name: Push OCI image
         id: push
         shell: bash
@@ -74,8 +70,7 @@ jobs:
           set -euxo pipefail
 
           while read tag; do
-            sudo podman push --digestfile=/tmp/digestfile \
-              "${{ steps.build.outputs.id }}" "${tag}";
+            sudo podman push --digestfile=/tmp/digestfile "${{ steps.build.outputs.id }}" "${tag}";
           done <<<"$(echo -en "${{ steps.meta.outputs.tags }}")";
 
           echo "digest=$(cat /tmp/digestfile)" >> "${GITHUB_OUTPUT}"
