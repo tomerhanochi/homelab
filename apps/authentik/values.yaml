@@ -2,6 +2,7 @@
 # Authentik settings
 authentik:
   log_level: info
+  secret_key: file:///run/secrets/app/secret-key
 
 # Blueprints configuration
 blueprints:
@@ -12,15 +13,10 @@ blueprints:
 postgresql:
   # Disable embedded PostgreSQL (use external or cloudnative-pg)
   enabled: false
-
-  host: authentik-db-rw.authentik.svc.cluster.local
+  host: authentik-db-rw
   name: authentik
-  user: authentik
-  password:
-    valueFrom:
-      secretKeyRef:
-        name: authentik-db-app
-        key: password
+  user: file:///run/secrets/postgres/username
+  password: file:///run/secrets/postgres/password
   port: 5432
 
 # Monitoring (disabled by default)
@@ -35,12 +31,24 @@ server:
     - name: jellyfin-client-secret
       secret:
         secretName: jellyfin-oidc-client-secret
+    - name: authentik-secret
+      secret:
+        secretName: authentik-secret
+    - name: postgres-credentials
+      secret:
+        secretName: authentik-database-credentials
   extraVolumeMounts:
     - name: argocd-client-secret
       mountPath: /run/secrets/argocd
       readOnly: true
     - name: jellyfin-client-secret
       mountPath: /run/secrets/jellyfin
+      readOnly: true
+    - name: authentik-secret
+      mountPath: /run/secrets/app
+      readOnly: true
+    - name: postgres-credentials
+      mountPath: /run/secrets/postgres
       readOnly: true
   ingress:
     enabled: true
@@ -64,12 +72,24 @@ worker:
     - name: jellyfin-client-secret
       secret:
         secretName: jellyfin-oidc-client-secret
+    - name: authentik-secret
+      secret:
+        secretName: authentik-secret
+    - name: postgres-credentials
+      secret:
+        secretName: authentik-database-credentials
   extraVolumeMounts:
     - name: argocd-client-secret
       mountPath: /run/secrets/argocd
       readOnly: true
     - name: jellyfin-client-secret
       mountPath: /run/secrets/jellyfin
+      readOnly: true
+    - name: authentik-secret
+      mountPath: /run/secrets/app
+      readOnly: true
+    - name: postgres-credentials
+      mountPath: /run/secrets/postgres
       readOnly: true
   metrics:
     enabled: false

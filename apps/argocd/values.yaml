@@ -28,6 +28,7 @@ server:
 
 configs:
   cm:
+    admin.enabled: "false"
     url: https://argocd.glb.svc.tomerhanochi.com
     application.resourceTrackingMethod: annotation
     kustomize.buildOptions: >-
@@ -55,9 +56,15 @@ configs:
     createSecret: false
 
 repoServer:
+  env:
+    - name: SOPS_AGE_SSH_PRIVATE_KEY_FILE
+      value: /run/secrets/sops/ssh/private_key
   volumes:
     - name: custom-tools
       emptyDir: {}
+    - name: sops-ssh-private-key
+      secret:
+        secretName: argocd-sops-ssh-private-key
   volumeMounts:
     - mountPath: /usr/local/bin/kustomize
       name: custom-tools
@@ -65,6 +72,9 @@ repoServer:
     - mountPath: /usr/local/bin/ksops
       name: custom-tools
       subPath: ksops
+    - name: sops-ssh-private-key
+      mountPath: /run/secrets/sops/ssh
+      readOnly: true
   initContainers:
     - name: install-ksops
       image: viaductoss/ksops:v4.4.1

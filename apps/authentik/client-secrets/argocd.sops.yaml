@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: argocd-oidc-client-secret
+    namespace: authentik
+stringData:
+    client_secret: ENC[AES256_GCM,data:PBcojYQPNgBqF39IQkwhstGwKI1JFvyzPvWViGAFgQTd+Wh095/mJln+1jaQnKWG020inHksYtJFEEmtLfQsUjDEzIUKR/eRwfk/Bvi9YqjipZ+e2bjE/MW1LG1Lxu4PUgPfPQ7ElyRgod71VYm02y8ZddMcqbXaSu79JI5foVg=,iv:jGFQA02HhV9dQyzADtjqgyzSGRIvsuMvT1X+UM3wnC8=,tag:Pf1wuXSX+ECbBm3nY7Q4tw==,type:str]
+sops:
+    age:
+        - recipient: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIElU9nABetlwxlF7Nf9YS4fy15NV3ll1+07rsul8Mewq
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHNzaC1lZDI1NTE5IGlGcHgyZyAzRUNU
+            M0szcHlVWW85V1NYcDZ5L3ZmZUZpMS81NDgyc054OE9mcVdVVkdZCmwwTCtTMlhH
+            c1I3aElWVU9iQ2kzZWJUaFNHb21McVBlR0lWclYzWTlDTVEKLS0tIE03a1FWb3Ew
+            ZGJmRVBpOVIrcWlvOHJVUlhsM3hFWHhLaS84bEk1K1NpVDAKQuvLaIUQR76/QtCe
+            206TAbbgceii6CDkGTLgf7FrUeZchoc26qzQ+ZuC/E1IDSCwKvgfK5vqRWSCwYjU
+            tzpuyw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-03-02T17:20:59Z"
+    mac: ENC[AES256_GCM,data:LI4+ne8BX8cQ2Pst5PD7oiu4bF//csye1GRDVu3lMhZcfkawZ4htAeqU+7hQh3FY9CSJut/7FWMTougYc1e5Cnz4+m7C3zHyuxRy8jB38+WBbt/LDPk0boh1jPGBeULTZu8LgHYH2YqZRBl+4eROlxQVYKxC+bud5o2XVb0p0zw=,iv:Kcbir8mqvOGDaWc1VxqBVe5/zGs6U/gDjjvfcYZn/e8=,tag:efMXtANgEVzZwitjBWKlDA==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type)$
+    version: 3.12.1

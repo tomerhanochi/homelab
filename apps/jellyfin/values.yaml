@@ -7,36 +7,6 @@ jellyfin:
   enableDLNA: false
   publishDiscovery: false
 
-  # Environment variables for LDAP integration with Authentik
-  env:
-    # LDAP Configuration for Authentik integration
-    - name: JELLYFIN_LDAP_HOST
-      value: "authentik-ldap.authentik.svc.cluster.local"
-    - name: JELLYFIN_LDAP_PORT
-      value: "3389"
-    - name: JELLYFIN_LDAP_USE_SSL
-      value: "false"
-    - name: JELLYFIN_LDAP_START_TLS
-      value: "false"
-    - name: JELLYFIN_LDAP_BIND_DN
-      valueFrom:
-        secretKeyRef:
-          name: jellyfin-ldap
-          key: LDAP_BIND_DN
-    - name: JELLYFIN_LDAP_BIND_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: jellyfin-ldap
-          key: LDAP_BIND_PASSWORD
-    - name: JELLYFIN_LDAP_SEARCH_BASE
-      value: "ou=users,dc=ldap,dc=goauthentik,dc=io"
-    - name: JELLYFIN_LDAP_SEARCH_FILTER
-      value: "(sAMAccountName=%s)"
-    - name: JELLYFIN_LDAP_USERNAME_ATTRIBUTE
-      value: "sAMAccountName"
-    - name: JELLYFIN_LDAP_ADMIN_USERNAME
-      value: ""
-
   # Resource requests and limits for single-node deployment
   resources:
     requests:
@@ -62,9 +32,6 @@ ingress:
     tailscale.com/funnel: "false"
   hosts:
     - host: jellyfin
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
   tls: []
 
 # Persistence configuration
@@ -168,30 +135,6 @@ podPrivileges:
 replicaCount: 1
 deploymentStrategy:
   type: Recreate
-
-# Health probes
-startupProbe:
-  tcpSocket:
-    port: http
-  initialDelaySeconds: 0
-  periodSeconds: 10
-  failureThreshold: 30
-
-livenessProbe:
-  httpGet:
-    path: /health
-    port: http
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  failureThreshold: 3
-
-readinessProbe:
-  httpGet:
-    path: /health
-    port: http
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  failureThreshold: 3
 
 # Metrics (disabled by default)
 metrics:

@@ -1,0 +1,6 @@
+---
+creation_rules:
+  - unencrypted_regex: "^(apiVersion|metadata|kind|type)$"
+    key_groups:
+      - age:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIElU9nABetlwxlF7Nf9YS4fy15NV3ll1+07rsul8Mewq
