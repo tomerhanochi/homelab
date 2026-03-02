@@ -10,3 +10,9 @@ spec:
     size: 1Gi
   monitoring:
     enablePodMonitor: false
+  managed:
+    roles:
+      - name: authentik
+        passwordSecret:
+          name: authentik-db-app
+          key: password
