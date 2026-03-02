@@ -17,5 +17,6 @@ helmCharts:
     namespace: argocd
     valuesFile: values.yaml
 
-commonLabels:
-  app.kubernetes.io/part-of: argocd
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: argocd
