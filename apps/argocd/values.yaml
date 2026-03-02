@@ -29,8 +29,6 @@ server:
 configs:
   cm:
     url: https://argocd.glb.svc.tomerhanochi.com
-    additionalUrls:
-      - https://argocd.int.svc.tomerhanochi.com
     application.resourceTrackingMethod: annotation
     kustomize.buildOptions: >-
       --enable-helm

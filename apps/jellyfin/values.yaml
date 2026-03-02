@@ -1,0 +1,200 @@
+---
+# Jellyfin Helm Chart Values
+# https://github.com/jellyfin/jellyfin-helm/tree/master/charts/jellyfin
+
+# Disable DLNA and service discovery (not needed with static DNS)
+jellyfin:
+  enableDLNA: false
+  publishDiscovery: false
+
+  # Environment variables for LDAP integration with Authentik
+  env:
+    # LDAP Configuration for Authentik integration
+    - name: JELLYFIN_LDAP_HOST
+      value: "authentik-ldap.authentik.svc.cluster.local"
+    - name: JELLYFIN_LDAP_PORT
+      value: "3389"
+    - name: JELLYFIN_LDAP_USE_SSL
+      value: "false"
+    - name: JELLYFIN_LDAP_START_TLS
+      value: "false"
+    - name: JELLYFIN_LDAP_BIND_DN
+      valueFrom:
+        secretKeyRef:
+          name: jellyfin-ldap
+          key: LDAP_BIND_DN
+    - name: JELLYFIN_LDAP_BIND_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: jellyfin-ldap
+          key: LDAP_BIND_PASSWORD
+    - name: JELLYFIN_LDAP_SEARCH_BASE
+      value: "ou=users,dc=ldap,dc=goauthentik,dc=io"
+    - name: JELLYFIN_LDAP_SEARCH_FILTER
+      value: "(sAMAccountName=%s)"
+    - name: JELLYFIN_LDAP_USERNAME_ATTRIBUTE
+      value: "sAMAccountName"
+    - name: JELLYFIN_LDAP_ADMIN_USERNAME
+      value: ""
+
+  # Resource requests and limits for single-node deployment
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8096
+  portName: http
+
+# Ingress configuration using Tailscale (without funnel!)
+ingress:
+  enabled: true
+  className: tailscale
+  annotations:
+    tailscale.com/proxy-group: tailscale-ingress-proxy-group
+    # Explicitly disable funnel - we don't want public exposure
+    tailscale.com/funnel: "false"
+  hosts:
+    - host: jellyfin
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+# Persistence configuration
+persistence:
+  # Config - regular PVC for persistent settings (not taken on external drive)
+  config:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    storageClass: ""
+    type: pvc
+
+  # Media - hostPath PV for media storage (TODO: set actual path)
+  media:
+    enabled: true
+    type: hostPath
+    # TODO: Replace with actual media storage path on the host
+    hostPath: ""
+    accessMode: ReadWriteOnce
+
+  # Cache - emptyDir for caching (single node, no need for PV)
+  cache:
+    enabled: true
+    type: emptyDir
+    accessMode: ReadWriteOnce
+
+# Network policies for hardening
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # Ingress rules - only allow from Tailscale ingress namespace
+  ingress:
+    allowExternal: false
+    # Allow traffic from Tailscale operator namespace
+    namespaceSelector:
+      kubernetes.io/metadata.name: tailscale
+    podSelector: {}
+    customRules: []
+
+  # Egress rules - restricted for security
+  egress:
+    allowDNS: true
+    dnsNamespace: kube-system
+    dnsPodSelector:
+      k8s-app: kube-dns
+    allowAllEgress: false
+    restrictedEgress:
+      allowMetadata: false
+      allowInCluster: true
+      # Allow communication with Authentik for LDAP
+      allowedCIDRs: []
+    customRules:
+      # Allow LDAP connection to Authentik
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: authentik
+        ports:
+          - protocol: TCP
+            port: 3389
+      # Allow DNS to kube-system
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: kube-system
+        ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53
+
+# Security contexts
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# Service account
+serviceAccount:
+  create: true
+  automount: false
+
+# Pod privileges (disabled for security)
+podPrivileges:
+  hostIPC: false
+  hostNetwork: false
+  hostPID: false
+
+# Deployment settings
+replicaCount: 1
+deploymentStrategy:
+  type: Recreate
+
+# Health probes
+startupProbe:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  failureThreshold: 30
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+# Metrics (disabled by default)
+metrics:
+  enabled: false
+  serviceMonitor:
+    enabled: false

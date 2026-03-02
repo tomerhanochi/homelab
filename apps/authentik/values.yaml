@@ -3,6 +3,11 @@
 authentik:
   log_level: info
 
+# Blueprints configuration
+blueprints:
+  configMaps:
+    - authentik-blueprints
+
 # PostgreSQL configuration (connect to local cloudnative-pg cluster)
 postgresql:
   # Disable embedded PostgreSQL (use external or cloudnative-pg)
@@ -23,6 +28,20 @@ server:
   replicas: 1
   service:
     type: ClusterIP
+  extraVolumes:
+    - name: argocd-client-secret
+      secret:
+        secretName: argocd-oidc-client-secret
+    - name: jellyfin-client-secret
+      secret:
+        secretName: jellyfin-oidc-client-secret
+  extraVolumeMounts:
+    - name: argocd-client-secret
+      mountPath: /run/secrets/argocd
+      readOnly: true
+    - name: jellyfin-client-secret
+      mountPath: /run/secrets/jellyfin
+      readOnly: true
   ingress:
     enabled: true
     ingressClassName: tailscale
@@ -38,6 +57,20 @@ server:
 
 worker:
   replicas: 1
+  extraVolumes:
+    - name: argocd-client-secret
+      secret:
+        secretName: argocd-oidc-client-secret
+    - name: jellyfin-client-secret
+      secret:
+        secretName: jellyfin-oidc-client-secret
+  extraVolumeMounts:
+    - name: argocd-client-secret
+      mountPath: /run/secrets/argocd
+      readOnly: true
+    - name: jellyfin-client-secret
+      mountPath: /run/secrets/jellyfin
+      readOnly: true
   metrics:
     enabled: false
   serviceMonitor:

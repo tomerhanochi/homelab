@@ -5,6 +5,8 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - postgres
+  - blueprints.yaml
+  - secret-generator.yaml
 
 helmCharts:
   - name: authentik
