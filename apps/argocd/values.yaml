@@ -16,6 +16,12 @@ global:
     create: true
     defaultDenyIngress: true
 
+server:
+  ingress:
+    enabled: true
+    annotations:
+      tailscale.com/proxy-group: "tailscale-global-proxy"
+
 configs:
   cm:
     url: https://argocd.glb.svc.tomerhanochi.com

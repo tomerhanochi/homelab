@@ -1,0 +1,38 @@
+---
+# Authentik settings
+authentik:
+  log_level: info
+
+# PostgreSQL configuration (connect to local cloudnative-pg cluster)
+postgresql:
+  # Disable embedded PostgreSQL (use external or cloudnative-pg)
+  enabled: false
+
+  host: authentik-db-rw.authentik.svc.cluster.local
+  name: authentik
+  user: authentik
+  password:
+    valueFrom:
+      secretKeyRef:
+        name: authentik-db-app
+        key: password
+  port: 5432
+
+# Monitoring (disabled by default)
+server:
+  replicas: 1
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+  metrics:
+    enabled: false
+  serviceMonitor:
+    enabled: false
+
+worker:
+  replicas: 1
+  metrics:
+    enabled: false
+  serviceMonitor:
+    enabled: false

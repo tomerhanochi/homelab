@@ -2,11 +2,11 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: global-postgres
-  namespace: postgres
+  name: authentik-db
+  namespace: authentik
 spec:
   instances: 1
   storage:
     size: 1Gi
   monitoring:
-    enablePodMonitor: true
+    enablePodMonitor: false

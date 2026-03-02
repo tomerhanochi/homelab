@@ -1,0 +1,8 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyGroup
+metadata:
+  name: tailscale-global-proxy
+  namespace: tailscale
+spec:
+  type: ingress
