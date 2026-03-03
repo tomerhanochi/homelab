@@ -2,14 +2,3 @@
 oauth:
   clientId: ""
   clientSecret: ""
-
-operatorConfig:
-  podSecurityContext:
-    runAsNonRoot: false
-    seccompProfile:
-      type: RuntimeDefault
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
