@@ -6,7 +6,9 @@ resources:
   - namespace.yaml
   - postgres-cluster.yaml
   - blueprints.yaml
-  - secret-generator.yaml
+
+generators:
+  - ./secret-generator.yaml
 
 helmCharts:
   - name: authentik
