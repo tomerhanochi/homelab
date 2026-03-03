@@ -5,8 +5,7 @@ oauth:
 
 operatorConfig:
   podSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 65534
+    runAsNonRoot: false
     seccompProfile:
       type: RuntimeDefault
   securityContext:
