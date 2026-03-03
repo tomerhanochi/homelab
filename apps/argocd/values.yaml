@@ -28,7 +28,7 @@ server:
 
 configs:
   cm:
-    admin.enabled: "false"
+    admin.enabled: "true"
     url: https://argocd.glb.svc.tomerhanochi.com
     application.resourceTrackingMethod: annotation
     kustomize.buildOptions: >-
