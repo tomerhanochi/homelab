@@ -8,7 +8,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/tomerhanochi/homelab.git
-        revision: main
+        revision: feat/bootstrap-manifests
         directories:
           - path: apps/*
   template:
@@ -18,7 +18,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/tomerhanochi/homelab.git
-        targetRevision: main
+        targetRevision: feat/bootstrap-manifests
         path: '{{path}}'
       destination:
         server: https://kubernetes.default.svc
@@ -28,5 +28,3 @@ spec:
           enabled: true
           prune: true
           selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
