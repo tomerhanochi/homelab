@@ -1,14 +1,4 @@
 ---
-# Tailscale Operator values
-#
-# You must generate an OAuth client ID and secret from the Tailscale admin console:
-# https://login.tailscale.com/admin/settings/oauth
-#
-# Then, create a Kubernetes secret with the same name as the one referenced below
-# (e.g., tailscale-oauth) in the 'tailscale' namespace containing the following keys:
-#   clientId: <YOUR_CLIENT_ID>
-#   clientSecret: <YOUR_CLIENT_SECRET>
-
 oauth:
   clientId: ""
   clientSecret: ""

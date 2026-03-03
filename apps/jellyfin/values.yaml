@@ -32,7 +32,6 @@ ingress:
     tailscale.com/funnel: "false"
   hosts:
     - host: jellyfin
-  tls: []
 
 # Persistence configuration
 persistence:
