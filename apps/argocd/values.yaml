@@ -24,6 +24,7 @@ server:
       tailscale.com/proxy-group: tailscale-ingress-proxy-group
       tailscale.com/funnel: "true"
     hostname: argocd
+    tls: true
 
 configs:
   cm:
