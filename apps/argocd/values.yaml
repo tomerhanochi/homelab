@@ -59,35 +59,23 @@ repoServer:
   env:
     - name: SOPS_AGE_SSH_PRIVATE_KEY_FILE
       value: /run/secrets/sops/ssh/private_key
+    - name: PATH
+      value: /ksops/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   volumes:
-    - name: custom-tools
-      emptyDir: {}
     - name: sops-ssh-private-key
       secret:
         secretName: argocd-sops-ssh-private-key
+    - name: ksops
+      image:
+        reference: viaductoss/ksops:v4.4.0
+        pullPolicy: IfNotPresent
   volumeMounts:
-    - mountPath: /usr/local/bin/kustomize
-      name: custom-tools
-      subPath: kustomize
-    - mountPath: /usr/local/bin/ksops
-      name: custom-tools
-      subPath: ksops
+    - mountPath: /ksops
+      name: ksops
+      readOnly: true
     - name: sops-ssh-private-key
       mountPath: /run/secrets/sops/ssh
       readOnly: true
-  initContainers:
-    - name: install-ksops
-      image: viaductoss/ksops:v4.4.1
-      command: ["/bin/sh", "-c"]
-      args:
-        - |
-          echo "Installing KSOPS..."
-          cp /usr/local/bin/ksops /custom-tools/
-          cp /usr/local/bin/kustomize /custom-tools/
-          echo "Done."
-      volumeMounts:
-        - mountPath: /custom-tools
-          name: custom-tools
 
 dex:
   enabled: false

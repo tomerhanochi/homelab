@@ -65,6 +65,7 @@ kube-apiserver-arg:
   - "audit-log-maxage=30"
   - "audit-log-maxbackup=10"
   - "audit-log-maxsize=100"
+  - "feature-gates=ImageVolume=true"
   - "request-timeout=60s"
 kube-controller-manager-arg:
   - 'terminated-pod-gc-threshold=10'
