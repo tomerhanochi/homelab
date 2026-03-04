@@ -1,8 +1,18 @@
 ---
+# Global configuration
+global:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+
 # Authentik settings
 authentik:
   log_level: info
-  secret_key: file:///run/secrets/app/secret_key
+  secret_key: file:///run/secrets/app/secret-key
 
 # Blueprints configuration
 blueprints:
@@ -11,32 +21,23 @@ blueprints:
 
 # PostgreSQL configuration (connect to local cloudnative-pg cluster)
 postgresql:
-  # Disable embedded PostgreSQL (use external or cloudnative-pg)
-  enabled: false
   host: authentik-db-rw
   name: authentik
   user: file:///run/secrets/postgres/username
   password: file:///run/secrets/postgres/password
   port: 5432
 
-# Monitoring (disabled by default)
+# Server configuration
 server:
   replicas: 1
   service:
     type: ClusterIP
-  securityContext:
-    runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 1000
-    seccompProfile:
-      type: RuntimeDefault
   containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
         - ALL
-  extraVolumes:
+  volumes:
     - name: argocd-client-secret
       secret:
         secretName: argocd-oidc-client-secret
@@ -49,7 +50,7 @@ server:
     - name: postgres-credentials
       secret:
         secretName: authentik-database-credentials
-  extraVolumeMounts:
+  volumeMounts:
     - name: argocd-client-secret
       mountPath: /run/secrets/argocd
       readOnly: true
@@ -66,24 +67,18 @@ server:
     enabled: false
   metrics:
     enabled: false
-  serviceMonitor:
-    enabled: false
+    serviceMonitor:
+      enabled: false
 
+# Worker configuration
 worker:
   replicas: 1
-  securityContext:
-    runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 1000
-    seccompProfile:
-      type: RuntimeDefault
   containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
         - ALL
-  extraVolumes:
+  volumes:
     - name: argocd-client-secret
       secret:
         secretName: argocd-oidc-client-secret
@@ -96,7 +91,7 @@ worker:
     - name: postgres-credentials
       secret:
         secretName: authentik-database-credentials
-  extraVolumeMounts:
+  volumeMounts:
     - name: argocd-client-secret
       mountPath: /run/secrets/argocd
       readOnly: true
@@ -111,5 +106,5 @@ worker:
       readOnly: true
   metrics:
     enabled: false
-  serviceMonitor:
-    enabled: false
+    serviceMonitor:
+      enabled: false
