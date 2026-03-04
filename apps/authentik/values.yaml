@@ -31,7 +31,7 @@ server:
     fsGroup: 1000
     seccompProfile:
       type: RuntimeDefault
-  securityContext:
+  containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
@@ -78,7 +78,7 @@ worker:
     fsGroup: 1000
     seccompProfile:
       type: RuntimeDefault
-  securityContext:
+  containerSecurityContext:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
