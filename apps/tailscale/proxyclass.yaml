@@ -1,0 +1,11 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: tailscale-ingress-proxy-class
+  namespace: tailscale
+spec:
+  statefulSet:
+    pod:
+      labels:
+        tailscale.com/proxy-type: ingress

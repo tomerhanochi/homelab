@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - postgres-cluster.yaml
   - blueprints.yaml
+  - networkpolicy.yaml
 
 generators:
   - ./secret-generator.yaml

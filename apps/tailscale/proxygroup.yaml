@@ -6,3 +6,4 @@ metadata:
   namespace: tailscale
 spec:
   type: ingress
+  proxyClass: tailscale-ingress-proxy-class
