@@ -24,7 +24,7 @@ server:
   replicas: 1
   service:
     type: ClusterIP
-  podSecurityContext:
+  securityContext:
     runAsNonRoot: true
     runAsUser: 1000
     runAsGroup: 1000
@@ -71,7 +71,7 @@ server:
 
 worker:
   replicas: 1
-  podSecurityContext:
+  securityContext:
     runAsNonRoot: true
     runAsUser: 1000
     runAsGroup: 1000
