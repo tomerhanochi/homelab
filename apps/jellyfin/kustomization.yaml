@@ -4,8 +4,8 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - networkpolicy.yaml
   - ingress.yaml
+  - ./networkpolicies
 
 helmCharts:
   - name: jellyfin

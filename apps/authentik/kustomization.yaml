@@ -6,8 +6,8 @@ resources:
   - namespace.yaml
   - postgres-cluster.yaml
   - blueprints.yaml
-  - networkpolicy.yaml
   - ingress.yaml
+  - ./networkpolicies
 
 generators:
   - ./secret-generator.yaml
