@@ -2,7 +2,7 @@
 # Authentik settings
 authentik:
   log_level: info
-  secret_key: file:///run/secrets/app/secret-key
+  secret_key: file:///run/secrets/app/secret_key
 
 # Blueprints configuration
 blueprints:
