@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ory Request Flow</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #1a1a2e;
+        }
+    </style>
+</head>
+<body>
+    <pre class="mermaid">
+graph TD
+    User([User / Browser])
+
+    subgraph Internet
+        UI[kratos.tomerhanochi.com&lt;br/&gt;Selfservice UI]
+        Hydra[sso.tomerhanochi.com&lt;br/&gt;Hydra Public API]
+    end
+
+    subgraph Cluster Internal
+        KratosPublic[Kratos Public API&lt;br/&gt;:4433]
+        KratosAdmin[Kratos Admin API&lt;br/&gt;:4434]
+        HydraAdmin[Hydra Admin API&lt;br/&gt;:4445]
+        HydraDB[(Hydra PostgreSQL)]
+        KratosDB[(Kratos PostgreSQL)]
+    end
+
+    User -->|Login / Register / Settings| UI
+    User -->|OAuth2 Authorization / Token| Hydra
+
+    UI -->|Proxy browser requests| KratosPublic
+    UI -->|Admin calls| KratosAdmin
+
+    Hydra -->|Login / Consent redirect| UI
+    Hydra -->|Validate sessions| KratosAdmin
+    Hydra --> HydraDB
+    HydraAdmin -->|Manage OAuth2 clients| HydraDB
+
+    KratosPublic --> KratosDB
+
+    HydraAdmin -.->|Used by internal services&lt;br/&gt;to create OAuth2 clients| Hydra
+    </pre>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+</body>
+</html>

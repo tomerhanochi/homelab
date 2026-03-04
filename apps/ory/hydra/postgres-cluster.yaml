@@ -1,0 +1,18 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: hydra-database
+  namespace: ory
+spec:
+  instances: 1
+  storage:
+    size: 1Gi
+  monitoring:
+    enablePodMonitor: false
+  bootstrap:
+    initdb:
+      database: hydra
+      owner: hydra
+      secret:
+        name: hydra-database-credentials

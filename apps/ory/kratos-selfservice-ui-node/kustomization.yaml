@@ -1,0 +1,11 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+  - name: kratos-selfservice-ui-node
+    repo: https://k8s.ory.sh/helm/charts
+    version: 0.60.1
+    releaseName: kratos-selfservice-ui-node
+    namespace: ory
+    valuesFile: values.yaml

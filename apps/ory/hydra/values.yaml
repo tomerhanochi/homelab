@@ -1,0 +1,75 @@
+---
+hydra:
+  automigration:
+    enabled: true
+    type: initContainer
+  existingSecret: hydra-secret
+  config:
+    dsn: "\
+      postgres://$(HYDRA_DB_USER):$(HYDRA_DB_PASSWORD)@hydra-database-rw:5432/hydra\
+      ?sslmode=verify-full&sslrootcert=/var/run/secrets/postgres/ca.crt\
+      "
+    serve:
+      public:
+        port: 4444
+      admin:
+        port: 4445
+    urls:
+      self:
+        issuer: https://auth.tomerhanochi.com
+      login: https://accounts.tomerhanochi.com/login
+      consent: https://accounts.tomerhanochi.com/consent
+      logout: https://accounts.tomerhanochi.com/logout
+      error: https://accounts.tomerhanochi.com/error
+    oauth2:
+      expose_internal_errors: false
+    log:
+      format: json
+      level: warn
+    ttl:
+      access_token: 1h
+      refresh_token: 720h
+      id_token: 1h
+      auth_code: 10m
+      login_consent_request: 30m
+
+deployment:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+  extraEnv:
+    - name: HYDRA_DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: hydra-database-credentials
+          key: username
+    - name: HYDRA_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: hydra-database-credentials
+          key: password
+  extraVolumes:
+    - name: postgres-ca
+      secret:
+        secretName: hydra-database-ca
+  extraVolumeMounts:
+    - name: postgres-ca
+      mountPath: /var/run/secrets/postgres
+      readOnly: true
+
+service:
+  public:
+    type: ClusterIP
+  admin:
+    type: ClusterIP
+
+maester:
+  enabled: true
+
+hydra-maester:
+  adminService:
+    port: 4445

@@ -6,10 +6,10 @@ resources:
   - namespace.yaml
   - proxyclass.yaml
   - proxygroup.yaml
-  - ./networkpolicies
+  - networkpolicies
 
 generators:
-  - ./secret-generator.yaml
+  - secret-generator.yaml
 
 helmCharts:
   - name: tailscale-operator

@@ -1,0 +1,19 @@
+---
+kratosAdminUrl: http://kratos-admin.ory.svc.cluster.local
+kratosPublicUrl: http://kratos-public.ory.svc.cluster.local
+kratosBrowserUrl: https://accounts.tomerhanochi.com
+
+deployment:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
