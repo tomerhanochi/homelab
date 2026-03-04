@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - networkpolicy.yaml
+  - ingress.yaml
 
 generators:
   - ./secret-generator.yaml
