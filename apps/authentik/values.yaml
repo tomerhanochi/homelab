@@ -13,19 +13,18 @@ global:
 authentik:
   log_level: info
   secret_key: file:///run/secrets/app/secret_key
+  # PostgreSQL configuration (connect to local cloudnative-pg cluster)
+  postgresql:
+    host: authentik-database-rw
+    name: authentik
+    user: file:///run/secrets/postgres/username
+    password: file:///run/secrets/postgres/password
+    port: 5432
 
 # Blueprints configuration
 blueprints:
   configMaps:
     - authentik-blueprints
-
-# PostgreSQL configuration (connect to local cloudnative-pg cluster)
-postgresql:
-  host: authentik-database-rw
-  name: authentik
-  user: file:///run/secrets/postgres/username
-  password: file:///run/secrets/postgres/password
-  port: 5432
 
 # Server configuration
 server:
