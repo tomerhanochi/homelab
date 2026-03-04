@@ -24,6 +24,18 @@ server:
   replicas: 1
   service:
     type: ClusterIP
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   extraVolumes:
     - name: argocd-client-secret
       secret:
@@ -59,6 +71,18 @@ server:
 
 worker:
   replicas: 1
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   extraVolumes:
     - name: argocd-client-secret
       secret:
