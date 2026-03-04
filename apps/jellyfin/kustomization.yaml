@@ -5,11 +5,12 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - networkpolicy.yaml
+  - ingress.yaml
 
 helmCharts:
   - name: jellyfin
     repo: https://jellyfin.github.io/jellyfin-helm
-    version: 1.11.1
+    version: 2.7.0
     releaseName: jellyfin
     namespace: jellyfin
     valuesFile: values.yaml

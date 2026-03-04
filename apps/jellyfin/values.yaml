@@ -24,14 +24,7 @@ service:
 
 # Ingress configuration using Tailscale (without funnel!)
 ingress:
-  enabled: true
-  className: tailscale
-  annotations:
-    tailscale.com/proxy-group: tailscale-ingress-proxy-group
-    # Explicitly disable funnel - we don't want public exposure
-    tailscale.com/funnel: "false"
-  hosts:
-    - host: jellyfin
+  enabled: false
 
 # Persistence configuration
 persistence:

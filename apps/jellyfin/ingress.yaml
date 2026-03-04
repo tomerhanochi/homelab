@@ -1,0 +1,22 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jellyfin
+  namespace: jellyfin
+  labels:
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/part-of: jellyfin
+  annotations:
+    tailscale.com/funnel: "false"
+    tailscale.com/proxy-group: tailscale-ingress-proxy-group
+spec:
+  defaultBackend:
+    service:
+      name: jellyfin
+      port:
+        number: 8096
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - jellyfin
