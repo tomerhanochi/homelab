@@ -21,7 +21,7 @@ blueprints:
 
 # PostgreSQL configuration (connect to local cloudnative-pg cluster)
 postgresql:
-  host: authentik-db-rw
+  host: authentik-database-rw
   name: authentik
   user: file:///run/secrets/postgres/username
   password: file:///run/secrets/postgres/password
