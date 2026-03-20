@@ -3,12 +3,7 @@ hydra:
   automigration:
     enabled: true
     type: initContainer
-  existingSecret: hydra-secret
   config:
-    dsn: "\
-      postgres://$(HYDRA_DB_USER):$(HYDRA_DB_PASSWORD)@hydra-database-rw:5432/hydra\
-      ?sslmode=verify-full&sslrootcert=/var/run/secrets/postgres/ca.crt\
-      "
     serve:
       public:
         port: 4444
@@ -33,6 +28,10 @@ hydra:
       auth_code: 10m
       login_consent_request: 30m
 
+secret:
+  enabled: false
+  nameOverride: hydra-secret
+
 deployment:
   initContainerSecurityContext:
     allowPrivilegeEscalation: false
@@ -51,17 +50,6 @@ deployment:
     limits:
       cpu: 200m
       memory: 128Mi
-  extraEnv:
-    - name: HYDRA_DB_USER
-      valueFrom:
-        secretKeyRef:
-          name: hydra-database-credentials
-          key: username
-    - name: HYDRA_DB_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: hydra-database-credentials
-          key: password
   extraVolumes:
     - name: postgres-ca
       secret:

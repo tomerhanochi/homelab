@@ -3,12 +3,7 @@ kratos:
   automigration:
     enabled: true
     type: initContainer
-  existingSecret: kratos-secret
   config:
-    dsn: "\
-      postgres://$(KRATOS_DB_USER):$(KRATOS_DB_PASSWORD)@kratos-database-rw:5432/kratos\
-      ?sslmode=verify-full&sslrootcert=/var/run/secrets/postgres/ca.crt\
-      "
     serve:
       public:
         port: 4433
@@ -105,6 +100,10 @@ kratos:
         }
       }
 
+secret:
+  enabled: false
+  nameOverride: kratos-secret
+
 deployment:
   resources:
     requests:
@@ -113,17 +112,6 @@ deployment:
     limits:
       cpu: 200m
       memory: 128Mi
-  extraEnv:
-    - name: KRATOS_DB_USER
-      valueFrom:
-        secretKeyRef:
-          name: kratos-database-credentials
-          key: username
-    - name: KRATOS_DB_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: kratos-database-credentials
-          key: password
   extraVolumes:
     - name: postgres-ca
       secret:
