@@ -7,7 +7,7 @@ kratos:
     serve:
       public:
         port: 4433
-        base_url: https://accounts.tomerhanochi.com
+        base_url: https://identity.tomerhanochi.com
       admin:
         port: 4434
         base_url: http://kratos-admin.ory.svc.cluster.local
