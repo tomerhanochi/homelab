@@ -13,7 +13,7 @@ service:
 
 secret:
   enabled: false
-  nameOverride: kratos-self-service-ui-node
+  nameOverride: kratos-selfservice-ui-node
 
 ingress:
   enabled: false
