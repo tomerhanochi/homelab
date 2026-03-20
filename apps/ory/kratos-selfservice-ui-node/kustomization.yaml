@@ -2,6 +2,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+generators:
+  - secret-generator.yaml
+
 helmCharts:
   - name: kratos-selfservice-ui-node
     repo: https://k8s.ory.sh/helm/charts

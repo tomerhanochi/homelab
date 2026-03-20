@@ -30,7 +30,7 @@ hydra:
 
 secret:
   enabled: false
-  nameOverride: hydra-secret
+  nameOverride: hydra
 
 deployment:
   initContainerSecurityContext:

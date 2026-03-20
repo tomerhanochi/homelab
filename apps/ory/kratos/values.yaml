@@ -102,7 +102,7 @@ kratos:
 
 secret:
   enabled: false
-  nameOverride: kratos-secret
+  nameOverride: kratos
 
 deployment:
   resources:
