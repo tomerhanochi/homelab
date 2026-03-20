@@ -3,6 +3,9 @@ kratosAdminUrl: http://kratos-admin.ory.svc.cluster.local
 kratosPublicUrl: http://kratos-public.ory.svc.cluster.local
 kratosBrowserUrl: https://accounts.tomerhanochi.com
 
+config:
+  csrfCookieName: __Host-kratos-csrf
+
 deployment: {}
 
 service:
