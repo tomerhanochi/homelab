@@ -9,3 +9,4 @@ helmCharts:
     releaseName: kratos-selfservice-ui-node
     namespace: ory
     valuesFile: values.yaml
+    includeCRDs: true

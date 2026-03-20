@@ -15,3 +15,4 @@ helmCharts:
     releaseName: hydra
     namespace: ory
     valuesFile: values.yaml
+    includeCRDs: true
