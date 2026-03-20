@@ -9,6 +9,11 @@ resources:
   - kratos
   - kratos-selfservice-ui-node
 
+patches:
+  - target:
+      kind: CustomResourceDefinition
+    path: patches/crd-argocd-sync-options.yaml
+
 labels:
   - pairs:
       app.kubernetes.io/part-of: ory

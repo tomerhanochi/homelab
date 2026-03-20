@@ -15,6 +15,11 @@ helmCharts:
     namespace: jellyfin
     valuesFile: values.yaml
 
+patches:
+  - target:
+      kind: CustomResourceDefinition
+    path: patches/crd-argocd-sync-options.yaml
+
 labels:
   - pairs:
       app.kubernetes.io/part-of: jellyfin
