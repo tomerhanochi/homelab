@@ -62,12 +62,12 @@ kratos:
             default_browser_return_url: https://accounts.tomerhanochi.com/login
     log:
       format: json
-      level: warn
+      level: info
     session:
       cookie:
         domain: accounts.tomerhanochi.com
         same_site: Lax
-        secure: true
+        secure: "true"
       lifespan: 24h
   identitySchemas:
     identity.default.schema.json: |
