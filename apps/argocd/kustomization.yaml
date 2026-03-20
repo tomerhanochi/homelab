@@ -21,7 +21,7 @@ helmCharts:
 patches:
   - target:
       kind: CustomResourceDefinition
-    path: ../../patches/crd-argocd-sync-options.yaml
+    path: patches/crd-argocd-sync-options.yaml
 
 labels:
   - pairs:
