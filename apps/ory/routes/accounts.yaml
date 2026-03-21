@@ -6,8 +6,8 @@ metadata:
   namespace: ory
 spec:
   parentRefs:
-    - name: cilium-gateway
-      namespace: cilium
+    - name: default
+      namespace: gateway
       sectionName: accounts
   hostnames:
     - accounts.tomerhanochi.com

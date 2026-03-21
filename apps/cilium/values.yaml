@@ -39,7 +39,8 @@ operator:
 envoy:
   enabled: true
 
+l2announcements:
+  enabled: true
+
 gatewayAPI:
   enabled: true
-  hostNetwork:
-    enabled: true
