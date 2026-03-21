@@ -2,8 +2,8 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: ingress-allow-cilium-envoy
-  namespace: ory
+  name: ingress-allow-gateway
+  namespace: argocd
 spec:
   endpointSelector: {}
   ingress:
