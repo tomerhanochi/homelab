@@ -7,3 +7,4 @@ resources:
   - ingress-allow-intra-namespace.yaml
   - ingress-allow-tailscale-proxy.yaml
   - ingress-allow-cloudnative-pg-operator.yaml
+  - ingress-allow-cilium-envoy.yaml
