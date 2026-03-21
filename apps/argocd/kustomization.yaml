@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - route.yaml
+  - oauth2client.yaml
   - networkpolicies
 
 generators:

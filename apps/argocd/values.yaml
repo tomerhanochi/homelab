@@ -23,7 +23,7 @@ server:
 configs:
   cm:
     admin.enabled: "true"
-    url: https://argocd.glb.svc.tomerhanochi.com
+    url: https://argocd.tomerhanochi.com
     application.resourceTrackingMethod: annotation
     kustomize.buildOptions: >-
       --enable-helm
@@ -31,17 +31,13 @@ configs:
       --enable-exec
       --network
     oidc.config: |-
-      name: sso
-      issuer: https://sso.glb.svc.tomerhanochi.com
+      name: SSO
+      issuer: https://auth.tomerhanochi.com
       clientID: argocd
       clientSecret: $oidc.sso.clientSecret
-      requestedIDTokenClaims:
-        groups:
-          essential: true
       requestedScopes:
         - openid
-        - profile
-        - email
+        - offline_access
 
   params:
     server.insecure: true
