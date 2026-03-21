@@ -14,4 +14,4 @@ spec:
   rules:
     - backendRefs:
         - name: kratos-selfservice-ui-node
-          port: 80
+          port: http
