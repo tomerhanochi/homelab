@@ -8,7 +8,6 @@ resources:
   - hydra
   - kratos
   - kratos-selfservice-ui-node
-  - routes
 
 patches:
   - target:

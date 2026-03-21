@@ -4,6 +4,7 @@ kind: Kustomization
 
 resources:
   - postgres-cluster.yaml
+  - route.yaml
 
 generators:
   - secret-generator.yaml
