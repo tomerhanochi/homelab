@@ -14,4 +14,4 @@ spec:
   rules:
     - backendRefs:
         - name: kratos-public
-          port: http
+          port: 80
