@@ -115,12 +115,13 @@ deployment:
       cpu: 200m
       memory: 128Mi
   extraVolumes:
-    - name: postgres-ca
-      secret:
-        secretName: kratos-database-ca
+    - name: ca-bundle
+      configMap:
+        name: ca-bundle
   extraVolumeMounts:
-    - name: postgres-ca
-      mountPath: /var/run/secrets/postgres
+    - name: ca-bundle
+      mountPath: /etc/ssl/certs/ca-certificates.crt
+      subPath: ca-certificates.crt
       readOnly: true
 
 service:

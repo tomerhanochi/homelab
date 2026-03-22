@@ -16,3 +16,8 @@ spec:
       owner: kratos
       secret:
         name: kratos-database-credentials
+  certificates:
+    serverCASecret: kratos-database-server-tls
+    serverTLSSecret: kratos-database-server-tls
+    clientCASecret: kratos-database-server-tls
+    replicationTLSSecret: kratos-database-replication-tls

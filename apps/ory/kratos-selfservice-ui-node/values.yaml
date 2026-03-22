@@ -6,7 +6,16 @@ kratosBrowserUrl: https://identity.tomerhanochi.com
 config:
   csrfCookieName: __Host-kratos-csrf
 
-deployment: {}
+deployment:
+  extraVolumes:
+    - name: ca-bundle
+      configMap:
+        name: ca-bundle
+  extraVolumeMounts:
+    - name: ca-bundle
+      mountPath: /etc/ssl/certs/ca-certificates.crt
+      subPath: ca-certificates.crt
+      readOnly: true
 
 service:
   type: ClusterIP

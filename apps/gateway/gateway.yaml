@@ -5,7 +5,7 @@ metadata:
   name: default
   namespace: gateway
   annotations:
-    cert-manager.io/cluster-issuer: selfsigned
+    cert-manager.io/cluster-issuer: internal-ca
 spec:
   gatewayClassName: cilium
   listeners:

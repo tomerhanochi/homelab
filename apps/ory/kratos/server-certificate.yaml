@@ -1,0 +1,27 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kratos-database-server
+  namespace: ory
+spec:
+  secretName: kratos-database-server-tls
+  issuerRef:
+    name: internal-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - kratos-database-rw
+    - kratos-database-rw.ory
+    - kratos-database-rw.ory.svc
+    - kratos-database-rw.ory.svc.cluster.local
+    - kratos-database-ro
+    - kratos-database-ro.ory
+    - kratos-database-ro.ory.svc
+    - kratos-database-ro.ory.svc.cluster.local
+    - kratos-database-r
+    - kratos-database-r.ory
+    - kratos-database-r.ory.svc
+    - kratos-database-r.ory.svc.cluster.local
+  duration: 2160h
+  renewBefore: 360h

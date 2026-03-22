@@ -1,0 +1,27 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hydra-database-server
+  namespace: ory
+spec:
+  secretName: hydra-database-server-tls
+  issuerRef:
+    name: internal-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - hydra-database-rw
+    - hydra-database-rw.ory
+    - hydra-database-rw.ory.svc
+    - hydra-database-rw.ory.svc.cluster.local
+    - hydra-database-ro
+    - hydra-database-ro.ory
+    - hydra-database-ro.ory.svc
+    - hydra-database-ro.ory.svc.cluster.local
+    - hydra-database-r
+    - hydra-database-r.ory
+    - hydra-database-r.ory.svc
+    - hydra-database-r.ory.svc.cluster.local
+  duration: 2160h
+  renewBefore: 360h

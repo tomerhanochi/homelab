@@ -19,6 +19,15 @@ global:
 server:
   ingress:
     enabled: false
+  volumes:
+    - name: ca-bundle
+      configMap:
+        name: ca-bundle
+  volumeMounts:
+    - name: ca-bundle
+      mountPath: /etc/ssl/certs/ca-certificates.crt
+      subPath: ca-certificates.crt
+      readOnly: true
 
 configs:
   cm:
@@ -30,7 +39,6 @@ configs:
       --enable-alpha-plugins
       --enable-exec
       --network
-    oidc.tls.insecure.skip.verify: "true"
     oidc.config: |-
       name: SSO
       issuer: https://auth.tomerhanochi.com

@@ -16,3 +16,8 @@ spec:
       owner: hydra
       secret:
         name: hydra-database-credentials
+  certificates:
+    serverCASecret: hydra-database-server-tls
+    serverTLSSecret: hydra-database-server-tls
+    clientCASecret: hydra-database-server-tls
+    replicationTLSSecret: hydra-database-replication-tls
