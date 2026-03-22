@@ -7,6 +7,9 @@ config:
   csrfCookieName: __Host-kratos-csrf
 
 deployment:
+  extraEnv:
+    - name: HYDRA_ADMIN_URL
+      value: http://hydra-admin.ory.svc.cluster.local:4445
   extraVolumes:
     - name: ca-bundle
       configMap:
