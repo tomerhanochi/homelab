@@ -4,6 +4,8 @@ kratos:
     enabled: true
     type: initContainer
   config:
+    oauth2_provider:
+      url: https://auth.tomerhanochi.com
     serve:
       public:
         port: 4433
