@@ -37,20 +37,6 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: ory
-    - name: identity
-      hostname: identity.tomerhanochi.com
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: identity-tls
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              kubernetes.io/metadata.name: ory
     - name: argocd
       hostname: argocd.tomerhanochi.com
       protocol: HTTPS

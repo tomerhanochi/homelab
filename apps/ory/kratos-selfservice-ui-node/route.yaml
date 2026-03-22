@@ -12,6 +12,19 @@ spec:
   hostnames:
     - accounts.tomerhanochi.com
   rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /kratos/
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: kratos-public
+          port: 80
     - backendRefs:
         - name: kratos-selfservice-ui-node
           port: 80

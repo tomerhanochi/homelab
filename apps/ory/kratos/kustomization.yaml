@@ -6,7 +6,6 @@ resources:
   - postgres-cluster.yaml
   - server-certificate.yaml
   - replication-certificate.yaml
-  - route.yaml
 
 generators:
   - secret-generator.yaml
