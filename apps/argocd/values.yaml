@@ -38,6 +38,8 @@ configs:
       requestedScopes:
         - openid
         - offline_access
+      rootCA: ""
+      tlsInsecureSkipVerify: true
 
   params:
     server.insecure: true
