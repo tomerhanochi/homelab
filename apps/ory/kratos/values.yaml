@@ -5,7 +5,7 @@ kratos:
     type: initContainer
   config:
     oauth2_provider:
-      url: https://auth.tomerhanochi.com
+      url: http://hydra-admin.ory.svc.cluster.local:4445
     serve:
       public:
         port: 4433
