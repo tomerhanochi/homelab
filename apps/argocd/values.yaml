@@ -30,6 +30,7 @@ configs:
       --enable-alpha-plugins
       --enable-exec
       --network
+    oidc.tls.insecure.skip.verify: "true"
     oidc.config: |-
       name: SSO
       issuer: https://auth.tomerhanochi.com
@@ -38,8 +39,6 @@ configs:
       requestedScopes:
         - openid
         - offline_access
-      rootCA: ""
-      tlsInsecureSkipVerify: true
 
   params:
     server.insecure: true
