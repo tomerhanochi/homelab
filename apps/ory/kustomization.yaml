@@ -7,7 +7,6 @@ resources:
   - networkpolicies
   - hydra
   - kratos
-  - kratos-selfservice-ui-node
 
 patches:
   - target:
