@@ -14,7 +14,7 @@ generators:
 helmCharts:
   - name: hydra
     repo: https://k8s.ory.sh/helm/charts
-    version: 0.60.1
+    version: 0.61.0
     releaseName: hydra
     namespace: ory
     valuesFile: values.yaml

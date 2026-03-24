@@ -11,7 +11,7 @@ generators:
 helmCharts:
   - name: kratos-selfservice-ui-node
     repo: https://k8s.ory.sh/helm/charts
-    version: 0.60.1
+    version: 0.61.0
     releaseName: kratos-selfservice-ui-node
     namespace: ory
     valuesFile: values.yaml
