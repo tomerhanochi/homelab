@@ -1,15 +1,18 @@
 # Homelab
 
-A self-hosted Kubernetes homelab powered by **bootc** (bootable container) and **GitOps** (ArgoCD).
+A self-hosted Kubernetes homelab powered by **bootc** (bootable container) and
+**GitOps** (FluxCD).
 
 ## Overview
 
-Homelab is a complete Kubernetes distribution designed for bare-metal servers. It combines:
+Homelab is a complete Kubernetes distribution designed for bare-metal servers. It
+combines:
 
 - **bootc Image**: A Fedora-based bootable container with K3s pre-configured
-- **GitOps Management**: ArgoCD synchronizes the cluster state with this Git repository
-- **Kustomize + SOPS**: Declarative infrastructure with encrypted secrets
-- **Cilium Networking**: High-performance CNI with network policies
+- **GitOps Management**: FluxCD reconciles the cluster state with this Git repository
+- **Kustomize + SOPS**: Declarative infrastructure with age-encrypted secrets
+- **Cilium Networking**: eBPF CNI with Gateway API, L2 load balancing, and network policies
+- **pocket-id SSO**: OIDC provider for single sign-on across apps and the cluster
 
 ## Architecture
 
@@ -17,26 +20,22 @@ Homelab is a complete Kubernetes distribution designed for bare-metal servers. I
 ┌─────────────────────────────────────────────────────────────┐
 │                    Bare Metal Server                         │
 │  ┌───────────────────────────────────────────────────────┐  │
-│  │              Homelab bootc Image                       │  │
+│  │              Homelab bootc Image (K3s)                 │  │
 │  │  ┌─────────────────────────────────────────────────┐  │  │
-│  │  │              K3s Kubernetes                       │  │  │
+│  │  │        FluxCD (GitOps Engine)                    │  │  │
+│  │  │  reconciles apps/ via per-app Kustomizations     │  │  │
 │  │  │  ┌───────────────────────────────────────────┐  │  │  │
-│  │  │  │           ArgoCD (GitOps Engine)           │  │  │  │
-│  │  │  │  ┌─────────────────────────────────────┐  │  │  │  │
-│  │  │  │  │     Applications (apps/)             │  │  │  │  │
-│  │  │  │  │  - Cilium (CNI)                      │  │  │  │  │
-│  │  │  │  │  - ArgoCD (GitOps)                   │  │  │  │  │
-│  │  │  │  │  - Authentik (IAM)                   │  │  │  │  │
-│  │  │  │  │  - CloudNativePG (PostgreSQL)        │  │  │  │  │
-│  │  │  │  │  - Tailscale (Remote Access)         │  │  │  │  │
-│  │  │  │  │  - Jellyfin (Media)                  │  │  │  │  │
-│  │  │  │  └─────────────────────────────────────┘  │  │  │  │
+│  │  │  │  Infra: cilium, cert-manager, cloudnative- │  │  │  │
+│  │  │  │  pg, gateway, external-dns                 │  │  │  │
+│  │  │  │  Apps:  pocket-id, jellyfin, jellyseerr,   │  │  │  │
+│  │  │  │  sonarr, radarr, qbittorrent, forgejo,     │  │  │  │
+│  │  │  │  kavita, paperless-ngx, atuin, homepage    │  │  │  │
 │  │  │  └───────────────────────────────────────────┘  │  │  │
 │  │  └─────────────────────────────────────────────────┘  │  │
 │  └───────────────────────────────────────────────────────┘  │
 │                                                              │
-│  Git Repository ◄───────► ArgoCD ApplicationSet             │
-│  (kustomize + sops)         Auto-discovers apps/            │
+│  Git Repository ──► FluxCD GitRepository + Kustomizations    │
+│  (kustomize + sops)   flux/cluster/*.yaml (one per app)      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -44,83 +43,73 @@ Homelab is a complete Kubernetes distribution designed for bare-metal servers. I
 
 ### bootc Image (`image/`)
 
-The foundation is a [bootc](https://github.com/containers/bootc) image that provides:
+The foundation is a [bootc](https://github.com/containers/bootc) image providing:
 
-- **Fedora 42 Minimal** base (via `quay.io/fedora-testing/fedora-bootc:42-minimal`)
-- **K3s** Kubernetes distribution (stable channel, auto-updated)
-- **Security Hardening**:
-  - SELinux enabled with k3s-selinux policies
-  - Kernel parameters tuned for Kubernetes (`vm.overcommit_memory=1`, etc.)
-  - Pod Security Admission configured
-  - Audit logging enabled
-  - Secrets encryption at rest
-  - Network policies enabled
-- **System Configuration**:
-  - `core` user with passwordless sudo via polkit
-  - SSH configured for key-based authentication
-  - tmpfiles for `/var/home/core` persistence
-  - systemd userdb for `core` user identity
+- **Fedora bootc minimal** base
+- **K3s** Kubernetes (traefik/servicelb/kube-proxy/flannel disabled — Cilium replaces them)
+- **Security hardening**: SELinux, tuned sysctls, Pod Security Admission, audit
+  logging, secrets encryption at rest, and OIDC (pocket-id) for the API server
+- **System config**: passwordless `core` user via polkit, key-based SSH, systemd userdb
 
-**Key Image Files:**
+### GitOps layout (`flux/`)
 
-| File | Purpose |
-|------|---------|
-| `Containerfile` | Builds the bootc image |
-| `setup.sh` | Installs K3s and dependencies |
-| `usr/lib/rancher/k3s/config.yaml` | K3s server configuration |
-| `usr/lib/systemd/system/k3s.service` | K3s systemd unit |
-| `usr/lib/sysctl.d/90-kubelet.conf` | Kernel tuning for Kubernetes |
-| `usr/share/polkit-1/rules.d/core.rules` | Polkit rules for `core` user |
+- `flux/flux-system/autogenerated/gotk-components.yaml` — the Flux controllers
+  (regenerate with `flux install --export`; do not hand-edit)
+- `flux/flux-system/sync.yaml` — the `GitRepository` (tracks `main`) + root `Kustomization`
+- `flux/cluster/*.yaml` — one Flux `Kustomization` per app, with `dependsOn`
+  ordering and SOPS decryption
 
 ### Applications (`apps/`)
 
-All Kubernetes applications are managed via GitOps:
-
 | Application | Description |
 |-------------|-------------|
-| **argocd** | GitOps engine with ApplicationSet for auto-discovery |
-| **cilium** | CNI providing networking, security, and load balancing |
-| **authentik** | Identity and access management (IAM) |
-| **cloudnative-pg** | PostgreSQL operator for database management |
-| **tailscale** | Tailscale operator for secure remote access |
+| **cilium** | eBPF CNI: networking, Gateway API, L2 LB, network policy |
+| **cert-manager** | TLS: Let's Encrypt (Cloudflare DNS-01) + an internal CA / trust-manager |
+| **cloudnative-pg** | PostgreSQL operator (per-app clusters) |
+| **gateway** | Cilium Gateway + per-host HTTPS listeners |
+| **external-dns** | Creates Cloudflare DNS records from Gateway HTTPRoutes |
+| **pocket-id** | OIDC provider (SSO) |
 | **jellyfin** | Media server |
+| **jellyseerr** | Media request frontend |
+| **sonarr** / **radarr** | TV / movie PVR backends (internal) |
+| **qbittorrent** | Torrent client, egress via ProtonVPN (gluetun sidecar) |
+| **forgejo** | Git forge |
+| **kavita** | Reading server (books/manga/comics) |
+| **paperless-ngx** | Document management |
+| **atuin** | Shell-history sync server |
+| **homepage** | Dashboard |
 
 See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
 
 ## How It Works
 
-1. **Boot**: Server boots from the homelab bootc image
-2. **K3s Starts**: systemd launches K3s with hardened configuration
-3. **Manual Bootstrap**: Cilium and ArgoCD are applied manually (see [INSTALLATION.md](INSTALLATION.md))
-4. **GitOps Sync**: ArgoCD ApplicationSet discovers all `apps/*/kustomization.yaml` files
-5. **Auto-Sync**: ArgoCD continuously synchronizes the cluster with Git state
-6. **Secrets Management**: SOPS-encrypted secrets are decrypted by KSOPS during kustomize builds
+1. **Boot**: the server boots the homelab bootc image; K3s starts (no CNI yet).
+2. **Bootstrap**: Cilium and Flux are installed manually (see [INSTALLATION.md](INSTALLATION.md)).
+3. **Sync**: the root Flux `Kustomization` applies `flux/cluster/*.yaml`, one
+   `Kustomization` per app, ordered by `dependsOn`.
+4. **Secrets**: kustomize-controller decrypts SOPS/age secrets in-cluster.
+5. **Helm**: helm-controller installs charts (cilium, cert-manager, cloudnative-pg,
+   jellyfin, forgejo) from `HelmRelease` resources.
+6. **DNS + TLS**: external-dns writes Cloudflare records; cert-manager issues
+   Let's Encrypt certs for every gateway hostname.
 
 ## Repository Structure
 
 ```
 homelab/
-├── image/                    # bootc image source
-│   ├── Containerfile         # Image build definition
-│   ├── setup.sh              # Installation script
-│   └── usr/                  # Files installed into the image
-├── apps/                     # Kubernetes applications (GitOps)
-│   ├── AGENTS.md             # Conventions and documentation
-│   ├── argocd/               # ArgoCD (GitOps engine)
-│   ├── cilium/               # Cilium (CNI)
-│   ├── authentik/            # Authentik (IAM)
-│   ├── cloudnative-pg/       # CloudNativePG (PostgreSQL)
-│   ├── tailscale/            # Tailscale (remote access)
-│   └── jellyfin/             # Jellyfin (media server)
-├── .sops.yaml                # SOPS encryption configuration
-├── Brewfile                  # Homebrew dependencies
-├── INSTALLATION.md           # Installation instructions
-└── README.md                 # This file
+├── image/            # bootc image source (Containerfile, setup.sh, K3s config)
+├── flux/             # FluxCD: controllers + GitRepository + per-app Kustomizations
+├── apps/             # Kubernetes applications (GitOps)
+├── scripts/          # bootstrap-sso.sh (creates pocket-id OIDC clients)
+├── .sops.yaml        # SOPS/age encryption config
+├── Brewfile          # CLI dependencies
+├── INSTALLATION.md   # Installation instructions
+└── README.md         # This file
 ```
 
 ## Installation
 
-See [INSTALLATION.md](INSTALLATION.md) for complete installation instructions.
+See [INSTALLATION.md](INSTALLATION.md).
 
 ## License
 

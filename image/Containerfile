@@ -1,4 +1,4 @@
-FROM quay.io/fedora-testing/fedora-bootc:42-minimal
+FROM quay.io/bootc-devel/fedora-bootc-44-minimal:20260715-142243@sha256:17a7230c2e41360beef7c93fb1468acc5dff9aab23c9660d6020564c073c56f5
 
 COPY /usr /usr
 

@@ -4,22 +4,8 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - issuers
-  - trust-manager
-
-helmCharts:
-  - name: cert-manager
-    repo: oci://quay.io/jetstack/charts
-    version: v1.20.0
-    releaseName: cert-manager
-    namespace: cert-manager
-    valuesFile: values.yaml
-    includeCRDs: true
-
-patches:
-  - target:
-      kind: CustomResourceDefinition
-    path: patches/crd-argocd-sync-options.yaml
+  - ocirepository.yaml
+  - helmrelease.yaml
 
 labels:
   - pairs:

@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - postgres-cluster.yaml
+  - postgres-cluster-credentials.sops.yaml
+  - secret.sops.yaml
+  - deployment.yaml
+  - service.yaml
+  - route.yaml
+  - networkpolicies
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: atuin

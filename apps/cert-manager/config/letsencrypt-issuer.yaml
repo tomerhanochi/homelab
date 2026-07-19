@@ -1,0 +1,19 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: letsencrypt.org@tomerhanochi.com
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    # DNS-01 via Cloudflare: works for private/LAN-only hosts (no inbound needed)
+    # and supports wildcards. Requires a Cloudflare API token with Zone:DNS:Edit.
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token

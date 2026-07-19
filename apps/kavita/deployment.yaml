@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kavita
+  namespace: kavita
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kavita
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kavita
+    spec:
+      # This image initializes /kavita/config as root on first start, so we do
+      # NOT set runAsNonRoot. fsGroup makes the config PVC group-writable.
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: kavita
+          # Reading server for books/manga/comics.
+          # v0.9.x ships native OIDC support: authentication can now be
+          # configured directly in the Kavita UI (Settings > Authentication).
+          image: ghcr.io/kareadita/kavita:0.9.0.2@sha256:880a8feff0833e860575f8e08788e4b4f59f8659afd17206566aae88a525130d
+          ports:
+            - name: http
+              containerPort: 5000
+          env:
+            - name: TZ
+              value: Europe/Amsterdam
+          volumeMounts:
+            - name: config
+              mountPath: /kavita/config
+            - name: library
+              mountPath: /library
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: kavita-config
+        # Read-only view of the shared media library (see apps/AGENTS.md storage
+        # convention). Kavita libraries point at subfolders of /library.
+        - name: library
+          hostPath:
+            path: /var/mnt/data/media
+            type: DirectoryOrCreate

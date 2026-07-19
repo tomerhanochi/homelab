@@ -1,93 +1,169 @@
 # Homelab Installation Guide
 
+The cluster is bootstrapped in three manual steps — **Cilium** (the CNI), then
+**Flux** (the GitOps engine) — after which Flux reconciles everything else in
+`apps/` from Git. Secrets are SOPS-encrypted with an **age** key that Flux's
+kustomize-controller decrypts in-cluster.
+
 ## Prerequisites
 
 1. Install the required CLI tools using [Homebrew](https://brew.sh/):
    ```bash
    brew bundle --file=Brewfile
    ```
-2. Verify that you have the location of the SOPS decryption SSH private key.
+2. Obtain the **age private key** for this repo and save it somewhere safe, then
+   point SOPS at it. The matching public recipient is in `.sops.yaml`.
+   ```bash
+   mkdir -p ~/.config/sops/age
+   # paste the private key (starts with AGE-SECRET-KEY-1...) into this file:
+   $EDITOR ~/.config/sops/age/homelab.agekey
+   export SOPS_AGE_KEY_FILE=~/.config/sops/age/homelab.agekey
+   ```
+3. Have a Cloudflare API token with **Zone → DNS → Edit** on `tomerhanochi.com`
+   (used by cert-manager for ACME DNS-01 and by external-dns), and your
+   ProtonVPN **WireGuard** private key + interface address (for qBittorrent).
 
-## Installation
+## Install the OS
 
-Follow [this guide](https://bootc-dev.github.io/bootc/bootc-install.html) on how to install a bootc image on a bare metal server, and use `ghcr.io/tomerhanochi/homelab:latest` as the source image to install.
+Follow [the bootc install guide](https://bootc-dev.github.io/bootc/bootc-install.html)
+and use `ghcr.io/tomerhanochi/homelab:latest` as the source image.
 
 ## Post Installation
 
 ### 1. Configure kubeconfig access
 
-Set up SSH access to your cluster and create a temporary kubeconfig:
-
 ```bash
 HOMELAB_IP="<homelab-ip>"
 SSH_KEY="<path-to-core-private-key>"
 
-# Create temporary kubeconfig
 export KUBECONFIG=$(mktemp)
 ssh -i "${SSH_KEY}" "core@${HOMELAB_IP}" run0 cat /var/lib/rancher/k3s/kubeconfig | \
-  sed 's/127.0.0.1/${HOMELAB_IP}/g' > "${KUBECONFIG}"
+  sed "s/127.0.0.1/${HOMELAB_IP}/g" > "${KUBECONFIG}"
 ```
 
-### 2. Install Cilium
+### 2. Provision shared media storage
 
-Cilium must be installed first as it provides the CNI for the cluster:
+The media/download stack (jellyfin, jellyseerr, sonarr, radarr, qbittorrent)
+shares one host directory so hardlinks work. Create it owned by UID/GID `1000`:
 
 ```bash
-kustomize build --enable-helm apps/cilium | kubectl apply -f -
+ssh -i "${SSH_KEY}" "core@${HOMELAB_IP}" \
+  run0 install -d -o 1000 -g 1000 /var/mnt/data/media /var/mnt/data/torrents
 ```
 
-Wait for Cilium to be ready:
+(Ideally `/var/mnt/data` is a mount point for a dedicated data disk.)
+
+### 3. Fill in the personal secrets
+
+The repo ships these secrets with placeholder values; replace them with
+`sops set` (which re-encrypts in place using your age key), then commit & push so
+Flux applies them.
 
 ```bash
+# Cloudflare API token — needed by cert-manager (ACME) and external-dns.
+TOKEN='<cloudflare-api-token>'
+sops set apps/cert-manager/config/cloudflare-api-token.sops.yaml '["stringData"]["api-token"]' "\"${TOKEN}\""
+sops set apps/external-dns/cloudflare-api-token.sops.yaml         '["stringData"]["api-token"]' "\"${TOKEN}\""
+
+# ProtonVPN WireGuard credentials for qBittorrent's gluetun sidecar.
+sops set apps/qbittorrent/vpn-secret.sops.yaml '["stringData"]["WIREGUARD_PRIVATE_KEY"]' '"<wg-private-key>"'
+sops set apps/qbittorrent/vpn-secret.sops.yaml '["stringData"]["WIREGUARD_ADDRESSES"]'   '"10.2.0.2/32"'
+
+git add -A && git commit -m "chore: set homelab secrets" && git push
+```
+
+### 4. Install Cilium (CNI)
+
+Cilium must be installed first — it provides networking, the Gateway, and
+network-policy enforcement. Install the Gateway API CRDs and the Cilium Helm
+release (Flux later adopts this release and keeps it reconciled):
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
+
+helm install cilium oci://quay.io/cilium/charts/cilium --version 1.19.6 \
+  --namespace cilium --create-namespace \
+  -f apps/cilium/values.yaml
+
 kubectl wait --for=condition=ready pod -l k8s-app=cilium -n cilium --timeout=300s
 ```
 
-### 3. Install ArgoCD
+### 5. Install Flux and point it at this repo
 
-Install ArgoCD which will manage the rest of your applications via GitOps:
+Create the `flux-system` namespace and the SOPS decryption key, install the
+GitOps Toolkit controllers, then apply the `GitRepository` + root `Kustomization`
+that make Flux reconcile `flux/cluster` (which fans out to every app):
 
 ```bash
-export SOPS_AGE_SSH_PRIVATE_KEY_FILE="<sops-decryption-ssh-private-key-file>"
-kustomize build --enable-helm --enable-alpha-plugins --enable-exec apps/argocd | kubectl apply --server-side -f -
-unset SOPS_AGE_SSH_PRIVATE_KEY_FILE
+kubectl create namespace flux-system
+
+# The age key Flux uses to decrypt SOPS secrets (data key MUST be named age.agekey).
+kubectl -n flux-system create secret generic sops-age \
+  --from-file=age.agekey="${SOPS_AGE_KEY_FILE}"
+
+# Controllers (source/kustomize/helm/notification).
+kubectl apply -f flux/flux-system/autogenerated/gotk-components.yaml
+
+# Wait for the controllers, then wire up the repo sync.
+kubectl -n flux-system wait --for=condition=Available deploy --all --timeout=300s
+kubectl apply -f flux/flux-system/sync.yaml
 ```
 
-Wait for ArgoCD to be ready:
+### 6. Wait for GitOps synchronization
+
+Flux reconciles apps in dependency order (cilium → cloudnative-pg / cert-manager
+→ cert-manager-config → gateway → apps). Watch progress:
 
 ```bash
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/part-of=argocd -n argocd --timeout=300s
+flux get kustomizations --watch
 ```
 
-### 4. Install ArgoCD ApplicationSet
+Once cert-manager, external-dns, and the gateway are healthy, external-dns
+creates the Cloudflare DNS records and cert-manager issues Let's Encrypt
+certificates for every hostname.
 
-After ArgoCD is fully running, apply the ApplicationSet that enables the App of Apps pattern:
+### 7. Bootstrap SSO (pocket-id)
+
+1. Open `https://sso.tomerhanochi.com/login/setup` and create the initial admin
+   (passkey). Create any user groups you want to use for role mapping.
+2. Create the OIDC clients and wire them into the app secrets:
+   ```bash
+   ./scripts/bootstrap-sso.sh
+   ```
+   This reads pocket-id's `STATIC_API_KEY` from the cluster, creates a client per
+   app, writes `forgejo`/`paperless-ngx` client credentials into their encrypted
+   secrets, and prints the credentials for the UI-configured apps (jellyfin,
+   kavita, jellyseerr, and the `kubernetes` client). Commit and
+   push the changed `*.sops.yaml` files afterwards.
+3. Finish per-app SSO where it is configured in the app's own UI (see the app
+   notes in [apps/AGENTS.md](apps/AGENTS.md)).
+
+### 8. (Optional) kubectl SSO via pocket-id
+
+The API server trusts pocket-id as an OIDC issuer. Authenticate `kubectl` with
+[kubelogin](https://github.com/int128/kubelogin) using the `kubernetes` client
+from step 7:
 
 ```bash
-kustomize build apps/argocd-objects | kubectl apply -f -
+kubectl oidc-login setup \
+  --oidc-issuer-url=https://sso.tomerhanochi.com \
+  --oidc-client-id=kubernetes \
+  --oidc-client-secret=<kubernetes-client-secret>
 ```
 
-### 5. Wait for GitOps synchronization
+Then bind your pocket-id identity/group to RBAC (subjects are prefixed `oidc:`),
+e.g. a `ClusterRoleBinding` for the group `oidc:admins`.
 
-ArgoCD will automatically discover and install all applications defined in the `apps/` directory via the ApplicationSet. Wait for all resources to synchronize:
-
-```bash
-# Watch ArgoCD applications sync status
-kubectl get applications -n argocd -w
-```
-
-### 6. Cleanup
+### 9. Cleanup
 
 ```bash
-rm "${KUBECONFIG}"
-unset KUBECONFIG
+rm "${KUBECONFIG}"; unset KUBECONFIG
 ```
 
 ## Verification
 
-After synchronization is complete, verify all applications are running:
-
 ```bash
-kubectl get pods -A
+flux get kustomizations          # all Ready=True
+kubectl get pods -A              # all Running
+kubectl get certificate -A       # all Ready=True (Let's Encrypt)
 ```
-
-All applications should show `Running` status.

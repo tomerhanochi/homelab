@@ -1,0 +1,95 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pocketid
+  namespace: pocketid
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pocketid
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pocketid
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: pocketid
+          image: ghcr.io/pocket-id/pocket-id:v2.11.0@sha256:b7c37ab3044e53fd29b5f7295eebff5fdc0367dc043f36b41bcbe1815fcd965d
+          ports:
+            - name: http
+              containerPort: 1411
+          env:
+            - name: APP_URL
+              value: https://sso.tomerhanochi.com
+            - name: INTERNAL_APP_URL
+              value: http://pocketid.pocketid.svc:1411
+            - name: TRUST_PROXY
+              value: "true"
+            # Keep the app stateless: persist uploads in Postgres, not on disk.
+            - name: FILE_BACKEND
+              value: database
+            - name: LOG_JSON
+              value: "true"
+            - name: ANALYTICS_DISABLED
+              value: "true"
+            - name: VERSION_CHECK_DISABLED
+              value: "true"
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: pocketid-secrets
+                  key: DB_CONNECTION_STRING
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocketid-secrets
+                  key: ENCRYPTION_KEY
+            # Grants admin API access so OIDC clients can be created via the API
+            # at bootstrap (see scripts/bootstrap-sso.sh).
+            - name: STATIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocketid-secrets
+                  key: STATIC_API_KEY
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+      volumes:
+        # GeoLite DB / runtime scratch; state lives in Postgres so this is ephemeral.
+        - name: data
+          emptyDir: {}

@@ -1,0 +1,22 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - atuin.yaml
+  - cert-manager-config.yaml
+  - cert-manager.yaml
+  - cilium.yaml
+  - cloudnative-pg.yaml
+  - external-dns.yaml
+  - forgejo.yaml
+  - gateway.yaml
+  - homepage.yaml
+  - jellyfin.yaml
+  - jellyseerr.yaml
+  - kavita.yaml
+  - paperless-ngx.yaml
+  - pocketid.yaml
+  - qbittorrent.yaml
+  - radarr.yaml
+  - sonarr.yaml

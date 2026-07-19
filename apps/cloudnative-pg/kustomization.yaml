@@ -4,19 +4,8 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-
-helmCharts:
-  - name: cloudnative-pg
-    repo: https://cloudnative-pg.github.io/charts
-    version: 0.27.1
-    releaseName: cloudnative-pg
-    namespace: cloudnative-pg
-    valuesFile: values.yaml
-
-patches:
-  - target:
-      kind: CustomResourceDefinition
-    path: patches/crd-argocd-sync-options.yaml
+  - ocirepository.yaml
+  - helmrelease.yaml
 
 labels:
   - pairs:

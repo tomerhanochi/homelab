@@ -1,0 +1,11 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ingress-allow-gateway
+  namespace: paperless-ngx
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - ingress
