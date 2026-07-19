@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: ingress-allow-cloudnative-pg-operator
-  namespace: pocketid
+  namespace: authentik
 spec:
   podSelector:
     matchExpressions:

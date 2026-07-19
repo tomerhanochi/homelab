@@ -49,10 +49,14 @@ data:
             href: https://git.tomerhanochi.com
             description: Git forge
             icon: forgejo.png
-        - Pocket ID:
+        - authentik:
             href: https://sso.tomerhanochi.com
-            description: OIDC provider
-            icon: pocket-id.png
+            description: OIDC provider (SSO)
+            icon: authentik.png
+        - Headlamp:
+            href: https://headlamp.tomerhanochi.com
+            description: Kubernetes console
+            icon: headlamp.png
         - Atuin:
             href: https://atuin.tomerhanochi.com
             description: Shell history sync

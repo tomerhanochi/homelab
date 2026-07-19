@@ -12,7 +12,8 @@ combines:
 - **GitOps Management**: FluxCD reconciles the cluster state with this Git repository
 - **Kustomize + SOPS**: Declarative infrastructure with age-encrypted secrets
 - **Cilium Networking**: eBPF CNI with Gateway API, L2 load balancing, and network policies
-- **pocket-id SSO**: OIDC provider for single sign-on across apps and the cluster
+- **authentik SSO**: OIDC provider for single sign-on across apps and the cluster,
+  with passkey-only self-registration and GitOps-managed clients (blueprints)
 
 ## Architecture
 
@@ -27,9 +28,10 @@ combines:
 │  │  │  ┌───────────────────────────────────────────┐  │  │  │
 │  │  │  │  Infra: cilium, cert-manager, cloudnative- │  │  │  │
 │  │  │  │  pg, gateway, external-dns                 │  │  │  │
-│  │  │  │  Apps:  pocket-id, jellyfin, jellyseerr,   │  │  │  │
-│  │  │  │  sonarr, radarr, qbittorrent, forgejo,     │  │  │  │
-│  │  │  │  kavita, paperless-ngx, atuin, homepage    │  │  │  │
+│  │  │  │  Apps:  authentik, headlamp, jellyfin,     │  │  │  │
+│  │  │  │  jellyseerr, sonarr, radarr, qbittorrent,  │  │  │  │
+│  │  │  │  forgejo, kavita, paperless-ngx, atuin,    │  │  │  │
+│  │  │  │  homepage                                  │  │  │  │
 │  │  │  └───────────────────────────────────────────┘  │  │  │
 │  │  └─────────────────────────────────────────────────┘  │  │
 │  └───────────────────────────────────────────────────────┘  │
@@ -48,7 +50,7 @@ The foundation is a [bootc](https://github.com/containers/bootc) image providing
 - **Fedora bootc minimal** base
 - **K3s** Kubernetes (traefik/servicelb/kube-proxy/flannel disabled — Cilium replaces them)
 - **Security hardening**: SELinux, tuned sysctls, Pod Security Admission, audit
-  logging, secrets encryption at rest, and OIDC (pocket-id) for the API server
+  logging, secrets encryption at rest, and OIDC (authentik) for the API server
 - **System config**: passwordless `core` user via polkit, key-based SSH, systemd userdb
 
 ### GitOps layout (`flux/`)
@@ -68,7 +70,8 @@ The foundation is a [bootc](https://github.com/containers/bootc) image providing
 | **cloudnative-pg** | PostgreSQL operator (per-app clusters) |
 | **gateway** | Cilium Gateway + per-host HTTPS listeners |
 | **external-dns** | Creates Cloudflare DNS records from Gateway HTTPRoutes |
-| **pocket-id** | OIDC provider (SSO) |
+| **authentik** | OIDC provider (SSO): passkey-only registration, clients via blueprints |
+| **headlamp** | Kubernetes web console (SSO-only login) |
 | **jellyfin** | Media server |
 | **jellyseerr** | Media request frontend |
 | **sonarr** / **radarr** | TV / movie PVR backends (internal) |
@@ -89,7 +92,7 @@ See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
    `Kustomization` per app, ordered by `dependsOn`.
 4. **Secrets**: kustomize-controller decrypts SOPS/age secrets in-cluster.
 5. **Helm**: helm-controller installs charts (cilium, cert-manager, cloudnative-pg,
-   jellyfin, forgejo) from `HelmRelease` resources.
+   authentik, jellyfin, forgejo, headlamp) from `HelmRelease` resources.
 6. **DNS + TLS**: external-dns writes Cloudflare records; cert-manager issues
    Let's Encrypt certs for every gateway hostname.
 
@@ -100,7 +103,6 @@ homelab/
 ├── image/            # bootc image source (Containerfile, setup.sh, K3s config)
 ├── flux/             # FluxCD: controllers + GitRepository + per-app Kustomizations
 ├── apps/             # Kubernetes applications (GitOps)
-├── scripts/          # bootstrap-sso.sh (creates pocket-id OIDC clients)
 ├── .sops.yaml        # SOPS/age encryption config
 ├── Brewfile          # CLI dependencies
 ├── INSTALLATION.md   # Installation instructions

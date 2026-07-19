@@ -122,37 +122,54 @@ Once cert-manager, external-dns, and the gateway are healthy, external-dns
 creates the Cloudflare DNS records and cert-manager issues Let's Encrypt
 certificates for every hostname.
 
-### 7. Bootstrap SSO (pocket-id)
+### 7. First-run SSO setup (authentik)
 
-1. Open `https://sso.tomerhanochi.com/login/setup` and create the initial admin
-   (passkey). Create any user groups you want to use for role mapping.
-2. Create the OIDC clients and wire them into the app secrets:
+Every OIDC client and the passwordless (passkey) enrollment flow are created
+declaratively by authentik **blueprints** (`apps/authentik/blueprints/`), applied
+by the authentik worker on startup — there is no API/UI client bootstrap. You only
+claim the admin account and finish the two apps configured in their own UI.
+
+1. Read the initial `akadmin` password and sign in:
    ```bash
-   ./scripts/bootstrap-sso.sh
+   sops -d apps/authentik/secret.sops.yaml | grep AUTHENTIK_BOOTSTRAP_PASSWORD
    ```
-   This reads pocket-id's `STATIC_API_KEY` from the cluster, creates a client per
-   app, writes `forgejo`/`paperless-ngx` client credentials into their encrypted
-   secrets, and prints the credentials for the UI-configured apps (jellyfin,
-   kavita, jellyseerr, and the `kubernetes` client). Commit and
-   push the changed `*.sops.yaml` files afterwards.
-3. Finish per-app SSO where it is configured in the app's own UI (see the app
-   notes in [apps/AGENTS.md](apps/AGENTS.md)).
+   Open `https://sso.tomerhanochi.com`, log in as `akadmin`, and (recommended)
+   register a passkey under **Settings → MFA Devices**.
+2. **Jellyfin** and **Kavita** are configured in their own OIDC UIs. Read their
+   client credentials from the encrypted blueprint secret and paste them in:
+   ```bash
+   sops -d apps/authentik/oidc-secret.sops.yaml
+   ```
+   - Jellyfin (SSO plugin): OIDC provider name `authentik`, client id `jellyfin`,
+     endpoint `https://sso.tomerhanochi.com/application/o/jellyfin/`.
+   - Kavita (**Settings → OIDC**): client id `kavita`, authority
+     `https://sso.tomerhanochi.com/application/o/kavita/`.
+   Seerr signs in "with Jellyfin", so it inherits SSO through Jellyfin.
+3. **Self-service registration is passkey-only**: the login page's *Sign up* link
+   runs the `passkey-enrollment` flow (no password — WebAuthn only). New users are
+   created **inactive**; activate them under **Directory → Users** and add them to
+   groups to drive per-app and cluster (RBAC) authorization.
 
-### 8. (Optional) kubectl SSO via pocket-id
+### 8. Cluster access via SSO (kubectl + Headlamp)
 
-The API server trusts pocket-id as an OIDC issuer. Authenticate `kubectl` with
-[kubelogin](https://github.com/int128/kubelogin) using the `kubernetes` client
-from step 7:
+The API server trusts authentik's `kubernetes` OIDC application as its issuer
+(`https://sso.tomerhanochi.com/application/o/kubernetes/`).
 
-```bash
-kubectl oidc-login setup \
-  --oidc-issuer-url=https://sso.tomerhanochi.com \
-  --oidc-client-id=kubernetes \
-  --oidc-client-secret=<kubernetes-client-secret>
-```
+- **Headlamp** (`https://headlamp.tomerhanochi.com`) signs in via SSO and forwards
+  your id_token to the API server — no extra setup.
+- **kubectl** via [kubelogin](https://github.com/int128/kubelogin), using the
+  committed `kubernetes` client secret:
+  ```bash
+  kubectl oidc-login setup \
+    --oidc-issuer-url=https://sso.tomerhanochi.com/application/o/kubernetes/ \
+    --oidc-client-id=kubernetes \
+    --oidc-client-secret="$(sops -d apps/authentik/oidc-secret.sops.yaml | \
+      awk '/KUBERNETES_CLIENT_SECRET/{print $2}')"
+  ```
 
-Then bind your pocket-id identity/group to RBAC (subjects are prefixed `oidc:`),
-e.g. a `ClusterRoleBinding` for the group `oidc:admins`.
+Authorization is via RBAC: bind your authentik identity/group (subjects are
+prefixed `oidc:`) to a Role/ClusterRole — e.g. a `ClusterRoleBinding` for the
+group `oidc:admins`. Headlamp and kubectl share this RBAC.
 
 ### 9. Cleanup
 

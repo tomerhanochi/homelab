@@ -9,20 +9,20 @@ metadata:
 spec:
   gatewayClassName: cilium
   listeners:
-    - name: pocketid
+    - name: authentik
       hostname: sso.tomerhanochi.com
       protocol: HTTPS
       port: 443
       tls:
         mode: Terminate
         certificateRefs:
-          - name: id-tls
+          - name: authentik-tls
       allowedRoutes:
         namespaces:
           from: Selector
           selector:
             matchLabels:
-              kubernetes.io/metadata.name: pocketid
+              kubernetes.io/metadata.name: authentik
     - name: jellyfin
       hostname: jellyfin.tomerhanochi.com
       protocol: HTTPS
@@ -147,3 +147,17 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: homepage
+    - name: headlamp
+      hostname: headlamp.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: headlamp-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: headlamp

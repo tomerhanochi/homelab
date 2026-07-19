@@ -2,17 +2,17 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: pocketid-database
-  namespace: pocketid
+  name: authentik-database
+  namespace: authentik
 spec:
   instances: 1
   storage:
-    size: 2Gi
+    size: 5Gi
   monitoring:
     enablePodMonitor: false
   bootstrap:
     initdb:
-      database: pocketid
-      owner: pocketid
+      database: authentik
+      owner: authentik
       secret:
-        name: pocketid-database-credentials
+        name: authentik-database-credentials

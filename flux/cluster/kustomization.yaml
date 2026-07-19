@@ -4,6 +4,7 @@ kind: Kustomization
 
 resources:
   - atuin.yaml
+  - authentik.yaml
   - cert-manager-config.yaml
   - cert-manager.yaml
   - cilium.yaml
@@ -11,12 +12,12 @@ resources:
   - external-dns.yaml
   - forgejo.yaml
   - gateway.yaml
+  - headlamp.yaml
   - homepage.yaml
   - jellyfin.yaml
   - jellyseerr.yaml
   - kavita.yaml
   - paperless-ngx.yaml
-  - pocketid.yaml
   - qbittorrent.yaml
   - radarr.yaml
   - sonarr.yaml

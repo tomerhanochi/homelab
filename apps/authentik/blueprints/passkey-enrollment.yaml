@@ -1,0 +1,129 @@
+version: 1
+metadata:
+  name: homelab-passkey-enrollment
+entries:
+  # Passkey (WebAuthn) setup stage. `resident_key_requirement: required` makes the
+  # credential discoverable (a true passkey) and `user_verification: required`
+  # forces the built-in authenticator gesture (biometric/PIN).
+  - model: authentik_stages_authenticator_webauthn.authenticatorwebauthnstage
+    state: present
+    id: webauthn-setup
+    identifiers:
+      name: homelab-passkey-setup
+    attrs:
+      friendly_name: Passkey
+      user_verification: required
+      resident_key_requirement: required
+
+  # Enrollment prompts — username, name, email. Deliberately NO password field:
+  # registration is passkey-only.
+  - model: authentik_stages_prompt.prompt
+    state: present
+    id: prompt-username
+    identifiers:
+      name: homelab-enroll-username
+    attrs:
+      field_key: username
+      label: Username
+      type: username
+      required: true
+      placeholder: Username
+      order: 0
+  - model: authentik_stages_prompt.prompt
+    state: present
+    id: prompt-name
+    identifiers:
+      name: homelab-enroll-name
+    attrs:
+      field_key: name
+      label: Display name
+      type: text
+      required: true
+      placeholder: Name
+      order: 1
+  - model: authentik_stages_prompt.prompt
+    state: present
+    id: prompt-email
+    identifiers:
+      name: homelab-enroll-email
+    attrs:
+      field_key: email
+      label: Email
+      type: email
+      required: true
+      placeholder: Email
+      order: 2
+  - model: authentik_stages_prompt.promptstage
+    state: present
+    id: prompt-stage
+    identifiers:
+      name: homelab-enroll-prompt
+    attrs:
+      fields:
+        - !KeyOf prompt-username
+        - !KeyOf prompt-name
+        - !KeyOf prompt-email
+
+  # Create the user, then let them register a passkey, then log them in. Users are
+  # created inactive so an admin approves them before they can sign in anywhere
+  # (open passkey registration on a public SSO otherwise lets anyone self-provision).
+  - model: authentik_stages_user_write.userwritestage
+    state: present
+    id: user-write
+    identifiers:
+      name: homelab-enroll-write
+    attrs:
+      user_creation_mode: always_create
+      create_users_as_inactive: true
+
+  - model: authentik_stages_user_login.userloginstage
+    state: present
+    id: user-login
+    identifiers:
+      name: homelab-enroll-login
+
+  - model: authentik_flows.flow
+    state: present
+    id: flow
+    identifiers:
+      slug: passkey-enrollment
+    attrs:
+      name: Passkey Enrollment
+      title: Create your account
+      designation: enrollment
+      authentication: require_unauthenticated
+
+  - model: authentik_flows.flowstagebinding
+    state: present
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf prompt-stage
+      order: 10
+  - model: authentik_flows.flowstagebinding
+    state: present
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf user-write
+      order: 20
+  - model: authentik_flows.flowstagebinding
+    state: present
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf webauthn-setup
+      order: 30
+  - model: authentik_flows.flowstagebinding
+    state: present
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf user-login
+      order: 40
+
+  # Wire the passkey flow as the default brand's self-service enrollment flow, so
+  # the login page shows a "Sign up" link that runs it. akadmin still logs in via
+  # the default (password-capable) authentication flow.
+  - model: authentik_brands.brand
+    state: present
+    identifiers:
+      domain: authentik-default
+    attrs:
+      flow_enrollment: !KeyOf flow

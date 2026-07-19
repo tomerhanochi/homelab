@@ -24,7 +24,7 @@ GitOps. Each app is applied by a Flux `Kustomization` in `flux/cluster/<app>.yam
   the same values are also needed for a manual bootstrap (see `apps/cilium`).
   Reference example: `apps/jellyfin`.
 - **Plain manifests**: for apps without a chart, write `deployment.yaml`,
-  `service.yaml`, etc. Reference example: `apps/pocketid`.
+  `service.yaml`, etc. Reference example: `apps/paperless-ngx`.
 - **Labeling**: use `labels` with `pairs` for `app.kubernetes.io/part-of`.
 
 ## NetworkPolicies (`apps/<app>/networkpolicies/`)
@@ -68,20 +68,31 @@ CNPG auto-generates TLS; connect via `<app>-database-rw.<app>.svc:5432`.
 Secrets are `*.sops.yaml` files encrypted with the age recipient in `.sops.yaml`
 and decrypted in-cluster by Flux (no ksops). They are listed directly in the
 app's `kustomization.yaml` `resources`. Create/rotate values with
-`sops set <file> '["stringData"]["KEY"]' '"value"'`. Personal secrets (Cloudflare
-token, ProtonVPN key) and OIDC client credentials ship as placeholders and are
-filled at bootstrap (see [INSTALLATION.md](../INSTALLATION.md) and
-`scripts/bootstrap-sso.sh`).
+`sops set <file> '["stringData"]["KEY"]' '"value"'`. Only the personal secrets
+(Cloudflare token, ProtonVPN key) ship as placeholders to fill at install; app DB
+passwords and OIDC client secrets are committed encrypted (see
+[INSTALLATION.md](../INSTALLATION.md)).
 
-## SSO (pocket-id / OIDC)
+## SSO (authentik / OIDC)
 
-pocket-id (`https://sso.tomerhanochi.com`) is the OIDC provider. OIDC clients are
-created via its API by `scripts/bootstrap-sso.sh` (not GitOps CRDs). Native-OIDC
-apps consume the client id/secret from a secret (forgejo, paperless-ngx); others
-are configured in their own UI/component (jellyfin plugin, kavita). Seerr has no
-pocket-id client of its own — it signs in via Jellyfin, which is behind pocket-id
-SSO. atuin and qbittorrent have no OIDC. The k3s API server also trusts pocket-id
-(see `image/.../k3s/config.yaml`); use kubelogin for kubectl.
+authentik (`https://sso.tomerhanochi.com`) is the OIDC provider. Everything is
+GitOps: OIDC providers/applications and the passkey enrollment flow are declared
+as **blueprints** (`apps/authentik/blueprints/`), mounted from the
+`authentik-blueprints` ConfigMap and applied by the authentik worker. Each client
+has a fixed `client_id` (the app name) and a `client_secret` injected into the
+blueprint via `!Env` from the `authentik-oidc` secret; the same secret value is
+committed into the consuming app's own secret. **Each app has its own per-app
+issuer** `https://sso.tomerhanochi.com/application/o/<slug>/` (not one shared
+issuer). Native-OIDC apps read the client id/secret from a secret (forgejo,
+paperless-ngx, headlamp); jellyfin and kavita are configured in their own UI with
+credentials read from `authentik-oidc`. Seerr has no client of its own — it signs
+in via Jellyfin, which is behind SSO. atuin and qbittorrent have no OIDC. The k3s
+API server trusts authentik's `kubernetes` application as an issuer (see
+`image/.../k3s/config.yaml`); Headlamp and kubelogin use it for cluster access.
+Self-service registration is **passkey-only** (WebAuthn); new users are created
+inactive. Adding a client = add a provider+application entry to
+`apps/authentik/blueprints/oidc-clients.yaml`, a `*_CLIENT_SECRET` to the
+`authentik-oidc` secret, and wire the app to its per-app issuer.
 
 ## Applications
 
@@ -92,7 +103,8 @@ SSO. atuin and qbittorrent have no OIDC. The k3s API server also trusts pocket-i
 | **cloudnative-pg** | PostgreSQL operator managing per-app clusters. |
 | **gateway** | Cilium `Gateway` with per-host HTTPS listeners + the LB IP pool / L2 announcement. |
 | **external-dns** | Syncs Cloudflare DNS records from Gateway HTTPRoutes. |
-| **pocket-id** | OIDC provider for SSO (Postgres-backed). |
+| **authentik** | OIDC provider for SSO (Postgres + Redis). Clients + passkey enrollment via blueprints. |
+| **headlamp** | Kubernetes web console; SSO-only login (proxies the user's OIDC token to the API server). |
 | **jellyfin / jellyseerr** | Media server and request frontend. |
 | **sonarr / radarr** | TV / movie PVR backends (internal only). |
 | **qbittorrent** | Torrent client with ProtonVPN egress via a gluetun sidecar (kill switch on). |

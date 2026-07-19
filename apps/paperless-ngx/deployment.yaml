@@ -47,7 +47,7 @@ spec:
               value: http://paperless-ngx-tika:9998
             - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
               value: http://paperless-ngx-gotenberg:3000
-            # Enables the django-allauth OIDC provider (pocket-id).
+            # Enables the django-allauth OIDC provider (authentik).
             - name: PAPERLESS_APPS
               value: allauth.socialaccount.providers.openid_connect
             - name: PAPERLESS_SECRET_KEY
@@ -60,7 +60,7 @@ spec:
                 secretKeyRef:
                   name: paperless-ngx-secrets
                   key: PAPERLESS_DBPASS
-            # JSON blob wiring the pocket-id OIDC client (id/secret + endpoints).
+            # JSON blob wiring the authentik OIDC client (id/secret + endpoints).
             - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
               valueFrom:
                 secretKeyRef:
