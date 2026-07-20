@@ -73,8 +73,8 @@ git add -A && git commit -m "chore: set homelab secrets" && git push
 ```
 
 This first push to `main` also triggers the **Build bootstrap images** workflow,
-which publishes `ghcr.io/tomerhanochi/homelab-jellyfin-bootstrap` and
-`ghcr.io/tomerhanochi/homelab-kavita-bootstrap` (used by the Jellyfin/Kavita SSO
+which publishes `ghcr.io/tomerhanochi/homelab/internal/jellyfin-bootstrap` and
+`ghcr.io/tomerhanochi/homelab/internal/kavita-bootstrap` (used by the Jellyfin/Kavita SSO
 setup Jobs). Make both GHCR packages **public** (GitHub → Packages → each package
 → Package settings → Change visibility) so the cluster can pull them without a
 pull secret. They only need to exist before Flux reconciles Jellyfin/Kavita

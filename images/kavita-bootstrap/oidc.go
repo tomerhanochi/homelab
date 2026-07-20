@@ -78,6 +78,13 @@ func configureOIDC() error {
 	}
 	log.Print("Kavita OIDC settings applied")
 
+	// The OIDC connection settings only take effect after Kavita re-reads
+	// appsettings.json at startup, so restart it once. Outside Kubernetes (e.g.
+	// a local docker test) there is nothing to restart — skip it.
+	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
+		log.Print("not running in Kubernetes, skipping restart (restart Kavita manually for the settings to apply)")
+		return nil
+	}
 	if err := restartDeployment(authority); err != nil {
 		return fmt.Errorf("restart kavita: %w", err)
 	}

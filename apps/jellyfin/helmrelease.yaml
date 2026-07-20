@@ -91,7 +91,7 @@ spec:
     # plugin is already present, so Jellyfin's own updates are never clobbered.
     extraInitContainers:
       - name: install-sso-plugin
-        image: ghcr.io/tomerhanochi/homelab-jellyfin-bootstrap:0.1.0
+        image: ghcr.io/tomerhanochi/homelab/internal/jellyfin-bootstrap:0.1.0
         args: ["install-plugin"]
         env:
           - name: PLUGIN_URL
