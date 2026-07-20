@@ -100,12 +100,15 @@ See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
 ## How It Works
 
 1. **Boot**: the server boots the homelab bootc image; K3s starts (no CNI yet).
-2. **Bootstrap**: Cilium and Flux are installed manually (see [INSTALLATION.md](INSTALLATION.md)).
+2. **Bootstrap**: Cilium is applied from the repo (`kubectl apply -k apps/cilium`,
+   installed by k3s's helm-controller) and Flux is installed (see [INSTALLATION.md](INSTALLATION.md)).
 3. **Sync**: the root Flux `Kustomization` applies `flux/cluster/*.yaml`, one
    `Kustomization` per app, ordered by `dependsOn`.
 4. **Secrets**: kustomize-controller decrypts SOPS/age secrets in-cluster.
-5. **Helm**: helm-controller installs charts (cilium, cert-manager, cloudnative-pg,
-   authentik, jellyfin, forgejo, headlamp) from `HelmRelease` resources.
+5. **Helm**: Flux's helm-controller installs charts (cert-manager, cloudnative-pg,
+   authentik, jellyfin, forgejo, headlamp) from `HelmRelease` resources. Cilium is
+   the exception — k3s's own helm-controller installs it from a `HelmChart` CR
+   (`apps/cilium`), since the CNI must exist before Flux runs.
 6. **DNS + TLS**: external-dns writes Cloudflare records; cert-manager issues
    Let's Encrypt certs for every gateway hostname.
 

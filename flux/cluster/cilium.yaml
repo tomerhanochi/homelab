@@ -10,7 +10,12 @@ spec:
   timeout: 5m
   path: ./apps/cilium
   prune: true
-  wait: true
+  # Cilium is bootstrapped (and verified healthy) manually before Flux exists
+  # (`kubectl apply -k apps/cilium`), and it is installed by k3s' helm-controller
+  # via a HelmChart CR whose status Flux/kstatus cannot reliably health-check.
+  # So do not block this Kustomization (and everything that dependsOn it) on that
+  # check — just keep the manifests reconciled.
+  wait: false
   sourceRef:
     kind: GitRepository
     name: flux-system

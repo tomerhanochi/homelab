@@ -10,16 +10,9 @@ resources:
   # channel is needed.
   - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
   - namespace.yaml
-  - ocirepository.yaml
-  - helmrelease.yaml
-
-configMapGenerator:
-  - name: cilium-values
-    namespace: cilium
-    files:
-      - values.yaml
-    options:
-      disableNameSuffixHash: true
+  # k3s helm-controller installs Cilium from this HelmChart (both at bootstrap via
+  # `kubectl apply -k apps/cilium` and thereafter via Flux). Single source of truth.
+  - helmchart.yaml
 
 labels:
   - pairs:

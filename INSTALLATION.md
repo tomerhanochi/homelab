@@ -80,18 +80,19 @@ setup Jobs). Make both GHCR packages **public** (GitHub → Packages → each pa
 pull secret. They only need to exist before Flux reconciles Jellyfin/Kavita
 (late in the dependency order), so CI has ample time.
 
-### 4. Install Cilium (CNI)
+### 4. Bootstrap Cilium (CNI)
 
-Cilium must be installed first — it provides networking, the Gateway, and
-network-policy enforcement. Install the Gateway API CRDs and the Cilium Helm
-release (Flux later adopts this release and keeps it reconciled):
+Cilium must be up first — it provides networking, the Gateway, and network-policy
+enforcement, and Flux's own pods can't get an IP until a CNI exists. Apply it
+**straight from the repo**; k3s's built-in helm-controller installs it from the
+`HelmChart` in `apps/cilium` (its `bootstrap: true` runs the install Job on the
+host network, so it can bring up the CNI on a node that has none yet). This is
+the exact same `apps/cilium` that Flux reconciles afterwards, so the chart
+version, values, and Gateway API CRD version live in one place — nothing here to
+keep in sync by hand.
 
 ```bash
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
-
-helm install cilium oci://quay.io/cilium/charts/cilium --version 1.19.6 \
-  --namespace cilium --create-namespace \
-  -f apps/cilium/values.yaml
+kubectl apply -k apps/cilium
 
 kubectl wait --for=condition=ready pod -l k8s-app=cilium -n cilium --timeout=300s
 ```
