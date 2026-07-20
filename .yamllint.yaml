@@ -3,6 +3,7 @@ extends: default
 
 ignore:
   - "*.sops.yaml"
+  - "*.helm.yaml"
 
 rules:
   line-length:
