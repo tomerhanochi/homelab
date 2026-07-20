@@ -1,0 +1,51 @@
+---
+# Helm values for Cilium. After editing (or to bump the chart version), regenerate
+# the committed manifest so it stays byte-identical to `helm template`:
+#   helm repo add cilium https://helm.cilium.io && helm repo update
+#   helm template cilium cilium/cilium --version 1.19.6 --namespace cilium \
+#     -f values.yaml > ../usr/lib/rancher/k3s/server/manifests/10-cilium.yaml
+namespaceOverride: cilium
+
+kubeProxyReplacement: true
+# K3S proxies the API server to 127.0.0.1:6444.
+k8sServiceHost: 127.0.0.1
+k8sServicePort: 6444
+
+routingMode: native
+bpf:
+  datapathMode: netkit
+  masquerade: true
+  distributedLRU:
+    enabled: true
+  mapDynamicSizeRatio: 0.08
+bpfClockProbe: true
+
+autoDirectNodeRoutes: true
+ipv4:
+  enabled: true
+ipv4NativeRoutingCIDR: "10.0.0.0/8"
+
+ipv6:
+  enabled: false
+
+ipam:
+  mode: cluster-pool
+
+hubble:
+  enabled: false
+
+bandwidthManager:
+  enabled: false
+
+operator:
+  enabled: true
+  replicas: 1
+
+envoy:
+  enabled: true
+
+l2announcements:
+  enabled: true
+
+gatewayAPI:
+  enabled: true

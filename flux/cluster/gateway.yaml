@@ -15,7 +15,6 @@ spec:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    - name: cilium
     - name: cert-manager-config
   decryption:
     provider: sops

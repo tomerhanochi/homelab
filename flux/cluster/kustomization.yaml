@@ -6,7 +6,6 @@ resources:
   - authentik.yaml
   - cert-manager-config.yaml
   - cert-manager.yaml
-  - cilium.yaml
   - cloudnative-pg.yaml
   - external-dns.yaml
   - forgejo.yaml

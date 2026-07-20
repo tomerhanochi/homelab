@@ -1,9 +1,9 @@
 # Homelab Installation Guide
 
-The cluster is bootstrapped in three manual steps — **Cilium** (the CNI), then
-**Flux** (the GitOps engine) — after which Flux reconciles everything else in
-`apps/` from Git. Secrets are SOPS-encrypted with an **age** key that Flux's
-kustomize-controller decrypts in-cluster.
+The cluster needs a single manual bootstrap step — installing **Flux** (the
+GitOps engine) — after which Flux reconciles everything in `apps/` from Git.
+Secrets are SOPS-encrypted with an **age** key that Flux's kustomize-controller
+decrypts in-cluster.
 
 ## Prerequisites
 
@@ -80,24 +80,7 @@ setup Jobs). Make both GHCR packages **public** (GitHub → Packages → each pa
 pull secret. They only need to exist before Flux reconciles Jellyfin/Kavita
 (late in the dependency order), so CI has ample time.
 
-### 4. Bootstrap Cilium (CNI)
-
-Cilium must be up first — it provides networking, the Gateway, and network-policy
-enforcement, and Flux's own pods can't get an IP until a CNI exists. Apply it
-**straight from the repo**; k3s's built-in helm-controller installs it from the
-`HelmChart` in `apps/cilium` (its `bootstrap: true` runs the install Job on the
-host network, so it can bring up the CNI on a node that has none yet). This is
-the exact same `apps/cilium` that Flux reconciles afterwards, so the chart
-version, values, and Gateway API CRD version live in one place — nothing here to
-keep in sync by hand.
-
-```bash
-kubectl apply -k apps/cilium
-
-kubectl wait --for=condition=ready pod -l k8s-app=cilium -n cilium --timeout=300s
-```
-
-### 5. Install Flux and point it at this repo
+### 4. Install Flux and point it at this repo
 
 Create the `flux-system` namespace and the SOPS decryption key, install the
 GitOps Toolkit controllers, then apply the `GitRepository` + root `Kustomization`
@@ -118,10 +101,10 @@ kubectl -n flux-system wait --for=condition=Available deploy --all --timeout=300
 kubectl apply -f flux/flux-system/sync.yaml
 ```
 
-### 6. Wait for GitOps synchronization
+### 5. Wait for GitOps synchronization
 
-Flux reconciles apps in dependency order (cilium → cloudnative-pg / cert-manager
-→ cert-manager-config → gateway → apps). Watch progress:
+Flux reconciles apps in dependency order (cloudnative-pg / cert-manager →
+cert-manager-config → gateway → apps). Watch progress:
 
 ```bash
 flux get kustomizations --watch
@@ -131,7 +114,7 @@ Once cert-manager, external-dns, and the gateway are healthy, external-dns
 creates the Cloudflare DNS records and cert-manager issues Let's Encrypt
 certificates for every hostname.
 
-### 7. First-run SSO setup (authentik)
+### 6. First-run SSO setup (authentik)
 
 SSO is fully GitOps and requires **no manual configuration**. Every OIDC client
 and the passwordless (passkey) enrollment flow are created declaratively by
@@ -158,7 +141,7 @@ claim the authentik admin account:
 > `sops -d apps/jellyfin/oidc-secret.sops.yaml` and
 > `sops -d apps/kavita/oidc-secret.sops.yaml` if you ever need them.
 
-### 8. Cluster access via SSO (kubectl + Headlamp)
+### 7. Cluster access via SSO (kubectl + Headlamp)
 
 The API server trusts authentik's `kubernetes` OIDC application as its issuer
 (`https://sso.tomerhanochi.com/application/o/kubernetes/`).
@@ -179,7 +162,7 @@ Authorization is via RBAC: bind your authentik identity/group (subjects are
 prefixed `oidc:`) to a Role/ClusterRole — e.g. a `ClusterRoleBinding` for the
 group `oidc:admins`. Headlamp and kubectl share this RBAC.
 
-### 9. Cleanup
+### 8. Cleanup
 
 ```bash
 rm "${KUBECONFIG}"; unset KUBECONFIG

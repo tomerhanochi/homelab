@@ -26,8 +26,8 @@ combines:
 │  │  │        FluxCD (GitOps Engine)                    │  │  │
 │  │  │  reconciles apps/ via per-app Kustomizations     │  │  │
 │  │  │  ┌───────────────────────────────────────────┐  │  │  │
-│  │  │  │  Infra: cilium, cert-manager, cloudnative- │  │  │  │
-│  │  │  │  pg, gateway, external-dns                 │  │  │  │
+│  │  │  │  Infra: cert-manager, cloudnative-pg,      │  │  │  │
+│  │  │  │  gateway, external-dns                     │  │  │  │
 │  │  │  │  Apps:  authentik, headlamp, jellyfin,     │  │  │  │
 │  │  │  │  jellyseerr, sonarr, radarr, qbittorrent,  │  │  │  │
 │  │  │  │  forgejo, kavita, paperless-ngx, homepage  │  │  │  │
@@ -47,7 +47,7 @@ combines:
 The foundation is a [bootc](https://github.com/containers/bootc) image providing:
 
 - **Fedora bootc minimal** base
-- **K3s** Kubernetes (traefik/servicelb/kube-proxy/flannel disabled — Cilium replaces them)
+- **K3s** Kubernetes (traefik/servicelb/kube-proxy/flannel disabled — Cilium is the CNI)
 - **Security hardening**: SELinux, tuned sysctls, Pod Security Admission, audit
   logging, secrets encryption at rest, and OIDC (authentik) for the API server
 - **System config**: passwordless `core` user via polkit, key-based SSH, systemd userdb
@@ -79,7 +79,6 @@ needs to be codified.
 
 | Application | Description |
 |-------------|-------------|
-| **cilium** | eBPF CNI: networking, Gateway API, L2 LB, network policy |
 | **cert-manager** | TLS: Let's Encrypt (Cloudflare DNS-01) + an internal CA / trust-manager |
 | **cloudnative-pg** | PostgreSQL operator (per-app clusters) |
 | **gateway** | Cilium Gateway + per-host HTTPS listeners |
@@ -100,15 +99,12 @@ See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
 ## How It Works
 
 1. **Boot**: the server boots the homelab bootc image; K3s starts (no CNI yet).
-2. **Bootstrap**: Cilium is applied from the repo (`kubectl apply -k apps/cilium`,
-   installed by k3s's helm-controller) and Flux is installed (see [INSTALLATION.md](INSTALLATION.md)).
+2. **Bootstrap**: Flux is installed manually (see [INSTALLATION.md](INSTALLATION.md)).
 3. **Sync**: the root Flux `Kustomization` applies `flux/cluster/*.yaml`, one
    `Kustomization` per app, ordered by `dependsOn`.
 4. **Secrets**: kustomize-controller decrypts SOPS/age secrets in-cluster.
 5. **Helm**: Flux's helm-controller installs charts (cert-manager, cloudnative-pg,
-   authentik, jellyfin, forgejo, headlamp) from `HelmRelease` resources. Cilium is
-   the exception — k3s's own helm-controller installs it from a `HelmChart` CR
-   (`apps/cilium`), since the CNI must exist before Flux runs.
+   authentik, jellyfin, forgejo, headlamp) from `HelmRelease` resources.
 6. **DNS + TLS**: external-dns writes Cloudflare records; cert-manager issues
    Let's Encrypt certs for every gateway hostname.
 

@@ -20,10 +20,7 @@ GitOps. Each app is applied by a Flux `Kustomization` in `flux/cluster/<app>.yam
 - **Helm integration (Flux)**: third-party charts are deployed with a Flux
   `HelmRelease` + `HelmRepository`/`OCIRepository` (Flux's kustomize-controller
   does **not** run `kustomize build --enable-helm`). Put values inline under
-  `spec.values`. Reference example: `apps/jellyfin`. The exception is `apps/cilium`:
-  the CNI must exist before Flux, so it is a **k3s `HelmChart` CR** (installed by
-  k3s' helm-controller, `bootstrap: true`) applied at install with
-  `kubectl apply -k apps/cilium` and then reconciled by Flux — one source of truth.
+  `spec.values`. Reference example: `apps/jellyfin`.
 - **Plain manifests**: for apps without a chart, write `deployment.yaml`,
   `service.yaml`, etc. Reference example: `apps/paperless-ngx`.
 - **Labeling**: use `labels` with `pairs` for `app.kubernetes.io/part-of`.
@@ -103,7 +100,6 @@ inactive. Adding a client = add a provider+application entry to
 
 | Application | Purpose |
 | :--- | :--- |
-| **cilium** | eBPF CNI: networking, Gateway API, L2 LB, network policy (k3s `HelmChart`, applied via `kubectl apply -k apps/cilium` at bootstrap, then Flux-reconciled). |
 | **cert-manager** | TLS: Let's Encrypt via Cloudflare DNS-01 (`letsencrypt` ClusterIssuer) plus an internal CA and trust-manager CA bundle. |
 | **cloudnative-pg** | PostgreSQL operator managing per-app clusters. |
 | **gateway** | Cilium `Gateway` with per-host HTTPS listeners + the LB IP pool / L2 announcement. |

@@ -23,9 +23,7 @@ disable:
 ######### COMPONENTS #########
 ##############################
 disable-cloud-controller: true
-# helm-controller is ENABLED: it installs Cilium (the CNI) from the HelmChart in
-# apps/cilium at bootstrap (`bootstrap: true`, so its install Job runs on the host
-# network before any CNI exists). See apps/cilium/helmchart.yaml.
+disable-helm-controller: true
 # Disable network policy controller as cilium brings its own.
 disable-network-policy: true
 # Disable kube-proxy as cillium provides a replacement.
