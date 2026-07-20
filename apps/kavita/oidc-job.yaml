@@ -1,0 +1,97 @@
+---
+# ServiceAccount + minimal RBAC so the setup Job can trigger a single rolling
+# restart of the Kavita Deployment (Kavita only reads the OIDC connection
+# settings from appsettings.json at startup).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kavita-oidc
+  namespace: kavita
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kavita-oidc-restart
+  namespace: kavita
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["kavita"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kavita-oidc-restart
+  namespace: kavita
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kavita-oidc-restart
+subjects:
+  - kind: ServiceAccount
+    name: kavita-oidc
+    namespace: kavita
+---
+# Creates the first Kavita admin (if fresh) and applies the authentik OIDC config
+# via /api/Settings, then restarts Kavita once so the connection settings take
+# effect. Idempotent — safe to re-run; to re-run after an image bump, delete the
+# completed Job so Flux recreates it.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kavita-oidc-setup
+  namespace: kavita
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kavita-oidc-setup
+    spec:
+      restartPolicy: Never
+      serviceAccountName: kavita-oidc
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: setup
+          image: ghcr.io/tomerhanochi/homelab-kavita-bootstrap:0.1.0
+          args: ["oidc"]
+          env:
+            - name: KAVITA_URL
+              value: http://kavita:5000
+            # authentik per-app issuer for the "kavita" application. Trailing
+            # slash matches authentik's advertised issuer (Kavita validates it).
+            - name: OIDC_AUTHORITY
+              value: https://sso.tomerhanochi.com/application/o/kavita/
+            - name: OIDC_CLIENT_ID
+              value: kavita
+            - name: KAVITA_DEPLOYMENT
+              value: kavita
+            - name: KAVITA_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          # KAVITA_ADMIN_USER/PASSWORD/EMAIL, OIDC_CLIENT_SECRET.
+          envFrom:
+            - secretRef:
+                name: kavita-oidc
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

@@ -42,7 +42,7 @@ combines:
 
 ## Components
 
-### bootc Image (`image/`)
+### bootc Image (`images/os/`)
 
 The foundation is a [bootc](https://github.com/containers/bootc) image providing:
 
@@ -51,6 +51,21 @@ The foundation is a [bootc](https://github.com/containers/bootc) image providing
 - **Security hardening**: SELinux, tuned sysctls, Pod Security Admission, audit
   logging, secrets encryption at rest, and OIDC (authentik) for the API server
 - **System config**: passwordless `core` user via polkit, key-based SSH, systemd userdb
+
+### Bootstrap images (`images/jellyfin-bootstrap`, `images/kavita-bootstrap`)
+
+Two small static Go binaries (published to GHCR, run in a distroless image) that
+codify the bits of app config that can only be set through an app's own API, so
+SSO stays fully GitOps with no manual wizard/dashboard steps:
+
+- **jellyfin-bootstrap** — installs the `jellyfin-plugin-sso` binary (initContainer)
+  and, via a Job, finishes the first-run wizard and registers the authentik OIDC
+  provider through the plugin API.
+- **kavita-bootstrap** — via a Job, creates the first Kavita admin and applies the
+  OIDC config through `/api/Settings`.
+
+Both are idempotent. They are extensible: add subcommands as more app config
+needs to be codified.
 
 ### GitOps layout (`flux/`)
 
@@ -98,7 +113,10 @@ See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
 
 ```
 homelab/
-├── image/            # bootc image source (Containerfile, setup.sh, K3s config)
+├── images/           # container images built from this repo
+│   ├── os/           # bootc image source (Containerfile, setup.sh, K3s config)
+│   ├── jellyfin-bootstrap/  # Go tool: Jellyfin SSO plugin + OIDC setup
+│   └── kavita-bootstrap/    # Go tool: Kavita OIDC setup
 ├── flux/             # FluxCD: controllers + GitRepository + per-app Kustomizations
 ├── apps/             # Kubernetes applications (GitOps)
 ├── .sops.yaml        # SOPS/age encryption config

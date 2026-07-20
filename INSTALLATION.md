@@ -72,6 +72,14 @@ sops set apps/qbittorrent/vpn-secret.sops.yaml '["stringData"]["WIREGUARD_ADDRES
 git add -A && git commit -m "chore: set homelab secrets" && git push
 ```
 
+This first push to `main` also triggers the **Build bootstrap images** workflow,
+which publishes `ghcr.io/tomerhanochi/homelab-jellyfin-bootstrap` and
+`ghcr.io/tomerhanochi/homelab-kavita-bootstrap` (used by the Jellyfin/Kavita SSO
+setup Jobs). Make both GHCR packages **public** (GitHub → Packages → each package
+→ Package settings → Change visibility) so the cluster can pull them without a
+pull secret. They only need to exist before Flux reconciles Jellyfin/Kavita
+(late in the dependency order), so CI has ample time.
+
 ### 4. Install Cilium (CNI)
 
 Cilium must be installed first — it provides networking, the Gateway, and
@@ -124,10 +132,14 @@ certificates for every hostname.
 
 ### 7. First-run SSO setup (authentik)
 
-Every OIDC client and the passwordless (passkey) enrollment flow are created
-declaratively by authentik **blueprints** (`apps/authentik/blueprints/`), applied
-by the authentik worker on startup — there is no API/UI client bootstrap. You only
-claim the admin account and finish the two apps configured in their own UI.
+SSO is fully GitOps and requires **no manual configuration**. Every OIDC client
+and the passwordless (passkey) enrollment flow are created declaratively by
+authentik **blueprints** (`apps/authentik/blueprints/`), applied by the authentik
+worker on startup. The two apps that can only be configured through their own API
+(Jellyfin, Kavita) are wired automatically by their bootstrap Jobs
+(`images/jellyfin-bootstrap`, `images/kavita-bootstrap`) — you don't touch their
+UIs. Seerr signs in "with Jellyfin", so it inherits SSO through Jellyfin. You only
+claim the authentik admin account:
 
 1. Read the initial `akadmin` password and sign in:
    ```bash
@@ -135,20 +147,15 @@ claim the admin account and finish the two apps configured in their own UI.
    ```
    Open `https://sso.tomerhanochi.com`, log in as `akadmin`, and (recommended)
    register a passkey under **Settings → MFA Devices**.
-2. **Jellyfin** and **Kavita** are configured in their own OIDC UIs. Read their
-   client credentials from the encrypted blueprint secret and paste them in:
-   ```bash
-   sops -d apps/authentik/oidc-secret.sops.yaml
-   ```
-   - Jellyfin (SSO plugin): OIDC provider name `authentik`, client id `jellyfin`,
-     endpoint `https://sso.tomerhanochi.com/application/o/jellyfin/`.
-   - Kavita (**Settings → OIDC**): client id `kavita`, authority
-     `https://sso.tomerhanochi.com/application/o/kavita/`.
-   Seerr signs in "with Jellyfin", so it inherits SSO through Jellyfin.
-3. **Self-service registration is passkey-only**: the login page's *Sign up* link
+2. **Self-service registration is passkey-only**: the login page's *Sign up* link
    runs the `passkey-enrollment` flow (no password — WebAuthn only). New users are
    created **inactive**; activate them under **Directory → Users** and add them to
    groups to drive per-app and cluster (RBAC) authorization.
+
+> The Jellyfin/Kavita bootstrap Jobs create a local admin account in each app
+> (kept alongside SSO so you can't be locked out). Read those credentials with
+> `sops -d apps/jellyfin/oidc-secret.sops.yaml` and
+> `sops -d apps/kavita/oidc-secret.sops.yaml` if you ever need them.
 
 ### 8. Cluster access via SSO (kubectl + Headlamp)
 

@@ -8,6 +8,8 @@ resources:
   - deployment.yaml
   - service.yaml
   - route.yaml
+  - oidc-secret.sops.yaml
+  - oidc-job.yaml
   - networkpolicies
 
 labels:

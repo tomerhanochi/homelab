@@ -85,6 +85,36 @@ spec:
     deploymentStrategy:
       type: Recreate
 
+    # Install the jellyfin-plugin-sso binary into the config volume before
+    # Jellyfin starts, so the plugin is loaded on first boot (the jellyfin-oidc-
+    # setup Job then configures it via the plugin API). Idempotent: skips if the
+    # plugin is already present, so Jellyfin's own updates are never clobbered.
+    extraInitContainers:
+      - name: install-sso-plugin
+        image: ghcr.io/tomerhanochi/homelab-jellyfin-bootstrap:0.1.0
+        args: ["install-plugin"]
+        env:
+          - name: PLUGIN_URL
+            value: https://github.com/9p4/jellyfin-plugin-sso/releases/download/v4.0.0.4/sso-authentication_4.0.0.4.zip
+          - name: PLUGIN_SHA256
+            value: c09f16ba31059a434ddd7f811e4f9608d4b4c4514cc80a5bf1ca33bee61e1107
+          - name: PLUGIN_DIR
+            value: /config/plugins/SSO-Auth_4.0.0.4
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+          - name: config
+            mountPath: /config
+
     metrics:
       enabled: false
       serviceMonitor:
