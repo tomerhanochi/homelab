@@ -1,0 +1,12 @@
+[Unit]
+Description=Mount External Drive by Label
+After=network.target
+
+[Mount]
+What=/dev/disk/by-label/xtrnldrv
+Where=/var/mnt/data
+Type=exfat
+Options=defaults,nofail
+
+[Install]
+WantedBy=multi-user.target
