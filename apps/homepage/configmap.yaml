@@ -57,10 +57,6 @@ data:
             href: https://headlamp.tomerhanochi.com
             description: Kubernetes console
             icon: headlamp.png
-        - Atuin:
-            href: https://atuin.tomerhanochi.com
-            description: Shell history sync
-            icon: atuin.png
 
   widgets.yaml: |
     ---

@@ -30,8 +30,7 @@ combines:
 │  │  │  │  pg, gateway, external-dns                 │  │  │  │
 │  │  │  │  Apps:  authentik, headlamp, jellyfin,     │  │  │  │
 │  │  │  │  jellyseerr, sonarr, radarr, qbittorrent,  │  │  │  │
-│  │  │  │  forgejo, kavita, paperless-ngx, atuin,    │  │  │  │
-│  │  │  │  homepage                                  │  │  │  │
+│  │  │  │  forgejo, kavita, paperless-ngx, homepage  │  │  │  │
 │  │  │  └───────────────────────────────────────────┘  │  │  │
 │  │  └─────────────────────────────────────────────────┘  │  │
 │  └───────────────────────────────────────────────────────┘  │
@@ -79,7 +78,6 @@ The foundation is a [bootc](https://github.com/containers/bootc) image providing
 | **forgejo** | Git forge |
 | **kavita** | Reading server (books/manga/comics) |
 | **paperless-ngx** | Document management |
-| **atuin** | Shell-history sync server |
 | **homepage** | Dashboard |
 
 See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.

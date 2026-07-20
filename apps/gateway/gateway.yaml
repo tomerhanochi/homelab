@@ -119,20 +119,6 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: paperless-ngx
-    - name: atuin
-      hostname: atuin.tomerhanochi.com
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: atuin-tls
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              kubernetes.io/metadata.name: atuin
     - name: homepage
       hostname: home.tomerhanochi.com
       protocol: HTTPS

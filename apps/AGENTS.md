@@ -86,7 +86,7 @@ issuer** `https://sso.tomerhanochi.com/application/o/<slug>/` (not one shared
 issuer). Native-OIDC apps read the client id/secret from a secret (forgejo,
 paperless-ngx, headlamp); jellyfin and kavita are configured in their own UI with
 credentials read from `authentik-oidc`. Seerr has no client of its own — it signs
-in via Jellyfin, which is behind SSO. atuin and qbittorrent have no OIDC. The k3s
+in via Jellyfin, which is behind SSO. qbittorrent has no OIDC. The k3s
 API server trusts authentik's `kubernetes` application as an issuer (see
 `image/.../k3s/config.yaml`); Headlamp and kubelogin use it for cluster access.
 Self-service registration is **passkey-only** (WebAuthn); new users are created
@@ -111,5 +111,4 @@ inactive. Adding a client = add a provider+application entry to
 | **forgejo** | Git forge (official Helm chart, CNPG Postgres). |
 | **kavita** | Reading server. |
 | **paperless-ngx** | Document management (Postgres + redis + gotenberg + tika). |
-| **atuin** | Shell-history sync server (Postgres-backed). |
 | **homepage** | Dashboard with Kubernetes service discovery. |
