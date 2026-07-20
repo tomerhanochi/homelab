@@ -1145,7 +1145,7 @@ spec:
                     set -o errexit
                     set -o pipefail
                     set -o nounset
-                    
+
                     # When running in AWS ENI mode, it's likely that 'aws-node' has
                     # had a chance to install SNAT iptables rules. These can result
                     # in dropped traffic, so we should attempt to remove them.
@@ -1161,7 +1161,7 @@ spec:
                         iptables-save | grep -E -v 'AWS-SNAT-CHAIN|AWS-CONNMARK-CHAIN' | iptables-restore
                     fi
                     echo 'Done!'
-                    
+
           preStop:
             exec:
               command:
@@ -1230,7 +1230,7 @@ spec:
           mountPath: /run/xtables.lock
         - name: tmp
           mountPath: /tmp
-        
+
       initContainers:
       - name: config
         image: "quay.io/cilium/cilium:v1.19.6@sha256:0df5b2750b64c49843aba1d649e9eaf61467cb0645ad3171db6f6962c095ac92"
@@ -1436,7 +1436,7 @@ spec:
       automountServiceAccountToken: true
       terminationGracePeriodSeconds: 1
       hostNetwork: true
-      
+
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -1562,7 +1562,7 @@ spec:
   selector:
     matchLabels:
       k8s-app: cilium-envoy
-  
+
   updateStrategy:
     rollingUpdate:
       maxUnavailable: 2
@@ -1579,7 +1579,7 @@ spec:
       securityContext:
         appArmorProfile:
           type: Unconfined
-      
+
       containers:
       - name: cilium-envoy
         image: "quay.io/cilium/cilium-envoy:v1.36.9-1782267392-edeb3f2af56c37c407efa1f63f0b32f595399bbc@sha256:767101fb8a5e38f055778cb43b7aa8eed80450b37f8121effac3d9de9e06dc99"
@@ -1591,7 +1591,7 @@ spec:
         - '-c /var/run/cilium/envoy/bootstrap-config.json'
         - '--base-id 0'
         - '--log-level info'
-        
+
         startupProbe:
           httpGet:
             host: "127.0.0.1"
@@ -1637,7 +1637,7 @@ spec:
           value: "127.0.0.1"
         - name: KUBERNETES_SERVICE_PORT
           value: "6444"
-        
+
         ports:
         - name: envoy-metrics
           containerPort: 9964
@@ -1667,14 +1667,14 @@ spec:
         - name: bpf-maps
           mountPath: /sys/fs/bpf
           mountPropagation: HostToContainer
-        
+
       restartPolicy: Always
       priorityClassName: system-node-critical
       serviceAccountName: "cilium-envoy"
       automountServiceAccountToken: true
       terminationGracePeriodSeconds: 1
       hostNetwork: true
-      
+
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -1827,7 +1827,7 @@ spec:
         - name: cilium-config-path
           mountPath: /tmp/cilium/config-map
           readOnly: true
-        
+
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1861,7 +1861,7 @@ spec:
           operator: Exists
         - key: node.cilium.io/agent-not-ready
           operator: Exists
-      
+
       volumes:
         # To read the configuration from the config map
       - name: cilium-config-path
