@@ -1,6 +1,7 @@
+---
 name: Create and publish a Docker image
 
-on:
+"on":
   push:
     tags:
       - v*
@@ -22,7 +23,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Log in to the Container registry
-        uses: redhat-actions/podman-login@v1 # Also creates $HOME/.docker/config.json, which is used by Cosign for authentication.
+        uses: redhat-actions/podman-login@v1
+        # Also creates $HOME/.docker/config.json, which is used by Cosign
+        # for authentication.
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -49,7 +52,7 @@ jobs:
             --tag "${unchunked_image}" \
             $(echo -en "${{ steps.meta.outputs.labels }}" | xargs -i echo '--label={}') \
             $(echo -en "${{ steps.meta.outputs.annotations }}" | xargs -i echo '--annotation={}') \
-            ./image
+            ./images/os
 
           sudo podman run \
             --rm \

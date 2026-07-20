@@ -1,0 +1,12 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: authentik
+  namespace: authentik
+spec:
+  interval: 1h
+  url: oci://ghcr.io/goauthentik/helm-charts/authentik
+  ref:
+    tag: 2026.5.5
+    digest: sha256:9fdc70b38639e919b03a42a6836add351f6f7bc3f36bc4010dfe944eafea0aad

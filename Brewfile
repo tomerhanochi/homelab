@@ -1,0 +1,6 @@
+brew "kubectl"
+brew "kustomize"
+brew "fluxcd/tap/flux"
+brew "sops"
+brew "age"
+brew "jq"

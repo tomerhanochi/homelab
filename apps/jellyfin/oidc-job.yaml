@@ -1,0 +1,56 @@
+---
+# Completes Jellyfin's first-run wizard (creating the local admin) and registers
+# the authentik OIDC provider through the jellyfin-plugin-sso API, so SSO is set
+# up with no manual dashboard steps. Idempotent — safe to re-run; to re-run after
+# an image bump, delete the completed Job so Flux recreates it.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: jellyfin-oidc-setup
+  namespace: jellyfin
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: jellyfin-oidc-setup
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: setup
+          image: ghcr.io/tomerhanochi/homelab/internal/jellyfin-bootstrap:0.1.0
+          args: ["sso"]
+          env:
+            - name: JELLYFIN_URL
+              value: http://jellyfin:8096
+            - name: OIDC_PROVIDER
+              value: authentik
+            # authentik per-app issuer for the "jellyfin" application.
+            - name: OIDC_ISSUER_URL
+              value: https://sso.tomerhanochi.com/application/o/jellyfin/
+            - name: OIDC_CLIENT_ID
+              value: jellyfin
+          # JELLYFIN_ADMIN_USER, JELLYFIN_ADMIN_PASSWORD, OIDC_CLIENT_SECRET.
+          envFrom:
+            - secretRef:
+                name: jellyfin-oidc
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

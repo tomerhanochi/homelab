@@ -1,0 +1,117 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: qbittorrent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbittorrent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qbittorrent
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        # VPN sidecar. All qBittorrent egress goes through this container's
+        # network namespace; the gluetun firewall is the kill switch (traffic is
+        # dropped if the WireGuard tunnel is down).
+        - name: gluetun
+          image: ghcr.io/qdm12/gluetun:v3.41.1@sha256:1a5bf4b4820a879cdf8d93d7ef0d2d963af56670c9ebff8981860b6804ebc8ab
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: protonvpn
+            - name: VPN_TYPE
+              value: wireguard
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qbittorrent-vpn
+                  key: WIREGUARD_PRIVATE_KEY
+            - name: WIREGUARD_ADDRESSES
+              valueFrom:
+                secretKeyRef:
+                  name: qbittorrent-vpn
+                  key: WIREGUARD_ADDRESSES
+            # Country to exit from; edit to taste.
+            - name: SERVER_COUNTRIES
+              value: Netherlands
+            # ProtonVPN port forwarding for inbound BitTorrent connections.
+            - name: VPN_PORT_FORWARDING
+              value: "on"
+            - name: PORT_FORWARD_ONLY
+              value: "on"
+            # Kill switch: drop all traffic that is not through the tunnel.
+            - name: FIREWALL
+              value: "on"
+            # Allow the WebUI to be reached from within the cluster.
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080"
+            # k3s pod + service CIDRs: let kube-proxy/health checks and WebUI
+            # return traffic bypass the tunnel.
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: 10.42.0.0/16,10.43.0.0/16
+            - name: TZ
+              value: Europe/Amsterdam
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+        # BitTorrent client (official qbittorrent-nox image). No VPN config here:
+        # it shares gluetun's netns.
+        - name: qbittorrent
+          image: docker.io/qbittorrentofficial/qbittorrent-nox:5.2.3-1@sha256:9ebb534fe30bab98622cb84a8c3acecfd88319b2d540f52ecdec7b9f866374d7
+          env:
+            # Required by the official image to acknowledge the legal notice.
+            - name: QBT_LEGAL_NOTICE
+              value: confirm
+            # WebUI on 8080 to match the Service and gluetun FIREWALL_INPUT_PORTS.
+            - name: QBT_WEBUI_PORT
+              value: "8080"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: UMASK
+              value: "002"
+            - name: TZ
+              value: Europe/Amsterdam
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /data
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        # Shared download/library volume for hardlinking (see storage convention).
+        - name: data
+          hostPath:
+            path: /var/mnt/data
+            type: DirectoryOrCreate

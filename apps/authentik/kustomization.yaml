@@ -1,0 +1,31 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - postgres-cluster.yaml
+  - postgres-cluster-credentials.sops.yaml
+  - secret.sops.yaml
+  - oidc-secret.sops.yaml
+  - redis-deployment.yaml
+  - redis-service.yaml
+  - ocirepository.yaml
+  - helmrelease.yaml
+  - route.yaml
+  - networkpolicies
+
+# Blueprints are mounted into the worker from this ConfigMap and applied on
+# startup (referenced by name in helmrelease.yaml -> blueprints.configMaps).
+configMapGenerator:
+  - name: authentik-blueprints
+    namespace: authentik
+    files:
+      - blueprints/oidc-clients.yaml
+      - blueprints/passkey-enrollment.yaml
+    options:
+      disableNameSuffixHash: true
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: authentik

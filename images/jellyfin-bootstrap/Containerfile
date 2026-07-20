@@ -1,0 +1,16 @@
+# Small static Go binary that configures Jellyfin through its API (SSO plugin
+# install + OIDC provider registration) so it can be managed via GitOps.
+# Published to GHCR and used by the initContainer/Job in apps/jellyfin.
+FROM golang:1.26-alpine AS build
+WORKDIR /src
+COPY go.mod ./
+COPY *.go ./
+# Static, stripped binary (no cgo) so it runs in a distroless image.
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /jellyfin-bootstrap .
+
+# Distroless static, non-root by default (uid 65532). Ships CA certificates so
+# TLS to authentik works out of the box.
+FROM gcr.io/distroless/static:nonroot
+COPY --from=build /jellyfin-bootstrap /jellyfin-bootstrap
+USER 65532:65532
+ENTRYPOINT ["/jellyfin-bootstrap"]

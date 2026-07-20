@@ -1,0 +1,74 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: forgejo
+  # Chart 17.x dropped the bundled DB/cache subcharts and ships a strict values
+  # schema, so we only configure the external CloudNativePG database and
+  # in-memory cache/session/queue (no bundled-dependency toggles).
+  values:
+    service:
+      http:
+        port: 3000
+      # SSH exposed via the gateway's TCP listener + forgejo TCPRoute.
+      ssh:
+        type: ClusterIP
+        port: 22
+
+    # Config/state on a dynamically-provisioned PVC (default StorageClass).
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+
+    gitea:
+      # Inject the external Postgres password from the CNPG credentials secret.
+      additionalConfigFromEnvs:
+        - name: FORGEJO__database__PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: forgejo-database-credentials
+              key: password
+
+      # OIDC login via authentik. The chart reads `key` (client id) and
+      # `secret` (client secret) from the existing secret forgejo-oauth. The
+      # source name "authentik" sets the callback path /user/oauth2/authentik/...
+      oauth:
+        - name: authentik
+          provider: openidConnect
+          autoDiscoverUrl: https://sso.tomerhanochi.com/application/o/forgejo/.well-known/openid-configuration
+          existingSecret: forgejo-oauth
+
+      config:
+        server:
+          DOMAIN: git.tomerhanochi.com
+          ROOT_URL: https://git.tomerhanochi.com
+          SSH_DOMAIN: git.tomerhanochi.com
+          SSH_PORT: 22
+          START_SSH_SERVER: true
+        database:
+          DB_TYPE: postgres
+          HOST: forgejo-database-rw.forgejo.svc:5432
+          NAME: forgejo
+          USER: forgejo
+        # In-memory/local backends so no external redis is required.
+        cache:
+          ADAPTER: memory
+        session:
+          PROVIDER: memory
+        queue:
+          TYPE: level
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 2000m
+        memory: 2Gi

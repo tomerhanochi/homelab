@@ -1,0 +1,5 @@
+# Not part of the built image: the build instructions themselves and the Cilium
+# Helm values (only used to regenerate the committed manifests under usr/).
+.containerignore
+Containerfile
+cilium/

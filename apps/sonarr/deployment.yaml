@@ -1,0 +1,69 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+  namespace: sonarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sonarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sonarr
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        # TV PVR backend for jellyseerr (not publicly exposed).
+        - name: sonarr
+          image: ghcr.io/hotio/sonarr:release@sha256:a01185d990725bb77bef19627e6aa9431d31dbb5607433e38d5c864fd10d36ff
+          ports:
+            - name: http
+              containerPort: 8989
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: UMASK
+              value: "002"
+            - name: TZ
+              value: Europe/Amsterdam
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            # Whole shared library so hardlinks between /data/torrents and
+            # /data/media work.
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: sonarr-config
+        - name: data
+          hostPath:
+            path: /var/mnt/data
+            type: DirectoryOrCreate

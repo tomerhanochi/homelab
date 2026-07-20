@@ -1,0 +1,98 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authentik
+  namespace: authentik
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: authentik
+  # authentik = the OIDC provider (replaces pocket-id). Postgres is the external
+  # CloudNativePG cluster; Redis is the in-namespace ephemeral cache. All OIDC
+  # clients and the passkey enrollment flow are declared as blueprints (mounted
+  # from the authentik-blueprints ConfigMap and applied by the worker), so SSO is
+  # fully GitOps — no API/UI bootstrap.
+  values:
+    global:
+      image:
+        # Pin the server/worker image by digest (chart default tag == appVersion).
+        digest: sha256:50a833c48a714709f15d4f8846ec6b81a41d0d6a6bd2975087dfed3000d0d72e
+      # Applied to BOTH the server and worker deployments. Secret material is
+      # injected here (env overrides the chart's generated config secret); the
+      # worker needs these so blueprint `!Env` lookups resolve.
+      env:
+        - name: AUTHENTIK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: authentik-secrets
+              key: AUTHENTIK_SECRET_KEY
+        - name: AUTHENTIK_POSTGRESQL__PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authentik-database-credentials
+              key: password
+        - name: AUTHENTIK_REDIS__HOST
+          value: authentik-redis.authentik.svc
+        # Initial akadmin credentials (first-startup only). akadmin retains
+        # password login via the default authentication flow so it can enroll a
+        # passkey; self-service registration is passkey-only (see blueprints).
+        - name: AUTHENTIK_BOOTSTRAP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authentik-secrets
+              key: AUTHENTIK_BOOTSTRAP_PASSWORD
+        - name: AUTHENTIK_BOOTSTRAP_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: authentik-secrets
+              key: AUTHENTIK_BOOTSTRAP_TOKEN
+        - name: AUTHENTIK_BOOTSTRAP_EMAIL
+          value: admin@tomerhanochi.com
+      # OIDC client secrets consumed by the blueprints via `!Env` (e.g.
+      # FORGEJO_CLIENT_SECRET). envFrom exposes every key in the secret.
+      envFrom:
+        - secretRef:
+            name: authentik-oidc
+
+    authentik:
+      # Public URL / cookie domain.
+      log_level: info
+      error_reporting:
+        enabled: false
+      # External CloudNativePG database (bundled Bitnami PG stays disabled).
+      postgresql:
+        host: authentik-database-rw.authentik.svc
+        name: authentik
+        user: authentik
+        port: 5432
+
+    # Do not deploy the chart's bundled Bitnami PostgreSQL; we use CloudNativePG.
+    postgresql:
+      enabled: false
+
+    # Discover and apply every *.yaml key in this ConfigMap on worker startup.
+    blueprints:
+      configMaps:
+        - authentik-blueprints
+
+    server:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 2000m
+          memory: 1Gi
+
+    worker:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 2000m
+          memory: 1Gi
