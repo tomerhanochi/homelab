@@ -24,6 +24,8 @@ spec:
       - gateway-httproute
     domainFilters:
       - tomerhanochi.com
+    zoneIdFilters:
+      - 9ef59cbb1bf2c9f8de74829f8148a9e7
 
     registry: txt
     txtOwnerId: homelab
