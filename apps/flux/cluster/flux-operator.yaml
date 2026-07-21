@@ -2,19 +2,12 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cloudnative-pg
+  name: flux-operator
   namespace: flux-system
 spec:
   interval: 10m
-  retryInterval: 1m
-  timeout: 5m
-  path: ./apps/cloudnative-pg
+  path: ./apps/flux-operator
   prune: true
-  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age

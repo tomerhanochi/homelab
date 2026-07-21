@@ -15,7 +15,7 @@ spec:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    - name: cloudnative-pg
+    - name: cloudnative-pg-operator
     - name: gateway
   decryption:
     provider: sops

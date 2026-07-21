@@ -2,21 +2,18 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cert-manager
+  name: cert-manager-operator
   namespace: flux-system
 spec:
   interval: 10m
   retryInterval: 1m
   timeout: 5m
-  path: ./apps/cert-manager
+  path: ./apps/cert-manager-operator
   prune: true
   wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  dependsOn:
-    - name: cert-manager-operator
-    - name: trust-manager-operator
   decryption:
     provider: sops
     secretRef:
