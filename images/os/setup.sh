@@ -2,6 +2,13 @@
 set -euxo pipefail;
 
 ###############
+#---- OPT ----#
+###############
+mkdir -p /var/opt;
+rm -rf /opt;
+ln -s var/opt /opt;
+
+###############
 #---- K3S ----#
 ###############
 # Taken from https://github.com/k3s-io/k3s/blob/master/install.sh#L371
