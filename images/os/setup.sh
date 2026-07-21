@@ -38,6 +38,6 @@ dnf \
 ###################
 #---- SYSTEMD ----#
 ###################
-systemctl enable var-home.mount k3s.service
+systemctl enable var-home.mount var-mnt-data.mount k3s.service;
 
-systemctl set-default multi-user.target
+systemctl set-default multi-user.target;
