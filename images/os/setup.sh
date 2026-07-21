@@ -2,6 +2,13 @@
 set -euxo pipefail;
 
 ###############
+#---- OPT ----#
+###############
+mkdir -p /var/opt;
+rm -rf /opt;
+ln -s var/opt /opt;
+
+###############
 #---- K3S ----#
 ###############
 # Taken from https://github.com/k3s-io/k3s/blob/master/install.sh#L371
@@ -31,6 +38,6 @@ dnf \
 ###################
 #---- SYSTEMD ----#
 ###################
-systemctl enable var-home.mount k3s.service
+systemctl enable var-home.mount var-mnt-data.mount k3s.service;
 
-systemctl set-default multi-user.target
+systemctl set-default multi-user.target;

@@ -3,7 +3,7 @@
 # the committed manifest so it stays byte-identical to `helm template`:
 #   helm repo add cilium https://helm.cilium.io && helm repo update
 #   helm template cilium cilium/cilium --version 1.19.6 --namespace cilium \
-#     -f values.yaml > ../usr/lib/rancher/k3s/server/manifests/10-cilium.yaml
+#     -f values.yaml > ../usr/lib/rancher/k3s/server/manifests/11-cilium.yaml
 namespaceOverride: cilium
 
 kubeProxyReplacement: true
