@@ -55,13 +55,13 @@ kubectl -n flux-system create secret generic sops-age \
   --from-file=age.agekey="${SOPS_AGE_KEY_FILE}"
 
 # Controllers (source/kustomize/helm/notification).
-kubectl apply -f apps/flux/gitops-toolkit-components.generated.yaml
+kustomize build apps/flux-operator | kubectl apply -f -
 
 # Wait for the controllers
 kubectl -n flux-system wait --for=condition=Available deploy --all --timeout=300s
 
 # Wire up the repositories.
-ls apps/flux/repositories/* | grep -v -e kustomization.yaml | xargs -I{} kubectl apply -f {}
+kustomize build apps/flux/repositories | kubectl apply -f -
 # Wire up the flux self-synchornization
 kubectl apply -f apps/flux/cluster/flux.yaml
 ```
