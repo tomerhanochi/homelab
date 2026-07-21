@@ -34,7 +34,7 @@ Cilium enforces policy. Each app includes:
   (only for apps exposed via the gateway).
 - `ingress-allow-cloudnative-pg-operator.yaml` — for apps with a CNPG `Cluster`.
 - `ingress-allow-<other>.yaml` — when another namespace must reach this app
-  (e.g. jellyseerr → sonarr/radarr).
+  (e.g. seerr → sonarr/radarr).
 
 ## Exposure (Gateway API)
 
@@ -106,7 +106,7 @@ inactive. Adding a client = add a provider+application entry to
 | **external-dns** | Syncs Cloudflare DNS records from Gateway HTTPRoutes. |
 | **authentik** | OIDC provider for SSO (Postgres + Redis). Clients + passkey enrollment via blueprints. |
 | **headlamp** | Kubernetes web console; SSO-only login (proxies the user's OIDC token to the API server). |
-| **jellyfin / jellyseerr** | Media server and request frontend. |
+| **jellyfin / seerr** | Media server and request frontend. |
 | **sonarr / radarr** | TV / movie PVR backends (internal only). |
 | **qbittorrent** | Torrent client with ProtonVPN egress via a gluetun sidecar (kill switch on). |
 | **forgejo** | Git forge (official Helm chart, CNPG Postgres). |

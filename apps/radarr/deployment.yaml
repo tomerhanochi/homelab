@@ -21,7 +21,7 @@ spec:
       securityContext:
         fsGroup: 1000
       containers:
-        # Movie PVR backend for jellyseerr.
+        # Movie PVR backend for seerr.
         - name: radarr
           image: ghcr.io/hotio/radarr:release@sha256:4b334f33ae74337668b7c8a4ce1ff6b3e1a8b1e298812c6113ee4ad7e19fbaee
           ports:

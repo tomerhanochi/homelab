@@ -2,16 +2,16 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: jellyseerr
-  namespace: jellyseerr
+  name: seerr
+  namespace: seerr
 spec:
   parentRefs:
     - name: default
       namespace: gateway
-      sectionName: jellyseerr
+      sectionName: seerr
   hostnames:
-    - jellyseerr.tomerhanochi.com
+    - seerr.tomerhanochi.com
   rules:
     - backendRefs:
-        - name: jellyseerr
+        - name: seerr
           port: 5055

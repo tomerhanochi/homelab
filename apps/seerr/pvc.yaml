@@ -2,8 +2,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: jellyseerr-config
-  namespace: jellyseerr
+  name: seerr-config
+  namespace: seerr
 spec:
   accessModes:
     - ReadWriteOnce

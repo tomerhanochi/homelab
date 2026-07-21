@@ -37,20 +37,20 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: jellyfin
-    - name: jellyseerr
-      hostname: jellyseerr.tomerhanochi.com
+    - name: seerr
+      hostname: seerr.tomerhanochi.com
       protocol: HTTPS
       port: 443
       tls:
         mode: Terminate
         certificateRefs:
-          - name: jellyseerr-tls
+          - name: seerr-tls
       allowedRoutes:
         namespaces:
           from: Selector
           selector:
             matchLabels:
-              kubernetes.io/metadata.name: jellyseerr
+              kubernetes.io/metadata.name: seerr
     - name: qbittorrent
       hostname: torrent.tomerhanochi.com
       protocol: HTTPS

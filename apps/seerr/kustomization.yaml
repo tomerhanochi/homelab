@@ -12,4 +12,4 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/part-of: jellyseerr
+      app.kubernetes.io/part-of: seerr

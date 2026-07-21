@@ -5,4 +5,4 @@ kind: Kustomization
 resources:
   - ingress-deny-by-default.yaml
   - ingress-allow-intra-namespace.yaml
-  - ingress-allow-jellyseerr.yaml
+  - ingress-allow-seerr.yaml

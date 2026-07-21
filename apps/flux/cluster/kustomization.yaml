@@ -16,7 +16,7 @@ resources:
   - headlamp.yaml
   - homepage.yaml
   - jellyfin.yaml
-  - jellyseerr.yaml
+  - seerr.yaml
   - kavita.yaml
   - paperless-ngx.yaml
   - qbittorrent.yaml
