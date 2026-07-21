@@ -11,3 +11,6 @@ spec:
     tag: v1.21.0
     # Pin the exact chart artifact; the tag is verified against this digest.
     digest: sha256:cd55fea42658e54abc25e85a0bc1de229925a5006445f916bfd2c6dc80ac3613
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
