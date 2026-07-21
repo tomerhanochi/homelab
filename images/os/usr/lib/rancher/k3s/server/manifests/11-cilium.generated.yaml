@@ -1882,3 +1882,14 @@ spec:
       - name: cilium-config-path
         configMap:
           name: cilium-config
+      
+
+---
+# Source: cilium/templates/cilium-gateway-api-class.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: cilium
+spec:
+  controllerName: io.cilium/gateway-controller
+  description: The default Cilium GatewayClass
