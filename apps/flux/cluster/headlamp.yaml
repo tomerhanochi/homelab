@@ -15,7 +15,6 @@ spec:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    # authentik must exist so the OIDC "headlamp" client is available for login.
     - name: authentik
     - name: gateway
   decryption:

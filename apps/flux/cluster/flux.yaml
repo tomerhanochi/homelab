@@ -2,11 +2,10 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: flux-system
+  name: flux
   namespace: flux-system
 spec:
   interval: 10m
-  # Reconciles the toolkit components (self-management) and every app Kustomization.
   path: ./apps/flux
   prune: true
   sourceRef:
