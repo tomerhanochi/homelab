@@ -8,6 +8,7 @@ resources:
   - cert-manager.yaml
   - cloudnative-pg.yaml
   - external-dns.yaml
+  - flux.yaml
   - forgejo.yaml
   - gateway.yaml
   - headlamp.yaml
