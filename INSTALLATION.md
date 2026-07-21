@@ -61,7 +61,7 @@ kubectl apply -f apps/flux/gitops-toolkit-components.generated.yaml
 kubectl -n flux-system wait --for=condition=Available deploy --all --timeout=300s
 
 # Wire up the repositories.
-ls apps/flux/repositories | xargs -I{} kubectl apply -f {}
+ls apps/flux/repositories/* | grep -v -e kustomization.yaml | xargs -I{} kubectl apply -f {}
 # Wire up the flux self-synchornization
 kubectl apply -f apps/flux/cluster/flux.yaml
 ```
