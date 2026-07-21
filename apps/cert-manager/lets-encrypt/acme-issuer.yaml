@@ -12,7 +12,10 @@ spec:
     # DNS-01 via Cloudflare: works for private/LAN-only hosts (no inbound needed)
     # and supports wildcards. Requires a Cloudflare API token with Zone:DNS:Edit.
     solvers:
-      - dns01:
+      - selector:
+          dnsZones:
+            - tomerhanochi.com
+        dns01:
           cloudflare:
             apiTokenSecretRef:
               name: cloudflare-api-token
