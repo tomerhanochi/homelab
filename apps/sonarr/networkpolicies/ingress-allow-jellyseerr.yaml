@@ -2,10 +2,10 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-allow-jellyseerr
+  name: ingress-allow-seerr
   namespace: sonarr
 spec:
-  # jellyseerr calls Sonarr's API to request/manage series.
+  # seerr calls Sonarr's API to request/manage series.
   podSelector: {}
   policyTypes:
     - Ingress
@@ -13,4 +13,4 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: jellyseerr
+              kubernetes.io/metadata.name: seerr

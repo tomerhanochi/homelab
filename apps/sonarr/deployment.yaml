@@ -19,7 +19,7 @@ spec:
       securityContext:
         fsGroup: 1000
       containers:
-        # TV PVR backend for jellyseerr (not publicly exposed).
+        # TV PVR backend for seerr (not publicly exposed).
         - name: sonarr
           image: ghcr.io/hotio/sonarr:release@sha256:a01185d990725bb77bef19627e6aa9431d31dbb5607433e38d5c864fd10d36ff
           ports:

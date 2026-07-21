@@ -28,9 +28,9 @@ data:
             description: Movies and TV streaming
             icon: jellyfin.png
         - Jellyseerr:
-            href: https://jellyseerr.tomerhanochi.com
+            href: https://seerr.tomerhanochi.com
             description: Media requests
-            icon: jellyseerr.png
+            icon: seerr.png
         - qBittorrent:
             href: https://torrent.tomerhanochi.com
             description: Torrent client
