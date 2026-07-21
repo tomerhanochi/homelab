@@ -1496,7 +1496,7 @@ spec:
         # To install cilium cni configuration in the host
       - name: etc-cni-netd
         hostPath:
-          path: /etc/cilium/cni/net.d
+          path: /etc/cni/net.d
           type: DirectoryOrCreate
         # To be able to load kernel modules
       - name: lib-modules

@@ -22,7 +22,6 @@ bpfClockProbe: true
 
 cni:
   binPath: /var/lib/cilium/cni/bin
-  confPath: /etc/cilium/cni/net.d
 
 autoDirectNodeRoutes: true
 ipv4:
