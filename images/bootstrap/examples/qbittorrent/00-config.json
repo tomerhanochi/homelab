@@ -1,0 +1,14 @@
+{
+  "url": "http://qbittorrent:8080",
+  "username": "admin",
+  "preferences": {
+    "max_ratio_enabled": true,
+    "max_ratio": 0,
+    "max_ratio_act": 0,
+    "max_seeding_time_enabled": false
+  },
+  "categories": [
+    { "name": "tv-sonarr", "savePath": "/data/torrents/tv" },
+    { "name": "radarr", "savePath": "/data/torrents/movies" }
+  ]
+}

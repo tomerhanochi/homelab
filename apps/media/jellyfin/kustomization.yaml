@@ -8,8 +8,7 @@ resources:
   - persistentvolume.yaml
   - pvc.yaml
   - route.yaml
-  - oidc-secret.sops.yaml
-  - oidc-job.yaml
+  - bootstrap
   - ingress-allow-gateway.yaml
 
 labels:

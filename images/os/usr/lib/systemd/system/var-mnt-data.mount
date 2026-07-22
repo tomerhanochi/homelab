@@ -6,7 +6,11 @@ After=network.target
 What=/dev/disk/by-label/xtrnldrv
 Where=/var/mnt/data
 Type=exfat
-Options=defaults,nofail
+# exfat can't store per-file xattrs, so SELinux labels can't live on-disk and
+# chcon/relabeling is impossible. With SELinux enforcing (k3s selinux: true),
+# containers would be denied access. context= stamps one label on the whole fs
+# so restricted-PSA pods (UID/GID 1000) can read/write it.
+Options=defaults,nofail,context="system_u:object_r:container_file_t:s0"
 
 [Install]
 WantedBy=multi-user.target

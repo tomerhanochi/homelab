@@ -1,0 +1,22 @@
+# Single static Go binary that configures the homelab's non-GitOps apps through
+# their APIs (Kavita, Jellyfin, qBittorrent, Sonarr, Radarr) so their state can
+# be codified instead of clicked into an admin UI. Nested subcommands
+# (`bootstrap <app> <action>`) run as a per-app Deployment that watches a merged
+# JSON config directory and re-applies on change. Published to GHCR and used by
+# the bootstrap Deployments in apps/.
+FROM golang:1.26-alpine AS build
+WORKDIR /src
+# Deps first so the layer caches across source-only changes.
+COPY go.mod go.sum ./
+RUN go mod download
+COPY *.go ./
+# Static, stripped binary (no cgo) so it runs in a distroless image. Test files
+# (*_test.go) are copied but ignored by the build.
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /bootstrap .
+
+# Distroless static, non-root by default (uid 65532). Ships CA certificates so
+# TLS to authentik and the Kubernetes API works out of the box.
+FROM gcr.io/distroless/static:nonroot
+COPY --from=build /bootstrap /bootstrap
+USER 65532:65532
+ENTRYPOINT ["/bootstrap"]

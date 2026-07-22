@@ -1,0 +1,13 @@
+---
+# Minimal rights: get/patch only the Kavita Deployment, so the daemon can bounce
+# it (Kavita only reads OIDC connection settings from appsettings.json at startup).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kavita-bootstrap-restart
+  namespace: kavita
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["kavita"]
+    verbs: ["get", "patch"]

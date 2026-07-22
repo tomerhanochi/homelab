@@ -1,0 +1,57 @@
+---
+# External operator for Radarr: creates root folders + the qBittorrent download
+# client once, then watches the config dir and re-applies on change. Idempotent.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr-bootstrap
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radarr-bootstrap
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radarr-bootstrap
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bootstrap
+          image: ghcr.io/tomerhanochi/homelab/internal/bootstrap:0.1.0
+          args: ["radarr", "configure"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/bootstrap/config.d
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: config
+          projected:
+            sources:
+              - configMap:
+                  name: radarr-bootstrap-config
+              - secret:
+                  name: radarr-bootstrap-secret
+                  items:
+                    - key: 90-secret.json
+                      path: 90-secret.json
