@@ -1,3 +1,4 @@
+---
 version: 1
 metadata:
   name: homelab-oidc-clients
@@ -16,6 +17,27 @@ entries:
       expression: |
         return [group.name for group in request.user.ak_groups.all()]
 
+  - model: authentik_core.group
+    state: present
+    id: group-forgejo-users
+    identifiers:
+      name: forgejo-users
+  - model: authentik_core.group
+    state: present
+    id: group-forgejo-admins
+    identifiers:
+      name: forgejo-admins
+  - model: authentik_core.group
+    state: present
+    id: group-kavita-login
+    identifiers:
+      name: kavita-Login
+  - model: authentik_core.group
+    state: present
+    id: group-kavita-admin
+    identifiers:
+      name: kavita-Admin
+
   # ----------------------------------------------------------------- forgejo --
   - model: authentik_providers_oauth2.oauth2provider
     state: present
@@ -30,6 +52,9 @@ entries:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
       redirect_uris:
         - matching_mode: strict
           url: https://git.tomerhanochi.com/user/oauth2/authentik/callback
@@ -63,6 +88,9 @@ entries:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
       redirect_uris:
         - matching_mode: strict
           url: https://paperless.tomerhanochi.com/accounts/oidc/authentik/login/callback/
@@ -96,6 +124,9 @@ entries:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
       redirect_uris:
         - matching_mode: strict
           url: https://headlamp.tomerhanochi.com/oidc-callback
@@ -133,6 +164,9 @@ entries:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
       redirect_uris:
         - matching_mode: strict
           url: http://localhost:8000
@@ -170,6 +204,9 @@ entries:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
       redirect_uris:
         - matching_mode: strict
           url: https://jellyfin.tomerhanochi.com/sso/OID/redirect/authentik
@@ -205,6 +242,9 @@ entries:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
       redirect_uris:
         - matching_mode: regex
           url: "https://kavita\\.tomerhanochi\\.com/.*"
