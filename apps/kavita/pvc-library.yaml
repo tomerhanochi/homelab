@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kavita-library
+  namespace: kavita
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: ""
+  volumeName: kavita-library
+  resources:
+    requests:
+      storage: 1Ti

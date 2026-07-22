@@ -55,6 +55,11 @@ spec:
       envFrom:
         - secretRef:
             name: authentik-oidc
+      # Applied to all authentik pods (server + worker). Grants gateway ingress
+      # via the cluster-wide gateway ingress policy (apps/cluster), which
+      # matches any pod labeled gateway.tomerhanochi.com/exposed: "true".
+      podLabels:
+        gateway.tomerhanochi.com/exposed: "true"
 
     authentik:
       # Public URL / cookie domain.

@@ -1,0 +1,17 @@
+---
+# With cluster-wide default-deny egress in effect, same-namespace traffic must be
+# allowed on the egress side too (seerr -> jellyfin/sonarr/radarr).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-allow-intra-namespace
+  namespace: media
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: media

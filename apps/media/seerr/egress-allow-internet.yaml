@@ -1,0 +1,20 @@
+---
+# seerr reaches the TMDB API over HTTPS for metadata/search. Traffic to
+# jellyfin/sonarr/radarr (including the OIDC-via-jellyfin path) stays
+# intra-namespace and is already allowed in networkpolicies/.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: seerr-egress-internet
+  namespace: media
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: seerr
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

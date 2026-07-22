@@ -13,6 +13,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: homepage
+        # Grants gateway ingress via the cluster-wide gateway ingress policy
+        # (apps/cluster), which matches any pod labeled
+        # gateway.tomerhanochi.com/exposed: "true".
+        gateway.tomerhanochi.com/exposed: "true"
     spec:
       # Grants Kubernetes service discovery / cluster resource widgets.
       serviceAccountName: homepage
@@ -26,7 +30,7 @@ spec:
       containers:
         # gethomepage dashboard linking to all homelab services.
         - name: homepage
-          image: ghcr.io/gethomepage/homepage:v1.13.2@sha256:a0b71c8e757298d02560186bab9fbe3fc2d375c523a62cc1019177b37e48aa28
+          image: ghcr.io/gethomepage/homepage:v1.13.2@sha256:a0b71c8e757298d02560186bab9fbe3fc2d375c523a62cc1019177b37e48aa28  # yamllint disable-line rule:line-length
           ports:
             - name: http
               containerPort: 3000

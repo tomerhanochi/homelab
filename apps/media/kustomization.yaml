@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Consolidated media namespace: jellyfin + seerr (gateway-exposed) and the
+# sonarr/radarr PVR backends (internal only). qbittorrent stays in its own
+# privileged namespace because gluetun needs NET_ADMIN (see apps/qbittorrent).
+resources:
+  - namespace.yaml
+  - networkpolicies
+  - jellyfin
+  - seerr
+  - sonarr
+  - radarr
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: media

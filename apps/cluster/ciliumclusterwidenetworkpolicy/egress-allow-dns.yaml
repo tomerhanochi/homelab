@@ -1,0 +1,33 @@
+---
+# Every workload pod must be able to resolve DNS. Granted cluster-wide so no app
+# needs its own DNS egress rule. enableDefaultDeny is left at its default; the
+# separate default-deny policy is what puts endpoints into deny mode.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: egress-allow-dns
+spec:
+  description: Allow all workload namespaces to reach kube-dns.
+  endpointSelector:
+    matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: NotIn
+        values:
+          - kube-system
+          - cilium
+          - flux-system
+          - cert-manager
+          - external-dns
+          - cloudnative-pg
+          - gateway
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

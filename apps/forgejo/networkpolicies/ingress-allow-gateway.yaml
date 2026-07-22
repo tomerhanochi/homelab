@@ -1,4 +1,9 @@
 ---
+# Kept per-app (not migrated to the cluster-wide label-gated policy) because the
+# forgejo/gitea chart injects deployment.labels into the Deployment's IMMUTABLE
+# selector, so the gateway.tomerhanochi.com/exposed label can't be added to the
+# pods without breaking Helm upgrades. This policy grants the same gateway
+# ingress (HTTP + git-over-SSH) directly instead.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

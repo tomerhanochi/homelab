@@ -14,44 +14,87 @@ GitOps. Each app is applied by a Flux `Kustomization` in `flux/cluster/<app>.yam
   deprecated `commonLabels`).
 - **Namespacing**: each app defines its own `namespace.yaml` (namespace name ==
   app name) with the label `inject-ca-bundle: "true"` so trust-manager injects
-  the CA bundle. Include it in the `resources` list.
+  the CA bundle. Include it in the `resources` list. Two exceptions: `media` is a
+  shared namespace hosting several components (`jellyfin`, `seerr`, `sonarr`,
+  `radarr`) under `apps/media/<component>/`; `cluster` holds only cluster-scoped
+  objects and has no namespace.
+- **Pod Security**: the cluster enforces the `restricted` PSA by default. Every
+  workload must be admissible — set a pod + container securityContext
+  (`runAsNonRoot: true`, `runAsUser`/`runAsGroup` non-zero, `fsGroup`,
+  `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`,
+  `seccompProfile.type: RuntimeDefault`). Images that normally start as root for
+  PUID/PGID (hotio, paperless, kavita) are run **rootless** (drop PUID/PGID; rely
+  on `fsGroup` + host dirs owned `1000:1000`). The sole exception is
+  `qbittorrent`, whose gluetun sidecar needs `NET_ADMIN`: its namespace is
+  labelled `pod-security.kubernetes.io/enforce: privileged` and it stays in its
+  own namespace (it is not part of `media`).
 - **One resource per file.** Group related resources into subdirectories with
   their own `kustomization.yaml` (e.g. `networkpolicies/`, `cert-manager/config/`).
 - **Helm integration (Flux)**: third-party charts are deployed with a Flux
   `HelmRelease` + `HelmRepository`/`OCIRepository` (Flux's kustomize-controller
   does **not** run `kustomize build --enable-helm`). Put values inline under
-  `spec.values`. Reference example: `apps/jellyfin`.
+  `spec.values`. Reference example: `apps/media/jellyfin`.
 - **Plain manifests**: for apps without a chart, write `deployment.yaml`,
   `service.yaml`, etc. Reference example: `apps/paperless-ngx`.
 - **Labeling**: use `labels` with `pairs` for `app.kubernetes.io/part-of`.
+- **Cluster-scoped objects** (`CiliumClusterwideNetworkPolicy`, `ClusterRole`,
+  `ClusterRoleBinding`, …) live in the `cluster` app, nested by kind:
+  `apps/cluster/<kind>/<name>.yaml` (e.g.
+  `apps/cluster/ciliumclusterwidenetworkpolicy/default-deny.yaml`). Reconciled by
+  `flux/cluster/cluster.yaml`.
 
 ## NetworkPolicies (`apps/<app>/networkpolicies/`)
 
-Cilium enforces policy. Each app includes:
-- `ingress-deny-by-default.yaml` — `NetworkPolicy`, `podSelector: {}`, `policyTypes: [Ingress]`.
+Cilium enforces policy. **Default-deny (ingress AND egress) is cluster-wide**,
+declared once in `apps/cluster/ciliumclusterwidenetworkpolicy/` and applied to
+every workload namespace (infra namespaces — `kube-system`, `cilium`,
+`flux-system`, `cert-manager`, `external-dns`, `cloudnative-pg`, `gateway` — are
+exempted). Because egress is denied by default, same-namespace traffic must be
+allowed in **both** directions. The cluster-wide policies also grant, globally:
+- **DNS** egress (to kube-dns) for all workloads — never add per-app DNS rules.
+- **Gateway ingress** to any pod labelled `gateway.tomerhanochi.com/exposed:
+  "true"` (`ingress-allow-gateway`). Exposed apps opt in with that pod label
+  instead of a per-app policy. Exception: charts that inject pod labels into an
+  immutable `Deployment` selector (forgejo) keep a per-app
+  `ingress-allow-gateway.yaml` `CiliumNetworkPolicy` instead.
+- **CNPG operator → database** ingress + database → apiserver egress for any pod
+  labelled `cnpg.io/cluster` (`cloudnative-pg`).
+
+So each app's `networkpolicies/` typically contains only:
 - `ingress-allow-intra-namespace.yaml` — allow ingress from the same namespace.
-- `ingress-allow-gateway.yaml` — **CiliumNetworkPolicy** with `fromEntities: [ingress]`
-  (only for apps exposed via the gateway).
-- `ingress-allow-cloudnative-pg-operator.yaml` — for apps with a CNPG `Cluster`.
+- `egress-allow-intra-namespace.yaml` — allow egress to the same namespace.
+- `egress-allow-<dest>.yaml` — app-specific egress as a `CiliumNetworkPolicy`
+  (e.g. `toEntities: [world]` for internet, `toEntities: [kube-apiserver]`,
+  cross-namespace `toEndpoints`). Internet egress to the authentik OIDC issuer
+  currently uses `world` (sso.tomerhanochi.com resolves to the gateway LB IP);
+  this can later be tightened to the gateway CIDR `192.168.68.64/32`.
 - `ingress-allow-<other>.yaml` — when another namespace must reach this app
-  (e.g. seerr → sonarr/radarr).
+  (e.g. `media` → qbittorrent).
 
 ## Exposure (Gateway API)
 
 Apps are exposed through the shared Cilium `Gateway` (`apps/gateway`). Each has an
 HTTPS listener (`sectionName` == app name) with a cert-manager-issued Let's
 Encrypt certificate. Expose an app with an `HTTPRoute` (`route.yaml`) referencing
-`parentRefs: [{name: default, namespace: gateway, sectionName: <app>}]`.
-external-dns then creates the Cloudflare DNS record from the route. Internal-only
-backends (sonarr, radarr) have no listener and no `route.yaml`.
+`parentRefs: [{name: default, namespace: gateway, sectionName: <app>}]`, and add
+the pod label `gateway.tomerhanochi.com/exposed: "true"` so the cluster-wide
+gateway-ingress policy admits the traffic. external-dns then creates the
+Cloudflare DNS record from the route. Internal-only backends (sonarr, radarr,
+qbittorrent) have no listener, no `route.yaml`, and no exposed label. Only
+`jellyfin` and `seerr` in the `media` namespace are exposed.
 
 ## Storage
 
 - Shared media/download library lives on the host at `/var/mnt/data` (`media/`
-  clean library + `torrents/` downloads). Apps that hardlink (sonarr, radarr,
-  qbittorrent) mount the whole `/var/mnt/data` at `/data` via an inline
-  `hostPath`; consumers (jellyfin, kavita) mount only `/var/mnt/data/media`
-  read-only. The host dir must be owned by UID/GID `1000`.
+  clean library + `torrents/` downloads). `restricted` PSA forbids `hostPath`, so
+  the library is exposed through statically-provisioned `local`
+  `PersistentVolume`s (cluster-scoped, `storageClassName: ""`, `nodeAffinity`
+  pinned to `kubernetes.io/hostname: control-plane`) bound by a namespaced `PVC`
+  via `volumeName`. Apps that hardlink (sonarr, radarr, qbittorrent) get a
+  read-write PV over the whole `/var/mnt/data` at `/data`; consumers (jellyfin,
+  kavita) get a `ReadOnlyMany` PV over `/var/mnt/data/media`. One PV+PVC per
+  consumer (multiple PVs may point at the same host path). The host dir must be
+  owned by UID/GID `1000`. Reference: `apps/media/jellyfin/persistentvolume.yaml`.
 - Per-app config/state uses a `PersistentVolumeClaim` with the default
   StorageClass (k3s local-path), `ReadWriteOnce`, and a `Recreate` strategy.
 
@@ -106,9 +149,9 @@ inactive. Adding a client = add a provider+application entry to
 | **external-dns** | Syncs Cloudflare DNS records from Gateway HTTPRoutes. |
 | **authentik** | OIDC provider for SSO (Postgres + Redis). Clients + passkey enrollment via blueprints. |
 | **headlamp** | Kubernetes web console; SSO-only login (proxies the user's OIDC token to the API server). |
-| **jellyfin / seerr** | Media server and request frontend. |
-| **sonarr / radarr** | TV / movie PVR backends (internal only). |
-| **qbittorrent** | Torrent client with ProtonVPN egress via a gluetun sidecar (kill switch on). |
+| **media** | Shared namespace: jellyfin + seerr (exposed) and sonarr/radarr PVR backends (internal). |
+| **qbittorrent** | Torrent client with ProtonVPN egress via a gluetun sidecar (kill switch on); own **privileged** namespace (gluetun needs `NET_ADMIN`). |
+| **cluster** | Cluster-scoped objects: cluster-wide default-deny + shared allow policies, and homepage's service-discovery RBAC. |
 | **forgejo** | Git forge (official Helm chart, CNPG Postgres). |
 | **kavita** | Reading server. |
 | **paperless-ngx** | Document management (Postgres + redis + gotenberg + tika). |

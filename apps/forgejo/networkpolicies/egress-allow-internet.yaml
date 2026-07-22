@@ -1,0 +1,28 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: egress-allow-internet
+  namespace: forgejo
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: forgejo
+  egress:
+    # HTTPS to the outside world. Needed for:
+    #   - the authentik OIDC issuer, reached via the public gateway hostname
+    #     sso.tomerhanochi.com (resolves to the gateway LoadBalancer IP, which
+    #     Cilium classifies as `world`), and
+    #   - HTTPS repository mirroring / migration to external forges.
+    # TODO: outbound git over SSH (22/TCP) or the git protocol (9418/TCP) is NOT
+    # covered here; add those toPorts if push/pull mirroring over those
+    # transports is enabled.
+    # TODO: the OIDC hop can be tightened from `world` to the gateway CIDR
+    # 192.168.68.64/32 (toCIDR) once we no longer rely on world for HTTPS
+    # mirroring, or split it into its own rule.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

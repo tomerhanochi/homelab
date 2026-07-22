@@ -24,7 +24,7 @@ spec:
       containers:
         # Extracts text/metadata from documents for paperless.
         - name: tika
-          image: docker.io/apache/tika:3.3.1.0-full@sha256:d8e6ed96260ad89307a93195a1b856102987a818ac648502f8efbaf313d32470
+          image: docker.io/apache/tika:3.3.1.0-full@sha256:d8e6ed96260ad89307a93195a1b856102987a818ac648502f8efbaf313d32470  # yamllint disable-line rule:line-length
           ports:
             - name: http
               containerPort: 9998
@@ -45,6 +45,8 @@ spec:
             capabilities:
               drop:
                 - ALL
+            seccompProfile:
+              type: RuntimeDefault
           resources:
             requests:
               cpu: 100m

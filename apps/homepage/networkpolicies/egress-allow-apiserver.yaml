@@ -1,0 +1,16 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: egress-allow-apiserver
+  namespace: homepage
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: homepage
+  egress:
+    # homepage queries the Kubernetes API for service discovery and the
+    # cluster resource widgets (namespaces, pods, nodes, services, ingresses,
+    # httproutes, metrics).
+    - toEntities:
+        - kube-apiserver

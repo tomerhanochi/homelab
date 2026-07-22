@@ -1,0 +1,28 @@
+---
+# Restricted PSA forbids hostPath volumes, so the shared media library is exposed
+# through a statically-provisioned `local` PersistentVolume pinned to the node
+# that owns /var/mnt/data (see apps/AGENTS.md storage convention). Read-only view
+# of the clean library only. The host dir must be owned by UID/GID 1000.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kavita-library
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  # Empty storageClassName + explicit claim binding keeps the default local-path
+  # provisioner from touching this volume.
+  storageClassName: ""
+  local:
+    path: /var/mnt/data/media
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - control-plane

@@ -24,7 +24,7 @@ spec:
       containers:
         # Converts office documents to PDF for paperless (via paperless).
         - name: gotenberg
-          image: docker.io/gotenberg/gotenberg:8.34.0@sha256:67097317623a503ba2a6a7e9ae8db6929a1f7e1bbd88077bacf2d325fbdab923
+          image: docker.io/gotenberg/gotenberg:8.34.0@sha256:67097317623a503ba2a6a7e9ae8db6929a1f7e1bbd88077bacf2d325fbdab923  # yamllint disable-line rule:line-length
           # Restrict Chromium as recommended by the paperless docs.
           command:
             - gotenberg
@@ -50,6 +50,8 @@ spec:
             capabilities:
               drop:
                 - ALL
+            seccompProfile:
+              type: RuntimeDefault
           resources:
             requests:
               cpu: 50m

@@ -1,0 +1,25 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The oidc-secret.sops.yaml is committed encrypted with metadata.namespace:
+# jellyfin (its original namespace). Editing that field would break the SOPS MAC
+# and re-encrypting needs the age key, so instead we keep the file byte-identical
+# and let this namespace transformer rewrite every resource — the secret
+# included — into `media`. Flux decrypts before kustomize transforms, so the MAC
+# stays valid.
+namespace: media
+
+resources:
+  - helmrepository.yaml
+  - helmrelease.yaml
+  - persistentvolume.yaml
+  - pvc.yaml
+  - route.yaml
+  - oidc-secret.sops.yaml
+  - oidc-job.yaml
+  - egress-allow-internet.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: jellyfin

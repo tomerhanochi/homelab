@@ -1,0 +1,16 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Cluster-scoped objects, grouped into subdirectories named after their kind.
+# These are cluster-wide analogues of things that would otherwise be duplicated
+# per app: default-deny + shared allows (CiliumClusterwideNetworkPolicy), and the
+# homepage service-discovery RBAC (ClusterRole/ClusterRoleBinding).
+resources:
+  - ciliumclusterwidenetworkpolicy
+  - clusterrole
+  - clusterrolebinding
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: cluster
