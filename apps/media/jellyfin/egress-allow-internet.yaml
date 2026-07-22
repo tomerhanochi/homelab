@@ -1,16 +1,14 @@
 ---
-# Jellyfin fetches metadata (TMDB/fanart), downloads the SSO plugin, and reaches
-# authentik's OIDC issuer via the gateway (sso.tomerhanochi.com -> gateway LB IP,
-# which Cilium classifies as world). TODO: tighten the OIDC hop to the gateway
-# CIDR 192.168.68.64/32 once the world exit is split out.
+# Reaches authentik's OIDC issuer via the gateway LB IP, which Cilium classifies
+# as world.
+# TODO(tighten): restrict the OIDC hop to the gateway CIDR 192.168.68.64/32.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: jellyfin-egress-internet
   namespace: media
 spec:
-  # Covers both the jellyfin server and the jellyfin-oidc-setup Job (which may do
-  # OIDC discovery against the issuer during SSO bootstrap).
+  # Also covers the jellyfin-oidc-setup Job (OIDC discovery during bootstrap).
   endpointSelector:
     matchExpressions:
       - key: app.kubernetes.io/name

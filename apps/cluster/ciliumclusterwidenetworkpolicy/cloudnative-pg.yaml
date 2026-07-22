@@ -1,15 +1,11 @@
 ---
-# Cluster-wide replacement for the per-app "ingress-allow-cloudnative-pg-operator"
-# policies. Any CNPG-managed pod (labeled cnpg.io/cluster) accepts ingress from
-# the cloudnative-pg operator namespace and may reach the kube-apiserver (the
-# instance manager updates cluster/pod status), regardless of which namespace the
-# database lives in. New CNPG-backed apps are covered automatically.
+# CNPG-managed database pods (any namespace) accept ingress from the operator and
+# may reach the apiserver.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: cloudnative-pg
 spec:
-  description: CNPG operator -> database ingress and database -> apiserver egress.
   endpointSelector:
     matchExpressions:
       - key: cnpg.io/cluster

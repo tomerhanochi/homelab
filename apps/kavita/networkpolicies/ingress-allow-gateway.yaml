@@ -1,0 +1,17 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ingress-allow-gateway
+  namespace: kavita
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kavita
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP

@@ -15,7 +15,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kavita
-        gateway.tomerhanochi.com/exposed: "true"
     spec:
       # Forced rootless under the restricted PSA: the container runs as UID/GID
       # 1000 and initializes /kavita/config on the fsGroup-owned config PVC

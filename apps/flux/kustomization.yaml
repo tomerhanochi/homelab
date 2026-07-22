@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - repositories
   - cluster
+  - networkpolicies

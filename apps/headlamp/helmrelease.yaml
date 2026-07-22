@@ -48,11 +48,6 @@ spec:
     ingress:
       enabled: false
 
-    # Opt in to the cluster-wide gateway-ingress CiliumClusterwideNetworkPolicy
-    # (matches the gateway.tomerhanochi.com/exposed pod label).
-    podLabels:
-      gateway.tomerhanochi.com/exposed: "true"
-
     service:
       type: ClusterIP
       port: 80

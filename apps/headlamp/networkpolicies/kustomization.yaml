@@ -3,11 +3,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 # Namespace-scoped policies. Cluster-wide default-deny (ingress + egress) and DNS
-# egress live in apps/cluster. Gateway ingress is granted cluster-wide via the
-# gateway.tomerhanochi.com/exposed pod label. These open the remaining flows:
+# egress live in apps/cluster. These open the remaining flows: gateway ingress,
 # intra-namespace (both directions) and headlamp's egress to the kube-apiserver
 # and the OIDC issuer.
 resources:
+  - ingress-allow-gateway.yaml
   - ingress-allow-intra-namespace.yaml
   - egress-allow-intra-namespace.yaml
   - egress-allow-apiserver-and-oidc.yaml

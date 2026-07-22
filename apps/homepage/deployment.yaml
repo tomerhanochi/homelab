@@ -13,10 +13,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: homepage
-        # Grants gateway ingress via the cluster-wide gateway ingress policy
-        # (apps/cluster), which matches any pod labeled
-        # gateway.tomerhanochi.com/exposed: "true".
-        gateway.tomerhanochi.com/exposed: "true"
     spec:
       # Grants Kubernetes service discovery / cluster resource widgets.
       serviceAccountName: homepage

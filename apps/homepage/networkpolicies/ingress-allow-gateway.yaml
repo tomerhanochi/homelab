@@ -1,19 +1,17 @@
 ---
-# Kept per-app: the chart injects pod labels into the immutable Deployment
-# selector, so the exposed-label approach can't be used here.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: ingress-allow-gateway
-  namespace: forgejo
+  namespace: homepage
 spec:
-  endpointSelector: {}
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: homepage
   ingress:
     - fromEntities:
         - ingress
       toPorts:
         - ports:
             - port: "3000"
-              protocol: TCP
-            - port: "2222"
               protocol: TCP

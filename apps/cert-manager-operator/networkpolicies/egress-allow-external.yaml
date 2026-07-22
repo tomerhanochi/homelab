@@ -1,15 +1,15 @@
 ---
-# seerr reaches the TMDB API (HTTPS) for metadata/search.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: seerr-egress-internet
-  namespace: media
+  name: egress-allow-external
+  namespace: cert-manager
 spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: seerr
+  endpointSelector: {}
   egress:
+    - toEntities:
+        - kube-apiserver
+    # ACME (Let's Encrypt) and the Cloudflare DNS-01 API.
     - toEntities:
         - world
       toPorts:

@@ -15,8 +15,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: paperless-ngx
-        # Opt in to the cluster-wide gateway-ingress CiliumClusterwideNetworkPolicy.
-        gateway.tomerhanochi.com/exposed: "true"
     spec:
       # Forcing runAsUser 1000 + fsGroup 1000 runs paperless rootless against the
       # PVCs (ReadWriteOnce). The image would otherwise start as root to fix

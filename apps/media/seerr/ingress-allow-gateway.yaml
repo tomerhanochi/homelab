@@ -1,18 +1,17 @@
 ---
-# seerr reaches the TMDB API (HTTPS) for metadata/search.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: seerr-egress-internet
+  name: seerr-ingress-gateway
   namespace: media
 spec:
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: seerr
-  egress:
-    - toEntities:
-        - world
+  ingress:
+    - fromEntities:
+        - ingress
       toPorts:
         - ports:
-            - port: "443"
+            - port: "5055"
               protocol: TCP

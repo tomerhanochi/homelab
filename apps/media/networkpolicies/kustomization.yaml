@@ -2,10 +2,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Namespace-wide policies. Cluster-wide default-deny (ingress + egress) lives in
-# apps/cluster; these open the intra-namespace flows (seerr <-> jellyfin/sonarr/
-# radarr) in both directions. Gateway ingress is granted cluster-wide via the
-# gateway.tomerhanochi.com/exposed pod label (jellyfin, seerr).
+# Open intra-namespace flows (seerr <-> jellyfin/sonarr/radarr) in both
+# directions; cluster-wide default-deny lives in apps/cluster. Per-component
+# gateway ingress is granted by each app's ingress-allow-gateway.yaml.
 resources:
   - ingress-allow-intra-namespace.yaml
   - egress-allow-intra-namespace.yaml

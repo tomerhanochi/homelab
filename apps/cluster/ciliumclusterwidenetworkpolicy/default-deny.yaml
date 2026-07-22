@@ -1,19 +1,11 @@
 ---
-# Cluster-wide default-deny for BOTH directions across every workload namespace.
-# Per Cilium semantics, selecting an endpoint with an (empty) ingress/egress
-# section transitions it to default-deny for that direction; the empty rule lists
-# below allow nothing, so all traffic is denied unless another policy permits it
-# (DNS + gateway ingress + CNPG are granted cluster-wide alongside this file;
-# per-app allows live in each app's networkpolicies/).
-#
-# Infra/system namespaces are exempted so operators, the CNI, Flux, cert-manager,
-# external-dns, CNPG and the gateway keep working unrestricted.
+# Default-deny ingress + egress for every namespace except kube-system and
+# cilium. Allows are layered on by other cluster-wide policies and per-app rules.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: default-deny
 spec:
-  description: Default-deny ingress and egress for all workload namespaces.
   endpointSelector:
     matchExpressions:
       - key: k8s:io.kubernetes.pod.namespace
@@ -21,10 +13,5 @@ spec:
         values:
           - kube-system
           - cilium
-          - flux-system
-          - cert-manager
-          - external-dns
-          - cloudnative-pg
-          - gateway
   ingress: []
   egress: []

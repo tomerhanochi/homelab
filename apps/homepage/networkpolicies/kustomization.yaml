@@ -3,6 +3,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+  - ingress-allow-gateway.yaml
   - ingress-allow-intra-namespace.yaml
   - egress-allow-intra-namespace.yaml
   - egress-allow-apiserver.yaml

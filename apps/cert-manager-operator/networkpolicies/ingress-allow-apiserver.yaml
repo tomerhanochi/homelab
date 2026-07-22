@@ -1,0 +1,12 @@
+---
+# The cert-manager and trust-manager admission/conversion webhooks are called by the apiserver.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ingress-allow-apiserver
+  namespace: cert-manager
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - kube-apiserver

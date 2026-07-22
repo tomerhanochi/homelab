@@ -15,8 +15,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: seerr
-        # Opt in to the cluster-wide gateway-ingress CiliumClusterwideNetworkPolicy.
-        gateway.tomerhanochi.com/exposed: "true"
     spec:
       securityContext:
         runAsNonRoot: true
