@@ -38,11 +38,19 @@ spec:
               value: "002"
             - name: TZ
               value: Europe/Amsterdam
+            # Fix the API key (else Radarr generates a random one) so the
+            # radarr-bootstrap daemon can authenticate. Shared with the daemon's
+            # secret leaf — see bootstrap-secret.sops.yaml.
+            - name: RADARR__AUTH__APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: radarr-bootstrap-secret
+                  key: apikey
           volumeMounts:
             - name: config
               mountPath: /config
-            # Whole shared library mounted so hardlinks work across
-            # media/ and torrents/ (see apps/AGENTS.md storage convention).
+            # Whole shared library so Radarr can MOVE completed downloads from
+            # torrents/ into media/ (exfat can't hardlink; see apps/AGENTS.md).
             - name: data
               mountPath: /data
           livenessProbe:

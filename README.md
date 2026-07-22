@@ -52,17 +52,24 @@ The foundation is a [bootc](https://github.com/containers/bootc) image providing
   logging, secrets encryption at rest, and OIDC (authentik) for the API server
 - **System config**: passwordless `core` user via polkit, key-based SSH, systemd userdb
 
-### Bootstrap images (`images/jellyfin-bootstrap`, `images/kavita-bootstrap`)
+### Bootstrap image (`images/bootstrap`)
 
-Two small static Go binaries (published to GHCR, run in a distroless image) that
-codify the bits of app config that can only be set through an app's own API, so
-SSO stays fully GitOps with no manual wizard/dashboard steps:
+A single static Go binary (published to GHCR, run in a distroless image) with
+nested `<app> <action>` subcommands that codify the app config which can only be
+set through an app's own API, so state stays GitOps with no manual
+wizard/dashboard steps. It reads merged JSON from a config directory (a projected
+ConfigMap + SOPS Secret) and runs as a per-app Deployment that applies once on
+startup, then watches the config and re-applies on change (idempotent):
 
-- **jellyfin-bootstrap** — installs the `jellyfin-plugin-sso` binary (initContainer)
-  and, via a Job, finishes the first-run wizard and registers the authentik OIDC
-  provider through the plugin API.
-- **kavita-bootstrap** — via a Job, creates the first Kavita admin and applies the
-  OIDC config through `/api/Settings`.
+- **jellyfin** — installs the `jellyfin-plugin-sso` binary (initContainer), then
+  finishes the first-run wizard, registers the authentik OIDC provider, and
+  creates libraries.
+- **kavita** — creates the first admin, applies the OIDC config via `/api/Settings`,
+  creates libraries, and restarts Kavita once when the OIDC settings change.
+- **qbittorrent** — applies WebUI preferences (stop-on-seed-limit) and categories.
+- **sonarr / radarr** — create root folders and the qBittorrent download client
+  (with "remove completed downloads" so imports MOVE instead of copy — the exFAT
+  no-hardlink workaround).
 
 Both are idempotent. They are extensible: add subcommands as more app config
 needs to be codified.
@@ -114,8 +121,7 @@ See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
 homelab/
 ├── images/           # container images built from this repo
 │   ├── os/           # bootc image source (Containerfile, setup.sh, K3s config)
-│   ├── jellyfin-bootstrap/  # Go tool: Jellyfin SSO plugin + OIDC setup
-│   └── kavita-bootstrap/    # Go tool: Kavita OIDC setup
+│   └── bootstrap/    # Go tool: per-app API config (jellyfin/kavita/qbittorrent/sonarr/radarr)
 ├── flux/             # FluxCD: controllers + GitRepository + per-app Kustomizations
 ├── apps/             # Kubernetes applications (GitOps)
 ├── .sops.yaml        # SOPS/age encryption config

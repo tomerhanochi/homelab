@@ -1,0 +1,12 @@
+{
+  "url": "http://radarr:7878",
+  "rootFolders": ["/data/media/movies"],
+  "downloadClient": {
+    "name": "qBittorrent",
+    "host": "qbittorrent",
+    "port": 8080,
+    "category": "radarr",
+    "useSsl": false,
+    "removeCompletedDownloads": true
+  }
+}

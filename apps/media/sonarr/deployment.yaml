@@ -38,11 +38,19 @@ spec:
               value: "002"
             - name: TZ
               value: Europe/Amsterdam
+            # Fix the API key (else Sonarr generates a random one) so the
+            # sonarr-bootstrap daemon can authenticate. Shared with the daemon's
+            # secret leaf — see bootstrap-secret.sops.yaml.
+            - name: SONARR__AUTH__APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: sonarr-bootstrap-secret
+                  key: apikey
           volumeMounts:
             - name: config
               mountPath: /config
-            # Whole shared library so hardlinks between /data/torrents and
-            # /data/media work.
+            # Whole shared library so Sonarr can MOVE completed downloads from
+            # /data/torrents into /data/media (exfat can't hardlink).
             - name: data
               mountPath: /data
           livenessProbe:

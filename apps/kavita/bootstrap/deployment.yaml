@@ -1,0 +1,61 @@
+---
+# Long-lived, external "operator" for Kavita (not GitOps-managed state): applies
+# the config once on startup, then watches /etc/bootstrap/config.d and re-applies
+# on change (fsnotify + 5m resync). Idempotent — see images/bootstrap.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kavita-bootstrap
+  namespace: kavita
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kavita-bootstrap
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kavita-bootstrap
+    spec:
+      serviceAccountName: kavita-bootstrap
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bootstrap
+          image: ghcr.io/tomerhanochi/homelab/internal/bootstrap:0.1.0
+          args: ["kavita", "configure"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/bootstrap/config.d
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        # ConfigMap (non-secret) + SOPS Secret projected into one directory so
+        # the daemon merges them; the secret exposes only its JSON key.
+        - name: config
+          projected:
+            sources:
+              - configMap:
+                  name: kavita-bootstrap-config
+              - secret:
+                  name: kavita-bootstrap-secret
+                  items:
+                    - key: 90-secret.json
+                      path: 90-secret.json

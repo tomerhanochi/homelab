@@ -101,10 +101,10 @@ claim the authentik admin account:
    created **inactive**; activate them under **Directory → Users** and add them to
    groups to drive per-app and cluster (RBAC) authorization.
 
-> The Jellyfin/Kavita bootstrap Jobs create a local admin account in each app
+> The Jellyfin/Kavita bootstrap daemons create a local admin account in each app
 > (kept alongside SSO so you can't be locked out). Read those credentials with
-> `sops -d apps/jellyfin/oidc-secret.sops.yaml` and
-> `sops -d apps/kavita/oidc-secret.sops.yaml` if you ever need them.
+> `sops -d apps/media/jellyfin/bootstrap/secret.sops.yaml` and
+> `sops -d apps/kavita/bootstrap/secret.sops.yaml` if you ever need them.
 
 ### 5. Cluster access via SSO (kubectl + Headlamp)
 

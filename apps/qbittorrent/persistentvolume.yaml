@@ -2,8 +2,9 @@
 # The shared download/library volume is exposed through a statically-provisioned
 # `local` PersistentVolume pinned to the node that owns /var/mnt/data (see
 # apps/AGENTS.md storage convention). qBittorrent needs read-write here to write
-# completed downloads that sonarr/radarr later hardlink. The host dir must be
-# owned by UID/GID 1000.
+# completed downloads that sonarr/radarr later MOVE into the library — exfat can't
+# hardlink, so qBittorrent stops seeding on completion (bootstrap: max_ratio_act=0)
+# and the *arrs move instead of copy. The host dir must be owned by UID/GID 1000.
 apiVersion: v1
 kind: PersistentVolume
 metadata:

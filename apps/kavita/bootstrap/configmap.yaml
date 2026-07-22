@@ -1,0 +1,24 @@
+---
+# Non-secret bootstrap config, projected into the daemon alongside the SOPS
+# secret (secret.sops.yaml) at /etc/bootstrap/config.d and merged in lexicographic
+# order (00- before 90-).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kavita-bootstrap-config
+  namespace: kavita
+data:
+  00-config.json: |
+    {
+      "url": "http://kavita:5000",
+      "admin": { "username": "admin", "email": "admin@tomerhanochi.com" },
+      "oidc": {
+        "authority": "https://sso.tomerhanochi.com/application/o/kavita/",
+        "clientId": "kavita"
+      },
+      "libraries": [
+        { "name": "Comics", "type": 1, "folders": ["/library/comics"] },
+        { "name": "Books", "type": 2, "folders": ["/library/books"] }
+      ],
+      "deployment": { "name": "kavita", "namespace": "kavita" }
+    }

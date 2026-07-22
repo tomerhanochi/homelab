@@ -1,0 +1,14 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kavita-bootstrap-restart
+  namespace: kavita
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kavita-bootstrap-restart
+subjects:
+  - kind: ServiceAccount
+    name: kavita-bootstrap
+    namespace: kavita
