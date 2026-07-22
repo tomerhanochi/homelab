@@ -9,16 +9,14 @@ resources:
   - cloudnative-pg-operator.yaml
   - flux-operator.yaml
   - flux.yaml
+  - cilium.yaml
   - cert-manager.yaml
   - gateway.yaml
   - authentik.yaml
   - forgejo.yaml
   - headlamp.yaml
   - homepage.yaml
-  - jellyfin.yaml
-  - seerr.yaml
+  - media.yaml
   - kavita.yaml
   - paperless-ngx.yaml
   - qbittorrent.yaml
-  - radarr.yaml
-  - sonarr.yaml

@@ -16,13 +16,20 @@ spec:
       labels:
         app.kubernetes.io/name: paperless-ngx
     spec:
-      # The paperless image starts as root to fix volume permissions, then drops
-      # to the paperless user (UID 1000). fsGroup lets it read/write the PVCs.
+      # Forcing runAsUser 1000 + fsGroup 1000 runs paperless rootless against the
+      # PVCs (ReadWriteOnce). The image would otherwise start as root to fix
+      # volume permissions before dropping to the paperless user (UID 1000);
+      # pre-owned volumes make that root startup step unnecessary.
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: paperless-ngx
-          image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15@sha256:6c86cad803970ea782683a8e80e7403444c5bf3cf70de63b4d3c8e87500db92f
+          image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15@sha256:6c86cad803970ea782683a8e80e7403444c5bf3cf70de63b4d3c8e87500db92f  # yamllint disable-line rule:line-length
           ports:
             - name: http
               containerPort: 8000
@@ -66,6 +73,13 @@ spec:
                 secretKeyRef:
                   name: paperless-ngx-secrets
                   key: PAPERLESS_SOCIALACCOUNT_PROVIDERS
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - name: data
               mountPath: /usr/src/paperless/data

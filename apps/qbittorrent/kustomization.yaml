@@ -4,11 +4,11 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - persistentvolume.yaml
   - pvc.yaml
   - vpn-secret.sops.yaml
   - deployment.yaml
   - service.yaml
-  - route.yaml
   - networkpolicies
 
 labels:

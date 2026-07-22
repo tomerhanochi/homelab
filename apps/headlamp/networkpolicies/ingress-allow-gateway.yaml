@@ -5,7 +5,14 @@ metadata:
   name: ingress-allow-gateway
   namespace: headlamp
 spec:
-  endpointSelector: {}
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: headlamp
   ingress:
+    # Gateway targets the container port (4466), not the Service port (80).
     - fromEntities:
         - ingress
+      toPorts:
+        - ports:
+            - port: "4466"
+              protocol: TCP

@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+  namespace: media
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radarr
+    spec:
+      # hotio (s6-overlay) image runs rootless here: with no PUID/PGID the
+      # process stays UID/GID 1000, relying on fsGroup 1000 + host dirs owned
+      # 1000:1000 (restricted PSA forbids the root-then-drop startup).
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        # Movie PVR backend for seerr.
+        - name: radarr
+          image: ghcr.io/hotio/radarr:release@sha256:4b334f33ae74337668b7c8a4ce1ff6b3e1a8b1e298812c6113ee4ad7e19fbaee  # yamllint disable-line rule:line-length
+          ports:
+            - name: http
+              containerPort: 7878
+          env:
+            - name: UMASK
+              value: "002"
+            - name: TZ
+              value: Europe/Amsterdam
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            # Whole shared library mounted so hardlinks work across
+            # media/ and torrents/ (see apps/AGENTS.md storage convention).
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            periodSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: radarr-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: radarr-data

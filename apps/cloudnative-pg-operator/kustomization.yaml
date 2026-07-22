@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - ocirepository.yaml
   - helmrelease.yaml
+  - networkpolicies
 
 labels:
   - pairs:

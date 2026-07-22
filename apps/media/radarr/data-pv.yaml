@@ -1,0 +1,29 @@
+---
+# Restricted PSA forbids hostPath volumes, so the whole shared library is exposed
+# through a statically-provisioned `local` PersistentVolume pinned to the node
+# that owns /var/mnt/data (see apps/AGENTS.md storage convention). radarr mounts
+# the whole library so hardlinks between /data/torrents and /data/media work.
+# The host dir must be owned by UID/GID 1000.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: media-radarr-data
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  # Empty storageClassName + explicit claim binding keeps the default local-path
+  # provisioner from touching this volume.
+  storageClassName: ""
+  local:
+    path: /var/mnt/data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - control-plane

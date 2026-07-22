@@ -1,0 +1,28 @@
+---
+# Headlamp acts as an OIDC proxy: it forwards the user's id_token to the
+# kube-apiserver for every Kubernetes call, and it talks to the authentik OIDC
+# issuer (sso.tomerhanochi.com) during the login flow. Both egress paths must be
+# opened explicitly under cluster-wide default-deny egress. Cluster-wide DNS
+# egress is already granted, so it is not repeated here.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: egress-allow-apiserver-and-oidc
+  namespace: headlamp
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: headlamp
+  egress:
+    # Proxy user OIDC tokens to the Kubernetes API server.
+    - toEntities:
+        - kube-apiserver
+    # OIDC issuer (sso.tomerhanochi.com) resolves to the gateway LoadBalancer IP,
+    # which Cilium classifies as "world".
+    # TODO: tighten to the gateway CIDR (192.168.68.64/32) once toCIDR is wired up.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

@@ -1,0 +1,12 @@
+---
+# The CNPG operator webhook is called by the apiserver.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ingress-allow-apiserver
+  namespace: cloudnative-pg
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - kube-apiserver

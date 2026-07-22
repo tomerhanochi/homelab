@@ -5,6 +5,8 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - pvc.yaml
+  - persistentvolume.yaml
+  - pvc-library.yaml
   - deployment.yaml
   - service.yaml
   - route.yaml

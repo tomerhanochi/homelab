@@ -5,7 +5,16 @@ metadata:
   name: ingress-allow-gateway
   namespace: authentik
 spec:
-  endpointSelector: {}
+  # Only the authentik server pods are gateway-facing; the worker is not.
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: authentik
+      app.kubernetes.io/component: server
   ingress:
     - fromEntities:
         - ingress
+      toPorts:
+        - ports:
+            # http container port (authentik-server Service :80 targets this).
+            - port: "9000"
+              protocol: TCP

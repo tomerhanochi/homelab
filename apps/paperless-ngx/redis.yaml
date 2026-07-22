@@ -26,7 +26,7 @@ spec:
       containers:
         # Task broker for the paperless worker (required).
         - name: redis
-          image: docker.io/library/redis:8.8-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
+          image: docker.io/library/redis:8.8-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005  # yamllint disable-line rule:line-length
           ports:
             - name: redis
               containerPort: 6379
@@ -48,6 +48,8 @@ spec:
             capabilities:
               drop:
                 - ALL
+            seccompProfile:
+              type: RuntimeDefault
           resources:
             requests:
               cpu: 25m

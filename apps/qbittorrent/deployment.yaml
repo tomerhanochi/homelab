@@ -23,7 +23,7 @@ spec:
         # network namespace; the gluetun firewall is the kill switch (traffic is
         # dropped if the WireGuard tunnel is down).
         - name: gluetun
-          image: ghcr.io/qdm12/gluetun:v3.41.1@sha256:1a5bf4b4820a879cdf8d93d7ef0d2d963af56670c9ebff8981860b6804ebc8ab
+          image: ghcr.io/qdm12/gluetun:v3.41.1@sha256:1a5bf4b4820a879cdf8d93d7ef0d2d963af56670c9ebff8981860b6804ebc8ab  # yamllint disable-line rule:line-length
           securityContext:
             capabilities:
               add:
@@ -73,7 +73,7 @@ spec:
         # BitTorrent client (official qbittorrent-nox image). No VPN config here:
         # it shares gluetun's netns.
         - name: qbittorrent
-          image: docker.io/qbittorrentofficial/qbittorrent-nox:5.2.3-1@sha256:9ebb534fe30bab98622cb84a8c3acecfd88319b2d540f52ecdec7b9f866374d7
+          image: docker.io/qbittorrentofficial/qbittorrent-nox:5.2.3-1@sha256:9ebb534fe30bab98622cb84a8c3acecfd88319b2d540f52ecdec7b9f866374d7  # yamllint disable-line rule:line-length
           env:
             # Required by the official image to acknowledge the legal notice.
             - name: QBT_LEGAL_NOTICE
@@ -112,6 +112,5 @@ spec:
             claimName: qbittorrent-config
         # Shared download/library volume for hardlinking (see storage convention).
         - name: data
-          hostPath:
-            path: /var/mnt/data
-            type: DirectoryOrCreate
+          persistentVolumeClaim:
+            claimName: qbittorrent-data

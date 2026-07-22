@@ -1,0 +1,17 @@
+---
+# Default-deny ingress + egress for every namespace except kube-system and
+# cilium. Allows are layered on by other cluster-wide policies and per-app rules.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: NotIn
+        values:
+          - kube-system
+          - cilium
+  ingress: []
+  egress: []

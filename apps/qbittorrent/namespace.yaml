@@ -5,3 +5,7 @@ metadata:
   name: qbittorrent
   labels:
     inject-ca-bundle: "true"
+    # gluetun's kill switch needs NET_ADMIN, which the restricted PSA forbids, so
+    # this namespace stays privileged (qbittorrent + gluetun do not move to media).
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce-version: latest

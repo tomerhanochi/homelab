@@ -23,6 +23,9 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: authentik
+    # jellyfin and seerr both live in the consolidated `media` namespace and are
+    # the only media apps exposed via the gateway (sonarr/radarr/qbittorrent are
+    # internal).
     - name: jellyfin
       hostname: jellyfin.tomerhanochi.com
       protocol: HTTPS
@@ -36,7 +39,7 @@ spec:
           from: Selector
           selector:
             matchLabels:
-              kubernetes.io/metadata.name: jellyfin
+              kubernetes.io/metadata.name: media
     - name: seerr
       hostname: seerr.tomerhanochi.com
       protocol: HTTPS
@@ -50,21 +53,7 @@ spec:
           from: Selector
           selector:
             matchLabels:
-              kubernetes.io/metadata.name: seerr
-    - name: qbittorrent
-      hostname: torrent.tomerhanochi.com
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: qbittorrent-tls
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              kubernetes.io/metadata.name: qbittorrent
+              kubernetes.io/metadata.name: media
     - name: forgejo
       hostname: git.tomerhanochi.com
       protocol: HTTPS
