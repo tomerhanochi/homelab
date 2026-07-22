@@ -1,0 +1,66 @@
+---
+version: 1
+metadata:
+  name: homelab-passkey-login
+entries:
+  # Passwordless, usernameless authentication for ALL external apps. Passkeys
+  # enrolled by passkey-enrollment.yaml are discoverable (resident) credentials, so
+  # this authenticator-validation stage runs a WebAuthn ceremony with an empty
+  # allow-list: the browser offers the user's stored passkeys and the resident key
+  # identifies the account. No username, no password — just the biometric/PIN
+  # gesture. not_configured_action=deny means a user without a passkey cannot get in
+  # through here at all, which is the point: passkey-only.
+  - model: authentik_stages_authenticator_validate.authenticatorvalidatestage
+    state: present
+    id: passwordless-validate
+    identifiers:
+      name: homelab-passwordless-validate
+    attrs:
+      device_classes:
+        - webauthn
+      webauthn_user_verification: required
+      not_configured_action: deny
+
+  # The authentication flow: validate the passkey (which resolves the user), then
+  # log them in. Reuse the built-in login stage so session settings match the rest
+  # of the instance.
+  - model: authentik_flows.flow
+    state: present
+    id: passwordless-flow
+    identifiers:
+      slug: passkey-authentication
+    attrs:
+      name: Passkey Login
+      title: Sign in with your passkey
+      designation: authentication
+      authentication: require_unauthenticated
+
+  - model: authentik_flows.flowstagebinding
+    state: present
+    identifiers:
+      target: !KeyOf passwordless-flow
+      stage: !KeyOf passwordless-validate
+      order: 10
+  - model: authentik_flows.flowstagebinding
+    state: present
+    identifiers:
+      target: !KeyOf passwordless-flow
+      stage: !Find [authentik_stages_user_login.userloginstage, [name, default-authentication-login]]
+      order: 20
+
+  # Make this passkey-only flow the default brand's authentication flow, so every
+  # OIDC app (forgejo / kavita / jellyfin / headlamp / kubernetes / …) authenticates
+  # via passkey and never shows a password field. This patches the same brand as
+  # passkey-enrollment.yaml (which sets flow_enrollment); both are partial updates,
+  # so the two fields coexist.
+  #
+  # akadmin bootstrap escape hatch: the built-in password flow is left untouched and
+  # is still reachable directly at /if/flow/default-authentication-flow/ — use it
+  # once to sign in as akadmin and enroll a passkey, after which akadmin logs in via
+  # this flow like everyone else.
+  - model: authentik_brands.brand
+    state: present
+    identifiers:
+      domain: authentik-default
+    attrs:
+      flow_authentication: !KeyOf passwordless-flow

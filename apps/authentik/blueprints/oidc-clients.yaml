@@ -17,6 +17,25 @@ entries:
       expression: |
         return [group.name for group in request.user.ak_groups.all()]
 
+  # authentik's built-in email scope hardcodes "email_verified": False, which some
+  # apps (e.g. Kavita) treat as an unverified/unusable account. We have no email
+  # verification step (registration is passkey-only), so emit email_verified: True.
+  # Providers reference this instead of the built-in email scope mapping.
+  - model: authentik_providers_oauth2.scopemapping
+    state: present
+    id: scope-email
+    identifiers:
+      name: "Homelab OAuth Mapping: email"
+    attrs:
+      name: "Homelab OAuth Mapping: email"
+      scope_name: email
+      description: "Email address (verified)"
+      expression: |
+        return {
+            "email": request.user.email,
+            "email_verified": True,
+        }
+
   - model: authentik_core.group
     state: present
     id: group-forgejo-users
@@ -60,7 +79,7 @@ entries:
           url: https://git.tomerhanochi.com/user/oauth2/authentik/callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !KeyOf scope-email
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !KeyOf scope-groups
   - model: authentik_core.application
@@ -96,7 +115,7 @@ entries:
           url: https://paperless.tomerhanochi.com/accounts/oidc/authentik/login/callback/
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !KeyOf scope-email
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !KeyOf scope-groups
   - model: authentik_core.application
@@ -132,7 +151,7 @@ entries:
           url: https://headlamp.tomerhanochi.com/oidc-callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !KeyOf scope-email
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
         - !KeyOf scope-groups
@@ -174,7 +193,7 @@ entries:
           url: http://localhost:18000
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !KeyOf scope-email
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
         - !KeyOf scope-groups
@@ -212,7 +231,7 @@ entries:
           url: https://jellyfin.tomerhanochi.com/sso/OID/redirect/authentik
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !KeyOf scope-email
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !KeyOf scope-groups
   - model: authentik_core.application
@@ -250,7 +269,7 @@ entries:
           url: "https://kavita\\.tomerhanochi\\.com/.*"
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !KeyOf scope-email
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !KeyOf scope-groups
   - model: authentik_core.application

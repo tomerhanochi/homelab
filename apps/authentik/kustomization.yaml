@@ -23,6 +23,7 @@ configMapGenerator:
     files:
       - blueprints/oidc-clients.yaml
       - blueprints/passkey-enrollment.yaml
+      - blueprints/passkey-login.yaml
     options:
       disableNameSuffixHash: true
 
