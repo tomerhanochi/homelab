@@ -7,4 +7,3 @@ kind: Kustomization
 # gateway ingress is granted by each app's ingress-allow-gateway.yaml.
 resources:
   - ingress-allow-intra-namespace.yaml
-  - egress-allow-intra-namespace.yaml

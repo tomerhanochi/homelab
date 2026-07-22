@@ -81,6 +81,14 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           volumeMounts:
+            # s6-overlay (the image's init) needs writable, group-owned /run and
+            # /tmp. Running rootless (runAsUser 1000, no CAP_CHOWN) it can't chown
+            # the image's root-owned /run, so back both with emptyDirs that fsGroup
+            # 1000 makes group-writable.
+            - name: run
+              mountPath: /run
+            - name: tmp
+              mountPath: /tmp
             - name: data
               mountPath: /usr/src/paperless/data
             - name: media
@@ -109,6 +117,10 @@ spec:
               cpu: 2000m
               memory: 2Gi
       volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
         - name: data
           persistentVolumeClaim:
             claimName: paperless-ngx-data

@@ -1,6 +1,7 @@
 ---
-# Default-deny ingress + egress for every namespace except kube-system and
-# cilium. Allows are layered on by other cluster-wide policies and per-app rules.
+# Default-deny ingress for every namespace except kube-system and cilium. Allows
+# are layered on by other cluster-wide policies and per-app rules. Egress is
+# intentionally unrestricted for now (to be hardened later).
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
@@ -14,4 +15,3 @@ spec:
           - kube-system
           - cilium
   ingress: []
-  egress: []

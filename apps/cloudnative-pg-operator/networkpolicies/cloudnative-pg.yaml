@@ -1,6 +1,5 @@
 ---
-# CNPG-managed database pods (any namespace) accept ingress from the operator and
-# may reach the apiserver.
+# CNPG-managed database pods (any namespace) accept ingress from the operator.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
@@ -14,6 +13,3 @@ spec:
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: cloudnative-pg
-  egress:
-    - toEntities:
-        - kube-apiserver

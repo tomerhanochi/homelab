@@ -9,5 +9,3 @@ kind: Kustomization
 resources:
   - ingress-allow-gateway.yaml
   - ingress-allow-intra-namespace.yaml
-  - egress-allow-intra-namespace.yaml
-  - egress-allow-apiserver-and-oidc.yaml
