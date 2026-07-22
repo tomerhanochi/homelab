@@ -13,13 +13,36 @@ spec:
   # schema, so we only configure the external CloudNativePG database and
   # in-memory cache/session/queue (no bundled-dependency toggles).
   values:
+    image:
+      rootless: true
+
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
     service:
       http:
         port: 3000
-      # SSH exposed via the gateway's TCP listener + forgejo TCPRoute.
       ssh:
-        type: ClusterIP
         port: 22
+        targetPort: 2222
+
+    ingress:
+      enabled: false
 
     # Config/state on a dynamically-provisioned PVC (default StorageClass).
     persistence:
