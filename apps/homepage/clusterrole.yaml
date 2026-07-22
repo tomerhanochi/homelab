@@ -1,7 +1,6 @@
 ---
-# Cluster-scoped RBAC for homepage's Kubernetes service discovery. Lives in the
-# `cluster` app (nested by kind) rather than apps/homepage because it is a
-# cluster-scoped object; the namespaced ServiceAccount stays in apps/homepage.
+# Cluster-scoped RBAC for homepage's Kubernetes service discovery, bound to the
+# namespaced homepage ServiceAccount.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:

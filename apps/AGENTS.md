@@ -16,8 +16,8 @@ GitOps. Each app is applied by a Flux `Kustomization` in `flux/cluster/<app>.yam
   app name) with the label `inject-ca-bundle: "true"` so trust-manager injects
   the CA bundle. Include it in the `resources` list. Two exceptions: `media` is a
   shared namespace hosting several components (`jellyfin`, `seerr`, `sonarr`,
-  `radarr`) under `apps/media/<component>/`; `cluster` holds only cluster-scoped
-  objects and has no namespace.
+  `radarr`) under `apps/media/<component>/`; `cilium` holds only generic
+  cluster-wide Cilium policies and has no namespace.
 - **Pod Security**: the cluster enforces the `restricted` PSA by default. Every
   workload must be admissible — set a pod + container securityContext
   (`runAsNonRoot: true`, `runAsUser`/`runAsGroup` non-zero, `fsGroup`,
@@ -38,27 +38,28 @@ GitOps. Each app is applied by a Flux `Kustomization` in `flux/cluster/<app>.yam
   `service.yaml`, etc. Reference example: `apps/paperless-ngx`.
 - **Labeling**: use `labels` with `pairs` for `app.kubernetes.io/part-of`.
 - **Cluster-scoped objects** (`CiliumClusterwideNetworkPolicy`, `ClusterRole`,
-  `ClusterRoleBinding`, …) live in the `cluster` app, nested by kind:
-  `apps/cluster/<kind>/<name>.yaml` (e.g.
-  `apps/cluster/ciliumclusterwidenetworkpolicy/default-deny.yaml`). Reconciled by
-  `flux/cluster/cluster.yaml`.
+  `ClusterRoleBinding`, …) live **with the app they belong to** (locality of
+  behaviour) — e.g. homepage's `ClusterRole`/`ClusterRoleBinding` sit in
+  `apps/homepage/`, and the CNPG database-pod `CiliumClusterwideNetworkPolicy`
+  sits in `apps/cloudnative-pg-operator/networkpolicies/`. Only the *generic*
+  cluster-wide Cilium policies that belong to no single app (default-deny, shared
+  DNS egress) live in the `cilium` app, nested by kind
+  (`apps/cilium/ciliumclusterwidenetworkpolicy/<name>.yaml`), reconciled by
+  `flux/cluster/cilium.yaml`.
 
 ## NetworkPolicies (`apps/<app>/networkpolicies/`)
 
 Cilium enforces policy. **Default-deny (ingress AND egress) is cluster-wide**,
-declared once in `apps/cluster/ciliumclusterwidenetworkpolicy/` and applied to
-every workload namespace (infra namespaces — `kube-system`, `cilium`,
-`flux-system`, `cert-manager`, `external-dns`, `cloudnative-pg`, `gateway` — are
-exempted). Because egress is denied by default, same-namespace traffic must be
-allowed in **both** directions. The cluster-wide policies also grant, globally:
-- **DNS** egress (to kube-dns) for all workloads — never add per-app DNS rules.
-- **Gateway ingress** to any pod labelled `gateway.tomerhanochi.com/exposed:
-  "true"` (`ingress-allow-gateway`). Exposed apps opt in with that pod label
-  instead of a per-app policy. Exception: charts that inject pod labels into an
-  immutable `Deployment` selector (forgejo) keep a per-app
-  `ingress-allow-gateway.yaml` `CiliumNetworkPolicy` instead.
-- **CNPG operator → database** ingress + database → apiserver egress for any pod
-  labelled `cnpg.io/cluster` (`cloudnative-pg`).
+declared once in `apps/cilium/ciliumclusterwidenetworkpolicy/` and applied to
+every namespace except `kube-system` and `cilium` (the only exemptions). Every
+other namespace — including infra ones (`flux-system`, `cert-manager`,
+`external-dns`, `cloudnative-pg`, `gateway`) — is default-denied and carries its
+own allow policies. Because egress is denied by default, same-namespace traffic
+must be allowed in **both** directions. The generic cluster-wide policies also
+grant **DNS** egress (to kube-dns) for all workloads — never add per-app DNS
+rules. The CNPG database-pod policy (operator → database ingress + database →
+apiserver egress for pods labelled `cnpg.io/cluster`) lives with the operator in
+`apps/cloudnative-pg-operator/networkpolicies/cloudnative-pg.yaml`.
 
 So each app's `networkpolicies/` typically contains only:
 - `ingress-allow-intra-namespace.yaml` — allow ingress from the same namespace.
@@ -70,6 +71,8 @@ So each app's `networkpolicies/` typically contains only:
   this can later be tightened to the gateway CIDR `192.168.68.64/32`.
 - `ingress-allow-<other>.yaml` — when another namespace must reach this app
   (e.g. `media` → qbittorrent).
+- `ingress-allow-gateway.yaml` — for exposed apps only: a `CiliumNetworkPolicy`
+  with `fromEntities: [ingress]` scoped to the app's container port(s).
 
 ## Exposure (Gateway API)
 
@@ -77,11 +80,12 @@ Apps are exposed through the shared Cilium `Gateway` (`apps/gateway`). Each has 
 HTTPS listener (`sectionName` == app name) with a cert-manager-issued Let's
 Encrypt certificate. Expose an app with an `HTTPRoute` (`route.yaml`) referencing
 `parentRefs: [{name: default, namespace: gateway, sectionName: <app>}]`, and add
-the pod label `gateway.tomerhanochi.com/exposed: "true"` so the cluster-wide
-gateway-ingress policy admits the traffic. external-dns then creates the
-Cloudflare DNS record from the route. Internal-only backends (sonarr, radarr,
-qbittorrent) have no listener, no `route.yaml`, and no exposed label. Only
-`jellyfin` and `seerr` in the `media` namespace are exposed.
+a per-app `ingress-allow-gateway.yaml` (`CiliumNetworkPolicy`,
+`fromEntities: [ingress]`, scoped to the app's container port) so gateway traffic
+is admitted past default-deny. external-dns then creates the Cloudflare DNS record
+from the route. Internal-only backends (sonarr, radarr, qbittorrent) have no
+listener, no `route.yaml`, and no gateway ingress policy. Only `jellyfin` and
+`seerr` in the `media` namespace are exposed.
 
 ## Storage
 
@@ -151,7 +155,7 @@ inactive. Adding a client = add a provider+application entry to
 | **headlamp** | Kubernetes web console; SSO-only login (proxies the user's OIDC token to the API server). |
 | **media** | Shared namespace: jellyfin + seerr (exposed) and sonarr/radarr PVR backends (internal). |
 | **qbittorrent** | Torrent client with ProtonVPN egress via a gluetun sidecar (kill switch on); own **privileged** namespace (gluetun needs `NET_ADMIN`). |
-| **cluster** | Cluster-scoped objects: cluster-wide default-deny + shared allow policies, and homepage's service-discovery RBAC. |
+| **cilium** | Generic cluster-wide Cilium policies: default-deny + shared DNS egress. |
 | **forgejo** | Git forge (official Helm chart, CNPG Postgres). |
 | **kavita** | Reading server. |
 | **paperless-ngx** | Document management (Postgres + redis + gotenberg + tika). |

@@ -9,7 +9,7 @@ resources:
   - cloudnative-pg-operator.yaml
   - flux-operator.yaml
   - flux.yaml
-  - cluster.yaml
+  - cilium.yaml
   - cert-manager.yaml
   - gateway.yaml
   - authentik.yaml

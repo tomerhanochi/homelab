@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Generic cluster-wide Cilium policies (default-deny + shared allows), grouped
+# into a subdirectory named after their kind. App-specific cluster-wide policies
+# live with their app (e.g. the CNPG database-pod policy in
+# apps/cloudnative-pg-operator/networkpolicies).
+resources:
+  - ciliumclusterwidenetworkpolicy
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: cilium
