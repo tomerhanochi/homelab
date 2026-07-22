@@ -4,4 +4,3 @@ kind: Kustomization
 
 resources:
   - default-deny.yaml
-  - egress-allow-dns.yaml

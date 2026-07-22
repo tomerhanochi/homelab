@@ -5,5 +5,3 @@ kind: Kustomization
 resources:
   - ingress-allow-intra-namespace.yaml
   - ingress-allow-arr.yaml
-  - egress-allow-intra-namespace.yaml
-  - egress-allow-vpn.yaml

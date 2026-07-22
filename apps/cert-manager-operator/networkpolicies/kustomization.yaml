@@ -4,6 +4,4 @@ kind: Kustomization
 
 resources:
   - ingress-allow-intra-namespace.yaml
-  - egress-allow-intra-namespace.yaml
   - ingress-allow-apiserver.yaml
-  - egress-allow-external.yaml

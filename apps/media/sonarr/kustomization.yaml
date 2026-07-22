@@ -8,8 +8,6 @@ resources:
   - data-pvc.yaml
   - deployment.yaml
   - service.yaml
-  - egress-allow-internet.yaml
-  - egress-allow-qbittorrent.yaml
 
 labels:
   - pairs:
