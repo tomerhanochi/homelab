@@ -18,5 +18,4 @@ resources:
   - homepage.yaml
   - media.yaml
   - kavita.yaml
-  - paperless-ngx.yaml
   - qbittorrent.yaml
