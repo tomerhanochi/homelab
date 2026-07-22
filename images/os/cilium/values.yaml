@@ -32,7 +32,11 @@ ipam:
   mode: cluster-pool
 
 hubble:
-  enabled: false
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
 
 bandwidthManager:
   enabled: false
