@@ -67,8 +67,21 @@ spec:
           provider: openidConnect
           autoDiscoverUrl: https://sso.tomerhanochi.com/application/o/forgejo/.well-known/openid-configuration
           existingSecret: forgejo-oauth
+          scopes: openid email profile groups
+          groupClaimName: groups
+          adminGroup: forgejo-admins
+          requiredClaimName: groups
+          requiredClaimValue: forgejo-users
 
       config:
+        service:
+          ENABLE_PASSWORD_SIGNIN_FORM: false
+          ENABLE_OPENID_SIGNIN: false
+          ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+        oauth2_client:
+          ENABLE_AUTO_REGISTRATION: true
+          USERNAME: preferred_username
+          ACCOUNT_LINKING: auto
         server:
           DOMAIN: git.tomerhanochi.com
           ROOT_URL: https://git.tomerhanochi.com

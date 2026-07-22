@@ -52,25 +52,35 @@ func configureOIDC() error {
 		return fmt.Errorf("get settings: %w", err)
 	}
 
-	if oidc, ok := settings["oidcConfig"].(map[string]any); ok {
-		if cur, _ := oidc["authority"].(string); cur == authority {
-			log.Print("Kavita OIDC authority already configured and active, nothing to do")
-			return nil
-		}
-	}
-
 	oidc, _ := settings["oidcConfig"].(map[string]any)
 	if oidc == nil {
 		oidc = map[string]any{}
 	}
-	oidc["authority"] = authority
-	oidc["clientId"] = mustEnv("OIDC_CLIENT_ID")
-	oidc["secret"] = mustEnv("OIDC_CLIENT_SECRET")
-	oidc["provisionAccounts"] = true
-	oidc["rolesClaim"] = "groups"
-	// Keep local password login so the first admin cannot be locked out.
-	oidc["disablePasswordAuthentication"] = false
-	oidc["autoLogin"] = false
+
+	desired := map[string]any{
+		"authority":                     authority,
+		"clientId":                      mustEnv("OIDC_CLIENT_ID"),
+		"secret":                        mustEnv("OIDC_CLIENT_SECRET"),
+		"provisionAccounts":             true,
+		"syncUserSettings":              true,
+		"rolesClaim":                    "groups",
+		"rolesPrefix":                   "kavita-",
+		"customScopes":                  []string{"groups"},
+		"disablePasswordAuthentication": true,
+		"autoLogin":                     true,
+	}
+
+	changed := false
+	for k, v := range desired {
+		if !jsonEqual(oidc[k], v) {
+			changed = true
+		}
+		oidc[k] = v
+	}
+	if !changed {
+		log.Print("Kavita OIDC settings already active, nothing to do")
+		return nil
+	}
 	settings["oidcConfig"] = oidc
 
 	if err := kavitaPostSettings(base, token, settings); err != nil {
@@ -90,6 +100,18 @@ func configureOIDC() error {
 	}
 	log.Print("Kavita restart triggered so OIDC connection settings take effect")
 	return nil
+}
+
+// jsonEqual reports whether a and b marshal to the same JSON, so managed fields
+// can be compared regardless of type (e.g. a []string desired value vs a []any
+// decoded from the server's response). Slices are not comparable with ==.
+func jsonEqual(a, b any) bool {
+	ab, err1 := json.Marshal(a)
+	bb, err2 := json.Marshal(b)
+	if err1 != nil || err2 != nil {
+		return false
+	}
+	return bytes.Equal(ab, bb)
 }
 
 // kavitaToken registers the first admin (idempotent: a 400 means an admin
