@@ -1,3 +1,4 @@
+---
 version: 1
 metadata:
   name: homelab-passkey-enrollment
@@ -64,9 +65,16 @@ entries:
         - !KeyOf prompt-name
         - !KeyOf prompt-email
 
-  # Create the user, then let them register a passkey, then log them in. Users are
-  # created inactive so an admin approves them before they can sign in anywhere
-  # (open passkey registration on a public SSO otherwise lets anyone self-provision).
+  # Create the user, then let them register a passkey, then log them in. The user
+  # is created INACTIVE so a half-finished enrollment (user bails before the
+  # passkey step) never leaves a usable account behind — the activation policy
+  # below flips is_active only once a passkey has actually been registered.
+  #
+  # Note this is NOT an admin-approval gate: a completed enrollment self-activates.
+  # The real authorization boundary is group membership — a freshly enrolled user
+  # is in no groups, so they can reach the authentik dashboard but none of the
+  # OIDC apps (forgejo/kavita/headlamp/etc. all gate on groups) until an admin
+  # adds them. That is what keeps open passkey registration on a public SSO safe.
   - model: authentik_stages_user_write.userwritestage
     state: present
     id: user-write
@@ -81,6 +89,24 @@ entries:
     id: user-login
     identifiers:
       name: homelab-enroll-login
+
+  # Activation policy: runs immediately before the login stage (the stage binding
+  # sets re_evaluate_policies so this fires at execution time, once pending_user
+  # exists and the passkey is registered — not at plan build time). Flips the
+  # freshly created user active so userloginstage will accept them, then returns
+  # True so the login stage is included unconditionally.
+  - model: authentik_policies_expression.expressionpolicy
+    state: present
+    id: policy-activate
+    identifiers:
+      name: homelab-enroll-activate
+    attrs:
+      expression: |
+        pending_user = request.context.get("pending_user")
+        if pending_user and pending_user.pk:
+            pending_user.is_active = True
+            pending_user.save()
+        return True
 
   - model: authentik_flows.flow
     state: present
@@ -113,10 +139,25 @@ entries:
       order: 30
   - model: authentik_flows.flowstagebinding
     state: present
+    id: binding-user-login
     identifiers:
       target: !KeyOf flow
       stage: !KeyOf user-login
       order: 40
+    attrs:
+      # Defer policy evaluation from plan-build to stage-execution: pending_user
+      # does not exist when the plan is built, only once user-write has run.
+      evaluate_on_plan: false
+      re_evaluate_policies: true
+
+  # Bind the activation policy to the login stage binding so it fires right before
+  # the login stage executes.
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      policy: !KeyOf policy-activate
+      target: !KeyOf binding-user-login
+      order: 0
 
   # Wire the passkey flow as the default brand's self-service enrollment flow, so
   # the login page shows a "Sign up" link that runs it. akadmin still logs in via
