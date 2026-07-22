@@ -36,13 +36,16 @@ subjects:
 ---
 # Creates the first Kavita admin (if fresh) and applies the authentik OIDC config
 # via /api/Settings, then restarts Kavita once so the connection settings take
-# effect. Idempotent — safe to re-run; to re-run after an image bump, delete the
-# completed Job so Flux recreates it.
+# effect. Idempotent — safe to re-run. A Job's spec.template is immutable, so the
+# force annotation lets Flux delete+recreate this Job (only) when the image or
+# spec changes, instead of failing the apply with "field is immutable".
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: kavita-oidc-setup
   namespace: kavita
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
   backoffLimit: 10
   template:

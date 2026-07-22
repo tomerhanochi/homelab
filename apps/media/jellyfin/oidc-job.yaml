@@ -1,13 +1,17 @@
 ---
 # Completes Jellyfin's first-run wizard (creating the local admin) and registers
 # the authentik OIDC provider through the jellyfin-plugin-sso API, so SSO is set
-# up with no manual dashboard steps. Idempotent — safe to re-run; to re-run after
-# an image bump, delete the completed Job so Flux recreates it.
+# up with no manual dashboard steps. Idempotent — safe to re-run. A Job's
+# spec.template is immutable, so the force annotation lets Flux delete+recreate
+# this Job (only) when the image or spec changes, instead of failing the apply
+# with "field is immutable".
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: jellyfin-oidc-setup
   namespace: media
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
   backoffLimit: 10
   template:
