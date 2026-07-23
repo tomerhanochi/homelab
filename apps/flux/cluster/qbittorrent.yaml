@@ -11,8 +11,7 @@ spec:
   path: ./apps/qbittorrent
   prune: true
   wait: true
-  # Recreate resources on immutable-field changes — the bootstrap Job's pod
-  # template changes name when its config ConfigMap's content hash changes.
+  # Recreate resources on immutable-field changes (e.g. Service/selectors).
   force: true
   sourceRef:
     kind: GitRepository

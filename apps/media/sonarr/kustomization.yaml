@@ -9,7 +9,6 @@ resources:
   - apikey.sops.yaml
   - deployment.yaml
   - service.yaml
-  - bootstrap
 
 labels:
   - pairs:

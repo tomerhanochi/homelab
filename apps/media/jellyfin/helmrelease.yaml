@@ -49,9 +49,8 @@ spec:
         enabled: true
         type: pvc
         existingClaim: jellyfin-media
-        # Read-write so the library metadata savers (saveWithMedia in the
-        # bootstrap config) can write NFO, artwork, subtitles, lyrics and
-        # trickplay images alongside the media.
+        # Read-write so the library metadata savers can write NFO, artwork,
+        # subtitles, lyrics and trickplay images alongside the media.
         accessMode: ReadWriteOnce
       cache:
         enabled: true
@@ -91,39 +90,6 @@ spec:
     replicaCount: 1
     deploymentStrategy:
       type: Recreate
-
-    # Extra pod volume: the jellyfin-bootstrap-plugins ConfigMap (the plugin
-    # list), read by the install-sso-plugin initContainer below.
-    volumes:
-      - name: bootstrap-plugins
-        configMap:
-          name: jellyfin-bootstrap-plugins
-
-    # Install the configured plugins into the config volume before Jellyfin
-    # starts, so they're loaded on first boot (the jellyfin-bootstrap Job then
-    # configures them via the plugin API). Idempotent: skips any plugin already
-    # present, so Jellyfin's own updates aren't clobbered.
-    extraInitContainers:
-      - name: install-sso-plugin
-        image: ghcr.io/tomerhanochi/homelab/internal/bootstrap:0.1.0
-        args: ["jellyfin", "install-plugin", "--config", "/etc/bootstrap/plugins.json"]
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          runAsGroup: 1000
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
-          seccompProfile:
-            type: RuntimeDefault
-        volumeMounts:
-          - name: config
-            mountPath: /config
-          - name: bootstrap-plugins
-            mountPath: /etc/bootstrap
-            readOnly: true
 
     metrics:
       enabled: false

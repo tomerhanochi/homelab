@@ -15,31 +15,6 @@ combines:
 - **authentik SSO**: OIDC provider for single sign-on across apps and the cluster,
   with passkey-only self-registration and GitOps-managed clients (blueprints)
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Bare Metal Server                         │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │              Homelab bootc Image (K3s)                 │  │
-│  │  ┌─────────────────────────────────────────────────┐  │  │
-│  │  │        FluxCD (GitOps Engine)                    │  │  │
-│  │  │  reconciles apps/ via per-app Kustomizations     │  │  │
-│  │  │  ┌───────────────────────────────────────────┐  │  │  │
-│  │  │  │  Infra: cert-manager, cloudnative-pg,      │  │  │  │
-│  │  │  │  gateway, external-dns                     │  │  │  │
-│  │  │  │  Apps:  authentik, headlamp, jellyfin,     │  │  │  │
-│  │  │  │  jellyseerr, sonarr, radarr, qbittorrent,  │  │  │  │
-│  │  │  │  forgejo, kavita, paperless-ngx, homepage  │  │  │  │
-│  │  │  └───────────────────────────────────────────┘  │  │  │
-│  │  └─────────────────────────────────────────────────┘  │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                              │
-│  Git Repository ──► FluxCD GitRepository + Kustomizations    │
-│  (kustomize + sops)   flux/cluster/*.yaml (one per app)      │
-└─────────────────────────────────────────────────────────────┘
-```
-
 ## Components
 
 ### bootc Image (`images/os/`)
@@ -51,28 +26,6 @@ The foundation is a [bootc](https://github.com/containers/bootc) image providing
 - **Security hardening**: SELinux, tuned sysctls, Pod Security Admission, audit
   logging, secrets encryption at rest, and OIDC (authentik) for the API server
 - **System config**: passwordless `core` user via polkit, key-based SSH, systemd userdb
-
-### Bootstrap image (`images/bootstrap`)
-
-A single static Go binary (published to GHCR, run in a distroless image) with
-nested `<app> <action>` subcommands that codify the app config which can only be
-set through an app's own API, so state stays GitOps with no manual
-wizard/dashboard steps. It reads merged JSON from a config directory (a projected
-ConfigMap + SOPS Secret) and runs as a per-app Deployment that applies once on
-startup, then watches the config and re-applies on change (idempotent):
-
-- **jellyfin** — installs the `jellyfin-plugin-sso` binary (initContainer), then
-  finishes the first-run wizard, registers the authentik OIDC provider, and
-  creates libraries.
-- **kavita** — creates the first admin, applies the OIDC config via `/api/Settings`,
-  creates libraries, and restarts Kavita once when the OIDC settings change.
-- **qbittorrent** — applies WebUI preferences (stop-on-seed-limit) and categories.
-- **sonarr / radarr** — create root folders and the qBittorrent download client
-  (with "remove completed downloads" so imports MOVE instead of copy — the exFAT
-  no-hardlink workaround).
-
-Both are idempotent. They are extensible: add subcommands as more app config
-needs to be codified.
 
 ### GitOps layout (`flux/`)
 
@@ -98,8 +51,6 @@ needs to be codified.
 | **qbittorrent** | Torrent client, egress via ProtonVPN (gluetun sidecar) |
 | **forgejo** | Git forge |
 | **kavita** | Reading server (books/manga/comics) |
-| **paperless-ngx** | Document management |
-| **homepage** | Dashboard |
 
 See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
 
@@ -120,8 +71,7 @@ See [apps/AGENTS.md](apps/AGENTS.md) for conventions and structure.
 ```
 homelab/
 ├── images/           # container images built from this repo
-│   ├── os/           # bootc image source (Containerfile, setup.sh, K3s config)
-│   └── bootstrap/    # Go tool: per-app API config (jellyfin/kavita/qbittorrent/sonarr/radarr)
+│   └── os/           # bootc image source (Containerfile, setup.sh, K3s config)
 ├── flux/             # FluxCD: controllers + GitRepository + per-app Kustomizations
 ├── apps/             # Kubernetes applications (GitOps)
 ├── .sops.yaml        # SOPS/age encryption config

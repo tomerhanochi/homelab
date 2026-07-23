@@ -94,34 +94,6 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: kavita
-    - name: paperless
-      hostname: paperless.tomerhanochi.com
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: paperless-tls
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              kubernetes.io/metadata.name: paperless-ngx
-    - name: homepage
-      hostname: home.tomerhanochi.com
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: homepage-tls
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              kubernetes.io/metadata.name: homepage
     - name: headlamp
       hostname: headlamp.tomerhanochi.com
       protocol: HTTPS
