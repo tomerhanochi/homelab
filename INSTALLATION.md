@@ -81,14 +81,11 @@ certificates for every hostname.
 
 ### 4. First-run SSO setup (authentik)
 
-SSO is fully GitOps and requires **no manual configuration**. Every OIDC client
-and the passwordless (passkey) enrollment flow are created declaratively by
-authentik **blueprints** (`apps/authentik/blueprints/`), applied by the authentik
-worker on startup. The two apps that can only be configured through their own API
-(Jellyfin, Kavita) are wired automatically by their bootstrap Jobs
-(`images/jellyfin-bootstrap`, `images/kavita-bootstrap`) — you don't touch their
-UIs. Seerr signs in "with Jellyfin", so it inherits SSO through Jellyfin. You only
-claim the authentik admin account:
+The OIDC **clients** are fully GitOps: every provider/application and the
+passwordless (passkey) enrollment flow are declared as authentik **blueprints**
+(`apps/authentik/blueprints/`), applied by the authentik worker on startup.
+Wiring each application to its client, however, is done by hand in that app's own
+UI (step 5). First, claim the authentik admin account:
 
 1. Read the initial `akadmin` password and sign in:
    ```bash
@@ -101,12 +98,89 @@ claim the authentik admin account:
    created **inactive**; activate them under **Directory → Users** and add them to
    groups to drive per-app and cluster (RBAC) authorization.
 
-> The Jellyfin/Kavita bootstrap daemons create a local admin account in each app
-> (kept alongside SSO so you can't be locked out). Read those credentials with
-> `sops -d apps/media/jellyfin/bootstrap/secret.sops.yaml` and
-> `sops -d apps/kavita/bootstrap/secret.sops.yaml` if you ever need them.
+### 5. Configure applications manually
 
-### 5. Cluster access via SSO (kubectl + Headlamp)
+The apps that can only be configured through their own API/UI are **not**
+bootstrapped — set each one up by hand once. Every OIDC client secret is
+committed (SOPS-encrypted); read one with, e.g.:
+
+```bash
+sops -d apps/authentik/oidc-secret.sops.yaml | awk '/JELLYFIN_CLIENT_SECRET/{print $2}'
+```
+
+Sonarr, Radarr, and qBittorrent have no public hostname — reach them with a
+port-forward.
+
+#### Jellyfin
+
+At `https://jellyfin.tomerhanochi.com`, complete the first-run wizard (create the
+local admin). Install the **SSO Authentication** plugin (`jellyfin-plugin-sso`)
+from its plugin repo, then add an OIDC provider named `authentik`:
+
+- Issuer / OID endpoint: `https://sso.tomerhanochi.com/application/o/jellyfin/`
+- Client ID: `jellyfin`
+- Client secret: the `JELLYFIN_CLIENT_SECRET` (read as above)
+
+Add libraries: **Movies** → `/media/movies`, **TV Shows** → `/media/tv`. Seerr
+signs in "with Jellyfin", so it inherits SSO once Jellyfin is done.
+
+#### Kavita
+
+At `https://kavita.tomerhanochi.com`, create the first admin, then under
+**Settings → OIDC** set:
+
+- Authority: `https://sso.tomerhanochi.com/application/o/kavita/`
+- Client ID: `kavita`
+- Client secret: the `KAVITA_CLIENT_SECRET`
+
+Add libraries: **Comics** → `/library/comics`, **Books** → `/library/books`.
+
+#### qBittorrent
+
+qBittorrent stays internal (no hostname — its egress is tunnelled through the
+gluetun VPN sidecar). Configure it first, over a port-forward, and set the WebUI
+credentials that the Sonarr/Radarr download clients then authenticate with:
+
+1. Forward the WebUI straight from the pod (you're talking to qBittorrent as
+   `localhost`, which it always trusts):
+   ```bash
+   kubectl -n qbittorrent port-forward svc/qbittorrent 8080:8080
+   ```
+2. The official image sets a **temporary** admin password on first boot; grab it
+   from the logs, then open `http://localhost:8080` and sign in as `admin`:
+   ```bash
+   kubectl -n qbittorrent logs deploy/qbittorrent -c qbittorrent | grep -i "temporary password"
+   ```
+3. In **Tools → Options → Web UI → Authentication**, set the **username** (keep
+   `admin`) and a permanent **password**. These are the credentials you give the
+   Sonarr/Radarr download clients below — without them the arr apps can't reach
+   qBittorrent, since it authenticates every client.
+4. Set the default save path to `/data/torrents` (incomplete →
+   `/data/torrents/incomplete`), and add categories `tv-sonarr` →
+   `/data/torrents/tv` and `radarr` → `/data/torrents/movies`. Set a share-ratio
+   limit if you want.
+
+Re-run the port-forward whenever you need the WebUI later.
+
+#### Sonarr and Radarr
+
+These stay internal (no hostname). Port-forward to reach the WebUI, e.g.:
+
+```bash
+kubectl -n media port-forward svc/sonarr 8989:8989   # radarr: svc/radarr 7878:7878
+```
+
+In each, add a root folder (`/data/media/tv` for Sonarr, `/data/media/movies`
+for Radarr) and a **qBittorrent** download client:
+
+- Host: `qbittorrent.qbittorrent.svc.cluster.local`, port `8080`
+- Username `admin` and the WebUI password you set for qBittorrent (see the
+  qBittorrent section above)
+- Category: `tv-sonarr` (Sonarr) / `radarr` (Radarr)
+- Enable **Remove Completed Downloads** so imports MOVE instead of copy (the
+  exFAT no-hardlink workaround)
+
+### 6. Cluster access via SSO (kubectl + Headlamp)
 
 The API server trusts authentik's `kubernetes` OIDC application as its issuer
 (`https://sso.tomerhanochi.com/application/o/kubernetes/`).
@@ -127,7 +201,7 @@ Authorization is via RBAC: bind your authentik identity/group (subjects are
 prefixed `oidc:`) to a Role/ClusterRole — e.g. a `ClusterRoleBinding` for the
 group `oidc:admins`. Headlamp and kubectl share this RBAC.
 
-### 6. Cleanup
+### 7. Cleanup
 
 ```bash
 rm "${KUBECONFIG}"; unset KUBECONFIG

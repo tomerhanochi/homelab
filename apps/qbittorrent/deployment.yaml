@@ -18,44 +18,6 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
-      initContainers:
-        # Seed qBittorrent.conf before first boot so the WebUI authorizes the pod
-        # network without a password — the qbittorrent-bootstrap Job (and the
-        # sonarr/radarr download clients) then reach it credential-free. The
-        # official image's entrypoint only writes this file if absent, so seeding
-        # it here is respected and never clobbers a later human-set config. Path
-        # is /config/qBittorrent/config/qBittorrent.conf (the image's profile
-        # layout). Runs as root (privileged namespace); the entrypoint chowns
-        # /config to the qbt user afterward.
-        - name: seed-config
-          image: busybox:1.37
-          command:
-            - sh
-            - -c
-            - |
-              CONF=/config/qBittorrent/config/qBittorrent.conf
-              if [ ! -f "$CONF" ]; then
-                mkdir -p "$(dirname "$CONF")"
-                printf '%s\n' \
-                  '[BitTorrent]' \
-                  'Session\DefaultSavePath=/data/torrents' \
-                  'Session\TempPath=/data/torrents/incomplete' \
-                  '' \
-                  '[LegalNotice]' \
-                  'Accepted=true' \
-                  '' \
-                  '[Preferences]' \
-                  'WebUI\Port=8080' \
-                  'WebUI\AuthSubnetWhitelistEnabled=true' \
-                  'WebUI\AuthSubnetWhitelist=10.42.0.0/16' \
-                  > "$CONF"
-              fi
-          volumeMounts:
-            - name: config
-              mountPath: /config
-          securityContext:
-            runAsUser: 0
-            runAsGroup: 0
       containers:
         # VPN sidecar. All qBittorrent egress goes through this container's
         # network namespace; the gluetun firewall is the kill switch (traffic is

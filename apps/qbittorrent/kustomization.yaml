@@ -9,7 +9,6 @@ resources:
   - vpn-secret.sops.yaml
   - deployment.yaml
   - service.yaml
-  - bootstrap
   - networkpolicies
 
 labels:

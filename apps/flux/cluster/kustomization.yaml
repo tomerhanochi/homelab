@@ -15,7 +15,6 @@ resources:
   - authentik.yaml
   - forgejo.yaml
   - headlamp.yaml
-  - homepage.yaml
   - media.yaml
   - kavita.yaml
   - qbittorrent.yaml

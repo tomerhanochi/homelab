@@ -93,42 +93,6 @@ entries:
       meta_launch_url: https://git.tomerhanochi.com
       policy_engine_mode: any
 
-  # -------------------------------------------------------------- paperless ---
-  - model: authentik_providers_oauth2.oauth2provider
-    state: present
-    id: paperless-provider
-    identifiers:
-      name: paperless
-    attrs:
-      name: paperless
-      client_type: confidential
-      client_id: paperless
-      client_secret: !Env PAPERLESS_CLIENT_SECRET
-      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
-      grant_types:
-        - authorization_code
-        - refresh_token
-      redirect_uris:
-        - matching_mode: strict
-          url: https://paperless.tomerhanochi.com/accounts/oidc/authentik/login/callback/
-      property_mappings:
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !KeyOf scope-groups
-  - model: authentik_core.application
-    state: present
-    identifiers:
-      slug: paperless
-    attrs:
-      name: Paperless-ngx
-      slug: paperless
-      provider: !KeyOf paperless-provider
-      meta_launch_url: https://paperless.tomerhanochi.com
-      policy_engine_mode: any
-
   # --------------------------------------------------------------- headlamp ---
   - model: authentik_providers_oauth2.oauth2provider
     state: present

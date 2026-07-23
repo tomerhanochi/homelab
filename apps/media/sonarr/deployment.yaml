@@ -38,9 +38,14 @@ spec:
               value: "002"
             - name: TZ
               value: Europe/Amsterdam
-            # Fix the API key (else Sonarr generates a random one) so the
-            # sonarr-bootstrap Job can authenticate. Same value as the Job's
-            # encrypted bootstrap config — see apikey.sops.yaml.
+            # Let s6-overlay boot rootless: it wants to own/chown /run but can't
+            # under restricted PSA (no CAP_CHOWN). This tells it to accept a
+            # world-writable /run (the emptyDir below) instead of fixing it.
+            - name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
+              value: "1"
+            # Pin the API key (else Sonarr generates a random one on first boot)
+            # so it's stable and known for configuring integrations (e.g. the
+            # Prowlarr/qBittorrent wiring) — see apikey.sops.yaml.
             - name: SONARR__AUTH__APIKEY
               valueFrom:
                 secretKeyRef:
@@ -53,6 +58,9 @@ spec:
             # /data/torrents into /data/media (exfat can't hardlink).
             - name: data
               mountPath: /data
+            # Writable /run for s6-overlay (see the S6_ env above).
+            - name: run
+              mountPath: /run
           livenessProbe:
             httpGet:
               path: /ping
@@ -85,3 +93,5 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: sonarr-data
+        - name: run
+          emptyDir: {}

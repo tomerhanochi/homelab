@@ -11,8 +11,7 @@ spec:
   path: ./apps/media
   prune: true
   wait: true
-  # Recreate resources on immutable-field changes — the bootstrap Jobs' pod
-  # templates change name when their config Secret's content hash changes.
+  # Recreate resources on immutable-field changes (e.g. Service/selectors).
   force: true
   sourceRef:
     kind: GitRepository
