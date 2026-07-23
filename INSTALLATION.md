@@ -156,8 +156,8 @@ credentials that the Sonarr/Radarr download clients then authenticate with:
    Sonarr/Radarr download clients below — without them the arr apps can't reach
    qBittorrent, since it authenticates every client.
 4. Set the default save path to `/data/torrents` (incomplete →
-   `/data/torrents/incomplete`), and add categories `tv-sonarr` →
-   `/data/torrents/tv` and `radarr` → `/data/torrents/movies`. Set a share-ratio
+   `/data/torrents/incomplete`), and add categories `shows` →
+   `/data/torrents/shows` and `movies` → `/data/torrents/movies`. Set a share-ratio
    limit if you want.
 
 Re-run the port-forward whenever you need the WebUI later.
@@ -170,13 +170,13 @@ These stay internal (no hostname). Port-forward to reach the WebUI, e.g.:
 kubectl -n media port-forward svc/sonarr 8989:8989   # radarr: svc/radarr 7878:7878
 ```
 
-In each, add a root folder (`/data/media/tv` for Sonarr, `/data/media/movies`
+In each, add a root folder (`/data/media/shows` for Sonarr, `/data/media/movies`
 for Radarr) and a **qBittorrent** download client:
 
 - Host: `qbittorrent.qbittorrent.svc.cluster.local`, port `8080`
 - Username `admin` and the WebUI password you set for qBittorrent (see the
   qBittorrent section above)
-- Category: `tv-sonarr` (Sonarr) / `radarr` (Radarr)
+- Category: `shows` (Sonarr) / `movies` (Radarr)
 - Enable **Remove Completed Downloads** so imports MOVE instead of copy (the
   exFAT no-hardlink workaround)
 

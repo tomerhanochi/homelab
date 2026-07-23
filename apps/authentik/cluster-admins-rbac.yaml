@@ -1,0 +1,18 @@
+---
+# Grants cluster-admin to members of the authentik "kubernetes-cluster-admins"
+# group. The k3s apiserver runs with oidc-groups-prefix=oidc: (see
+# images/os/usr/lib/rancher/k3s/config.yaml), so the group name in the OIDC
+# groups claim is prefixed to "oidc:kubernetes-cluster-admins" here. The group
+# itself is declared as an authentik blueprint in blueprints/oidc-clients.yaml.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: oidc-kubernetes-cluster-admins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: Group
+    name: oidc:kubernetes-cluster-admins
+    apiGroup: rbac.authorization.k8s.io

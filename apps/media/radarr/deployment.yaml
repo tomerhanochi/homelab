@@ -16,9 +16,10 @@ spec:
       labels:
         app.kubernetes.io/name: radarr
     spec:
-      # hotio (s6-overlay) image runs rootless here: with no PUID/PGID the
-      # process stays UID/GID 1000, relying on fsGroup 1000 + host dirs owned
-      # 1000:1000 (restricted PSA forbids the root-then-drop startup).
+      # LinuxServer (s6-overlay) image run non-root: with runAsUser set, PUID/PGID
+      # are ignored and the app runs as UID/GID 1000 directly, relying on fsGroup
+      # 1000 + host dirs owned 1000:1000 (restricted PSA forbids the
+      # root-then-drop startup). See https://docs.linuxserver.io/misc/non-root/.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -29,7 +30,7 @@ spec:
       containers:
         # Movie PVR backend for seerr.
         - name: radarr
-          image: ghcr.io/hotio/radarr:release@sha256:4b334f33ae74337668b7c8a4ce1ff6b3e1a8b1e298812c6113ee4ad7e19fbaee  # yamllint disable-line rule:line-length
+          image: lscr.io/linuxserver/radarr:latest@sha256:e35056574cdc695a9ee745aa1ecda9eab3842450bf4b7b8471b023790fa3861d  # yamllint disable-line rule:line-length
           ports:
             - name: http
               containerPort: 7878
@@ -38,11 +39,6 @@ spec:
               value: "002"
             - name: TZ
               value: Europe/Amsterdam
-            # Let s6-overlay boot rootless: it wants to own/chown /run but can't
-            # under restricted PSA (no CAP_CHOWN). This tells it to accept a
-            # world-writable /run (the emptyDir below) instead of fixing it.
-            - name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
-              value: "1"
             # Pin the API key (else Radarr generates a random one on first boot)
             # so it's stable and known for configuring integrations (e.g. the
             # Prowlarr/qBittorrent wiring) — see apikey.sops.yaml.
@@ -58,7 +54,10 @@ spec:
             # torrents/ into media/ (exfat can't hardlink; see apps/AGENTS.md).
             - name: data
               mountPath: /data
-            # Writable /run for s6-overlay (see the S6_ env above).
+            # Writable /run for s6-overlay. fsGroup 1000 makes the emptyDir
+            # group-owned 1000 and group-writable, so s6 writes as our non-root
+            # user — no world-writable /run needed (docs.linuxserver.io non-root
+            # requires /run to match the user's UID/GID under no-new-privileges).
             - name: run
               mountPath: /run
           livenessProbe:
