@@ -20,7 +20,7 @@ spec:
         fsGroup: 1000
       initContainers:
         # Seed qBittorrent.conf before first boot so the WebUI authorizes the pod
-        # network without a password — the qbittorrent-bootstrap daemon (and the
+        # network without a password — the qbittorrent-bootstrap Job (and the
         # sonarr/radarr download clients) then reach it credential-free. The
         # official image's entrypoint only writes this file if absent, so seeding
         # it here is respected and never clobbers a later human-set config. Path

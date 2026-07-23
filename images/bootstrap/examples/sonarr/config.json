@@ -1,0 +1,13 @@
+{
+  "url": "http://sonarr:8989",
+  "apiKey": "REPLACE_WITH_SONARR_API_KEY",
+  "rootFolders": ["/data/media/tv"],
+  "downloadClient": {
+    "name": "qBittorrent",
+    "host": "qbittorrent",
+    "port": 8080,
+    "category": "tv-sonarr",
+    "useSsl": false,
+    "removeCompletedDownloads": true
+  }
+}

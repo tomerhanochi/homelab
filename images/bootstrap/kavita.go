@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/tomerhanochi/homelab/bootstrap/kavitaapi"
 )
 
 // kavitaConfig is the merged JSON for `bootstrap kavita configure`.
@@ -57,23 +59,36 @@ func reconcileKavita(ctx context.Context, dir string, getenv func(string) string
 	if cfg.Deployment.Name == "" {
 		cfg.Deployment.Name = "kavita"
 	}
-	base := cfg.URL
 
-	if err := waitReady(ctx, base+"/api/health", 5*time.Minute); err != nil {
+	if err := waitReady(ctx, cfg.URL+"/api/health", 5*time.Minute); err != nil {
 		return err
 	}
 
-	token, err := kavitaToken(ctx, base, cfg.Admin.Username, cfg.Admin.Password, cfg.Admin.Email)
+	// The register/login endpoints are anonymous; the rest need the admin JWT.
+	anon, err := kavitaapi.NewClientWithResponses(cfg.URL, kavitaapi.WithHTTPClient(httpClient))
+	if err != nil {
+		return err
+	}
+	token, err := kavitaToken(ctx, anon, cfg)
 	if err != nil {
 		return fmt.Errorf("obtain admin token: %w", err)
 	}
+	client, err := kavitaapi.NewClientWithResponses(cfg.URL,
+		kavitaapi.WithHTTPClient(httpClient),
+		kavitaapi.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("Authorization", "Bearer "+token)
+			return nil
+		}),
+	)
+	if err != nil {
+		return err
+	}
 
-	changed, err := kavitaApplyOIDC(ctx, base, token, cfg)
+	changed, err := kavitaApplyOIDC(ctx, client, cfg)
 	if err != nil {
 		return fmt.Errorf("apply oidc: %w", err)
 	}
-
-	if err := kavitaApplyLibraries(ctx, base, token, cfg); err != nil {
+	if err := kavitaApplyLibraries(ctx, client, cfg); err != nil {
 		return fmt.Errorf("apply libraries: %w", err)
 	}
 
@@ -90,45 +105,75 @@ func reconcileKavita(ctx context.Context, dir string, getenv func(string) string
 	return nil
 }
 
+// kavitaToken registers the first admin (idempotent: a non-2xx means an admin
+// already exists) and otherwise logs in, returning a JWT.
+func kavitaToken(ctx context.Context, c *kavitaapi.ClientWithResponses, cfg kavitaConfig) (string, error) {
+	reg, err := c.PostApiAccountRegisterWithResponse(ctx, kavitaapi.RegisterDto{
+		Username: cfg.Admin.Username,
+		Password: cfg.Admin.Password,
+		Email:    &cfg.Admin.Email,
+	})
+	if err != nil {
+		return "", err
+	}
+	if ok(reg.StatusCode()) && reg.JSON200 != nil && reg.JSON200.Token != nil {
+		log.Print("registered Kavita first admin")
+		return *reg.JSON200.Token, nil
+	}
+	log.Printf("register returned status %d (admin likely exists), logging in", reg.StatusCode())
+
+	login, err := c.PostApiAccountLoginWithResponse(ctx, kavitaapi.LoginDto{
+		Username: &cfg.Admin.Username,
+		Password: &cfg.Admin.Password,
+	})
+	if err != nil {
+		return "", err
+	}
+	if !ok(login.StatusCode()) || login.JSON200 == nil || login.JSON200.Token == nil {
+		return "", fmt.Errorf("login: status %d: %s", login.StatusCode(), login.Body)
+	}
+	return *login.JSON200.Token, nil
+}
+
 // kavitaApplyOIDC writes the OIDC config through /api/Settings, returning whether
-// anything changed (so the caller can decide to restart).
-func kavitaApplyOIDC(ctx context.Context, base, token string, cfg kavitaConfig) (bool, error) {
-	settings, err := kavitaGetSettings(ctx, base, token)
+// anything changed (so the caller can decide to restart). The whole
+// ServerSettingDto is round-tripped so unrelated settings are preserved.
+func kavitaApplyOIDC(ctx context.Context, c *kavitaapi.ClientWithResponses, cfg kavitaConfig) (bool, error) {
+	resp, err := c.GetApiSettingsWithResponse(ctx)
 	if err != nil {
 		return false, fmt.Errorf("get settings: %w", err)
 	}
-	oidc, _ := settings["oidcConfig"].(map[string]any)
-	if oidc == nil {
-		oidc = map[string]any{}
+	if resp.JSON200 == nil {
+		return false, fmt.Errorf("get settings: status %d: %s", resp.StatusCode(), resp.Body)
 	}
+	settings := resp.JSON200
+	if settings.OidcConfig == nil {
+		settings.OidcConfig = &kavitaapi.OidcConfigDto{}
+	}
+	oidc := settings.OidcConfig
+	before := mustJSON(oidc)
 
-	desired := map[string]any{
-		"authority":                     cfg.OIDC.Authority,
-		"clientId":                      cfg.OIDC.ClientID,
-		"secret":                        cfg.OIDC.ClientSecret,
-		"provisionAccounts":             true,
-		"syncUserSettings":              true,
-		"rolesClaim":                    cfg.OIDC.RolesClaim,
-		"rolesPrefix":                   cfg.OIDC.RolesPrefix,
-		"customScopes":                  []string{"groups"},
-		"disablePasswordAuthentication": true,
-		"autoLogin":                     true,
-	}
+	oidc.Authority = &cfg.OIDC.Authority
+	oidc.ClientId = &cfg.OIDC.ClientID
+	oidc.Secret = &cfg.OIDC.ClientSecret
+	oidc.ProvisionAccounts = ptr(true)
+	oidc.SyncUserSettings = ptr(true)
+	oidc.RolesClaim = &cfg.OIDC.RolesClaim
+	oidc.RolesPrefix = &cfg.OIDC.RolesPrefix
+	oidc.CustomScopes = &[]string{"groups"}
+	oidc.DisablePasswordAuthentication = ptr(true)
+	oidc.AutoLogin = ptr(true)
 
-	changed := false
-	for k, v := range desired {
-		if !jsonEqual(oidc[k], v) {
-			changed = true
-		}
-		oidc[k] = v
-	}
-	if !changed {
+	if mustJSON(oidc) == before {
 		log.Print("Kavita OIDC settings already active")
 		return false, nil
 	}
-	settings["oidcConfig"] = oidc
-	if err := kavitaPostSettings(ctx, base, token, settings); err != nil {
+	post, err := c.PostApiSettingsWithResponse(ctx, *settings)
+	if err != nil {
 		return false, fmt.Errorf("post settings: %w", err)
+	}
+	if !ok(post.StatusCode()) {
+		return false, fmt.Errorf("post settings: status %d: %s", post.StatusCode(), post.Body)
 	}
 	log.Print("Kavita OIDC settings applied")
 	return true, nil
@@ -137,126 +182,45 @@ func kavitaApplyOIDC(ctx context.Context, base, token string, cfg kavitaConfig) 
 // kavitaApplyLibraries creates any configured library whose name is not already
 // present. Kavita has no update-by-name endpoint we rely on, so existing
 // libraries are left untouched (idempotent create-if-missing).
-func kavitaApplyLibraries(ctx context.Context, base, token string, cfg kavitaConfig) error {
+func kavitaApplyLibraries(ctx context.Context, c *kavitaapi.ClientWithResponses, cfg kavitaConfig) error {
 	if len(cfg.Libraries) == 0 {
 		return nil
 	}
-	existing, err := kavitaLibraries(ctx, base, token)
+	resp, err := c.GetApiLibraryLibrariesWithResponse(ctx)
 	if err != nil {
 		return err
 	}
-	hdr := map[string]string{"Authorization": "Bearer " + token}
+	if resp.JSON200 == nil {
+		return fmt.Errorf("list libraries: status %d: %s", resp.StatusCode(), resp.Body)
+	}
+	existing := make(map[string]bool, len(*resp.JSON200))
+	for _, l := range *resp.JSON200 {
+		if l.Name != nil {
+			existing[*l.Name] = true
+		}
+	}
+
 	for _, lib := range cfg.Libraries {
 		if existing[lib.Name] {
 			continue
 		}
-		body := map[string]any{
-			"name":                 lib.Name,
-			"type":                 lib.Type,
-			"folders":              lib.Folders,
-			"folderWatching":       true,
-			"includeInDashboard":   true,
-			"includeInRecommended": true,
-			"includeInSearch":      true,
-			"manageCollections":    true,
-			"manageReadingLists":   true,
-		}
-		status, resp, err := request(ctx, http.MethodPost, base+"/api/Library/create", hdr, body)
+		create, err := c.PostApiLibraryCreateWithResponse(ctx, kavitaapi.UpdateLibraryDto{
+			Name:               lib.Name,
+			Type:               kavitaapi.LibraryType(lib.Type),
+			Folders:            lib.Folders,
+			FolderWatching:     true,
+			IncludeInDashboard: true,
+			IncludeInSearch:    true,
+			ManageCollections:  true,
+			ManageReadingLists: true,
+		})
 		if err != nil {
 			return err
 		}
-		if !ok(status) {
-			return fmt.Errorf("create library %q: status %d: %s", lib.Name, status, resp)
+		if !ok(create.StatusCode()) {
+			return fmt.Errorf("create library %q: status %d: %s", lib.Name, create.StatusCode(), create.Body)
 		}
 		log.Printf("created Kavita library %q", lib.Name)
-	}
-	return nil
-}
-
-func kavitaLibraries(ctx context.Context, base, token string) (map[string]bool, error) {
-	hdr := map[string]string{"Authorization": "Bearer " + token}
-	status, body, err := request(ctx, http.MethodGet, base+"/api/Library/libraries", hdr, nil)
-	if err != nil {
-		return nil, err
-	}
-	if !ok(status) {
-		return nil, fmt.Errorf("list libraries: status %d: %s", status, body)
-	}
-	var libs []struct {
-		Name string `json:"name"`
-	}
-	if err := jsonUnmarshal(body, &libs); err != nil {
-		return nil, err
-	}
-	names := make(map[string]bool, len(libs))
-	for _, l := range libs {
-		names[l.Name] = true
-	}
-	return names, nil
-}
-
-// kavitaToken registers the first admin (idempotent: a non-2xx means an admin
-// already exists) and otherwise logs in, returning a JWT.
-func kavitaToken(ctx context.Context, base, user, pass, email string) (string, error) {
-	reg := map[string]any{"username": user, "password": pass, "email": email}
-	status, body, err := request(ctx, http.MethodPost, base+"/api/Account/register", nil, reg)
-	if err != nil {
-		return "", err
-	}
-	if ok(status) {
-		log.Print("registered Kavita first admin")
-		return jsonToken(body)
-	}
-	log.Printf("register returned status %d (admin likely exists), logging in", status)
-
-	status, body, err = request(ctx, http.MethodPost, base+"/api/Account/login", nil,
-		map[string]any{"username": user, "password": pass})
-	if err != nil {
-		return "", err
-	}
-	if !ok(status) {
-		return "", fmt.Errorf("login: status %d: %s", status, body)
-	}
-	return jsonToken(body)
-}
-
-func jsonToken(body []byte) (string, error) {
-	var res struct {
-		Token string `json:"token"`
-	}
-	if err := jsonUnmarshal(body, &res); err != nil {
-		return "", err
-	}
-	if res.Token == "" {
-		return "", fmt.Errorf("no token in response")
-	}
-	return res.Token, nil
-}
-
-func kavitaGetSettings(ctx context.Context, base, token string) (map[string]any, error) {
-	hdr := map[string]string{"Authorization": "Bearer " + token}
-	status, body, err := request(ctx, http.MethodGet, base+"/api/Settings", hdr, nil)
-	if err != nil {
-		return nil, err
-	}
-	if !ok(status) {
-		return nil, fmt.Errorf("status %d: %s", status, body)
-	}
-	var settings map[string]any
-	if err := jsonUnmarshal(body, &settings); err != nil {
-		return nil, err
-	}
-	return settings, nil
-}
-
-func kavitaPostSettings(ctx context.Context, base, token string, settings map[string]any) error {
-	hdr := map[string]string{"Authorization": "Bearer " + token}
-	status, body, err := request(ctx, http.MethodPost, base+"/api/Settings", hdr, settings)
-	if err != nil {
-		return err
-	}
-	if !ok(status) {
-		return fmt.Errorf("status %d: %s", status, body)
 	}
 	return nil
 }

@@ -15,7 +15,7 @@ import (
 )
 
 // inCluster reports whether we're running inside Kubernetes (so restarts are
-// possible). Outside — e.g. a local `--once` test — there is nothing to restart.
+// possible). Outside — e.g. a local test — there is nothing to restart.
 func inCluster(getenv func(string) string) bool {
 	return getenv("KUBERNETES_SERVICE_HOST") != ""
 }
@@ -23,10 +23,10 @@ func inCluster(getenv func(string) string) bool {
 // restartDeployment patches a Deployment's pod-template with an annotation
 // derived from marker, forcing exactly one rolling restart per distinct marker
 // value (re-runs with the same marker are no-ops, so no restart loop). Used to
-// make an app re-read config it only loads at startup. The daemon runs as its
-// own Deployment, so the restart it triggers on the target never takes the
-// daemon down with it. The in-cluster ServiceAccount must be allowed to
-// get/patch the target Deployment (see the bootstrap RBAC).
+// make an app re-read config it only loads at startup. The bootstrap Job runs as
+// its own pod, so the restart it triggers on the target app doesn't affect it.
+// The in-cluster ServiceAccount must be allowed to get/patch the target
+// Deployment (see the bootstrap RBAC).
 func restartDeployment(ctx context.Context, getenv func(string) string, namespace, name, marker string) error {
 	host := getenv("KUBERNETES_SERVICE_HOST")
 	port := getenv("KUBERNETES_SERVICE_PORT")

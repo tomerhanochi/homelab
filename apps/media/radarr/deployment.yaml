@@ -39,12 +39,12 @@ spec:
             - name: TZ
               value: Europe/Amsterdam
             # Fix the API key (else Radarr generates a random one) so the
-            # radarr-bootstrap daemon can authenticate. Shared with the daemon's
-            # secret leaf — see bootstrap-secret.sops.yaml.
+            # radarr-bootstrap Job can authenticate. Same value as the Job's
+            # encrypted bootstrap config — see apikey.sops.yaml.
             - name: RADARR__AUTH__APIKEY
               valueFrom:
                 secretKeyRef:
-                  name: radarr-bootstrap-secret
+                  name: radarr-apikey
                   key: apikey
           volumeMounts:
             - name: config

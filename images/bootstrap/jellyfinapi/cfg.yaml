@@ -1,0 +1,24 @@
+---
+package: jellyfinapi
+output: client.generated.go
+generate:
+  models: true
+  client: true
+compatibility:
+  # Namespace enum members under their type name. Jellyfin's spec has a
+  # ProfileConditionValue enum whose "VideoRangeType" member otherwise collides
+  # with the VideoRangeType type, which won't compile.
+  always-prefix-enum-values: true
+output-options:
+  skip-prune: false
+  include-operation-ids:
+    - GetPublicSystemInfo
+    - UpdateInitialConfiguration
+    - GetFirstUser
+    - UpdateStartupUser
+    - SetRemoteAccess
+    - CompleteWizard
+    - AuthenticateUserByName
+    - GetVirtualFolders
+    - AddVirtualFolder
+    - UpdateLibraryOptions

@@ -39,12 +39,12 @@ spec:
             - name: TZ
               value: Europe/Amsterdam
             # Fix the API key (else Sonarr generates a random one) so the
-            # sonarr-bootstrap daemon can authenticate. Shared with the daemon's
-            # secret leaf — see bootstrap-secret.sops.yaml.
+            # sonarr-bootstrap Job can authenticate. Same value as the Job's
+            # encrypted bootstrap config — see apikey.sops.yaml.
             - name: SONARR__AUTH__APIKEY
               valueFrom:
                 secretKeyRef:
-                  name: sonarr-bootstrap-secret
+                  name: sonarr-apikey
                   key: apikey
           volumeMounts:
             - name: config

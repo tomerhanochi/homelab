@@ -15,29 +15,45 @@ import (
 	"strings"
 )
 
-// pluginConfig is the merged JSON for `bootstrap jellyfin install-plugin`.
+// pluginConfig is the JSON for `bootstrap jellyfin install-plugin`: a list of
+// plugins to install. It lives in its own (non-secret) ConfigMap, separate from
+// the main jellyfin config, because the initContainer is its only consumer.
 type pluginConfig struct {
-	Plugin struct {
-		URL    string `json:"url"`    // release zip URL
-		SHA256 string `json:"sha256"` // expected lowercase hex sha256 of the zip
-		Dir    string `json:"dir"`    // target dir, e.g. /config/plugins/SSO-Auth_4.0.0.4
-		Marker string `json:"marker"` // presence means "already installed" (default SSO-Auth.dll)
-	} `json:"plugin"`
+	Plugins []plugin `json:"plugins"`
 }
 
-// installPlugin downloads a Jellyfin plugin zip, verifies its SHA-256, and
-// extracts it into the plugin dir on Jellyfin's /config volume. It runs as a
-// one-shot initContainer before Jellyfin boots. Idempotent: if the marker DLL
-// already exists it does nothing, so Jellyfin's own plugin auto-updates are
-// never clobbered on restart.
-func installPlugin(ctx context.Context, dir string) error {
+type plugin struct {
+	URL    string `json:"url"`    // release zip URL
+	SHA256 string `json:"sha256"` // expected lowercase hex sha256 of the zip
+	Dir    string `json:"dir"`    // target dir, e.g. /config/plugins/SSO-Auth_4.0.0.4
+	Marker string `json:"marker"` // presence means "already installed" (default SSO-Auth.dll)
+}
+
+// installPlugins downloads each configured plugin zip, verifies its SHA-256, and
+// extracts it into its plugin dir on Jellyfin's /config volume. It runs as a
+// one-shot initContainer before Jellyfin boots. Idempotent: if a plugin's marker
+// DLL already exists that plugin is skipped, so Jellyfin's own plugin
+// auto-updates are never clobbered on restart.
+func installPlugins(ctx context.Context, path string) error {
 	var cfg pluginConfig
-	if err := loadConfig(dir, &cfg); err != nil {
+	if err := loadConfig(path, &cfg); err != nil {
 		return err
 	}
-	p := cfg.Plugin
+	if len(cfg.Plugins) == 0 {
+		return fmt.Errorf("no plugins configured")
+	}
+	for _, p := range cfg.Plugins {
+		if err := installPlugin(ctx, p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// installPlugin installs a single plugin (see installPlugins).
+func installPlugin(ctx context.Context, p plugin) error {
 	if p.URL == "" || p.SHA256 == "" || p.Dir == "" {
-		return fmt.Errorf("plugin.url, plugin.sha256 and plugin.dir are required")
+		return fmt.Errorf("plugin url, sha256 and dir are required")
 	}
 	marker := p.Marker
 	if marker == "" {

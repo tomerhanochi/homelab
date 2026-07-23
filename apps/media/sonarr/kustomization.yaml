@@ -6,6 +6,7 @@ resources:
   - config-pvc.yaml
   - data-pv.yaml
   - data-pvc.yaml
+  - apikey.sops.yaml
   - deployment.yaml
   - service.yaml
   - bootstrap

@@ -1,9 +1,10 @@
 ---
-# Restricted PSA forbids hostPath volumes, so the whole shared library is exposed
-# through a statically-provisioned `local` PersistentVolume pinned to the node
-# that owns /var/mnt/data (see apps/AGENTS.md storage convention). sonarr mounts
-# the whole library so it can MOVE completed downloads from /data/torrents into
-# /data/media (exfat can't hardlink). The host dir must be owned by UID/GID 1000.
+# Statically-provisioned hostPath PV (not `local`) pinned to the node that owns
+# /var/mnt/data, because kubelet relabels `local` volumes and that fails on the
+# exfat context= mount (no xattrs); hostPath volumes are never relabeled.
+# hostPath-via-PVC stays restricted-PSA compliant (PSA only checks the pod).
+# sonarr mounts the whole library to MOVE completed downloads from /data/torrents
+# into /data/media (exfat can't hardlink). Host dir must be owned by 1000:1000.
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -17,8 +18,9 @@ spec:
   # Empty storageClassName + explicit claim binding keeps the default local-path
   # provisioner from touching this volume.
   storageClassName: ""
-  local:
+  hostPath:
     path: /var/mnt/data
+    type: Directory
   nodeAffinity:
     required:
       nodeSelectorTerms:

@@ -1,0 +1,26 @@
+#ENC[AES256_GCM,data:NhTxkTmc1A1n6SHzpfOCbjOzdmINQVkvCaGzyXrS2Gl30p4BGLQ8Pd8udycSIIF5KXQntwxf+ckMTCYLfeQEl5d7BYz2VZA0dSH9rN8XP0qpPL73,iv:C+wWGhSiT+woobsxKoKOc1tATsCm2/O9NAc6NVDFWEs=,tag:PSS7PebEtQC/9lnIfPKlBQ==,type:comment]
+#ENC[AES256_GCM,data:SizoW+yzN61UHZn4n+TbMQtZa8Tf0looj0OLkQcBJTrxa5ncL+1UtUTDXFWYmqjkjQ4NAdJ9Fk8vBt4Ue24NI3f5v+TXQoQ6dDB3EbtCbsU=,iv:CMhJnm6D1R+fEQZI4YIPSLZiDvUEVK2t7a/i4MiqSQE=,tag:Y6UaqYiD/4qp5BkIi3IvyA==,type:comment]
+#ENC[AES256_GCM,data:3YBQKnnoV66oI4f98L+4Woe4giWcHfb1VF64TDx/k/FCYQte8xq+Qdp55hJddMOOsdd7du0a4UeyuAelTg==,iv:P1Nc7Qh7lfXigcSPd4daZ9ahqX/QIH+rCguILxOuJwQ=,tag:ryCWlyZgEf3bjgKfpU3Efg==,type:comment]
+apiVersion: v1
+kind: Secret
+metadata:
+    name: radarr-apikey
+    namespace: media
+type: Opaque
+stringData:
+    apikey: ENC[AES256_GCM,data:SoBtsFJEtjTXEBfWBoXuFeTcBOL+G6NOkHDK3H9lFy0=,iv:hCa3Lb+e9oLjKqKsKDNefgARisd1m2aD6DWnaVfU0Tw=,tag:65mVBdIg0VEapINjYTVU5g==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBSdFd6RmtwbW1YZUEvaStj
+            UFFvWHdiUEtWdHFaRU9zNTBsS1lmZHlnVkVNCkhQMlhVRUtQQVVKQWhCUEJlWkxT
+            NXNvWDY3R0V3L3pvUDVWNmZmTDRZQmMKLS0tIEthYk5kejBCaWRMKzB3T010Z0dU
+            OGl2ZlBzWTBNL0hCU1I5Mm1SMWtudzgKOK7qe25qY7Md7ZNH3ZYMk3nPdfmaIJ7T
+            Wim38lk6jhNjuWoEHwn5hwEfurh+W6FRyKQs0qKzbtMP+nyASRzIkg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1jjpauwwlhgtvk8k75cdulk3eweu3et8v3fn4clr8gm7sergvj3vsachhh4
+    lastmodified: "2026-07-23T18:30:17Z"
+    mac: ENC[AES256_GCM,data:ZPRLpy9Iq397ergIc3y9LNmD8H08KFN1z0Hi06K7V68tuMveRHJn5f4KqiWotdbZgokRqNhJ358E+ptE3vtuVKUgGzkyF6sl5tYjsNfyo9jk3OJwpUjA4mXCv2VjITOnyNjgrJklZbrlWjt0AgTPKueJj5iyjAAmyQKf14ro8nE=,iv:+WjiITulasqCuJPZpXL+C6b6RpqyGSuTIYDZ3ujTRak=,tag:ueyEkhj5csnpJD0p644aiw==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type)$
+    version: 3.13.2

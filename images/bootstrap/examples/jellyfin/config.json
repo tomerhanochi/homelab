@@ -1,0 +1,17 @@
+{
+  "url": "http://jellyfin:8096",
+  "admin": {
+    "username": "admin",
+    "password": "REPLACE_WITH_RANDOM_PASSWORD"
+  },
+  "oidc": {
+    "provider": "authentik",
+    "issuer": "https://sso.tomerhanochi.com/application/o/jellyfin/",
+    "clientId": "jellyfin",
+    "clientSecret": "REPLACE_WITH_OIDC_CLIENT_SECRET"
+  },
+  "libraries": [
+    { "name": "Movies", "collectionType": "movies", "paths": ["/media/movies"], "saveWithMedia": true },
+    { "name": "TV Shows", "collectionType": "tvshows", "paths": ["/media/tv"], "saveWithMedia": true }
+  ]
+}

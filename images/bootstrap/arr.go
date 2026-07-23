@@ -2,16 +2,15 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 )
 
 // arrConfig is the merged JSON for `bootstrap sonarr|radarr configure`. Sonarr
-// and Radarr share the /api/v3 shape, so one struct and one reconciler serve
-// both.
+// and Radarr share the /api/v3 shape, so one struct and one reconcile flow serve
+// both; only the generated client (radarrapi/sonarrapi) behind the arrClient
+// adapter differs.
 type arrConfig struct {
 	URL    string `json:"url"`
 	APIKey string `json:"apiKey"` // shared secret, also seeded into the app's config.xml
@@ -34,15 +33,47 @@ type arrConfig struct {
 	} `json:"downloadClient"`
 }
 
+// arrClient is the small slice of the Sonarr/Radarr v3 API that bootstrap drives.
+// Each app supplies a thin adapter (radarr.go, sonarr.go) over its generated
+// client so the reconcile flow below stays vendor-neutral.
+type arrClient interface {
+	// RootFolders returns the set of configured root-folder paths.
+	RootFolders(ctx context.Context) (map[string]bool, error)
+	AddRootFolder(ctx context.Context, path string) error
+	// QBittorrentDownloadClient returns the qBittorrent download client by name,
+	// or the schema template when none exists yet, as an editable handle.
+	QBittorrentDownloadClient(ctx context.Context, name string) (*arrDownloadClient, error)
+}
+
+// arrDownloadClient is a vendor-neutral, editable view of a DownloadClientResource.
+// Its mutators, snapshot and save close over the underlying generated struct, so
+// saving round-trips the whole resource — preserving the schema-supplied fields
+// (implementation, configContract, defaults) that bootstrap never touches.
+type arrDownloadClient struct {
+	setName            func(string)
+	setEnable          func(bool)
+	setRemoveCompleted func(bool)
+	// setField sets a named field in the resource's dynamic schema fields array,
+	// if that field exists (Sonarr and Radarr expose slightly different names).
+	setField func(name string, value any)
+	// snapshot is the JSON of the underlying resource, for change detection.
+	snapshot func() string
+	// save creates the resource (POST) or updates it (PUT) as appropriate.
+	save func(ctx context.Context) error
+}
+
 func reconcileSonarr(ctx context.Context, dir string) error {
-	return reconcileArr(ctx, dir, "sonarr", "http://sonarr:8989")
+	return reconcileArr(ctx, dir, "sonarr", "http://sonarr:8989", newSonarrClient)
 }
 
 func reconcileRadarr(ctx context.Context, dir string) error {
-	return reconcileArr(ctx, dir, "radarr", "http://radarr:7878")
+	return reconcileArr(ctx, dir, "radarr", "http://radarr:7878", newRadarrClient)
 }
 
-func reconcileArr(ctx context.Context, dir, app, defaultURL string) error {
+// reconcileArr loads the config, waits for the app, then applies root folders and
+// the download client through the adapter that newClient builds. Every step is
+// idempotent.
+func reconcileArr(ctx context.Context, dir, app, defaultURL string, newClient func(base, apiKey string) (arrClient, error)) error {
 	var cfg arrConfig
 	if err := loadConfig(dir, &cfg); err != nil {
 		return err
@@ -53,176 +84,85 @@ func reconcileArr(ctx context.Context, dir, app, defaultURL string) error {
 	if cfg.APIKey == "" {
 		return fmt.Errorf("apiKey is required (%s)", app)
 	}
-	base := cfg.URL
-	hdr := map[string]string{"X-Api-Key": cfg.APIKey}
 
 	// /ping is unauthenticated; wait on it before hitting the keyed endpoints.
-	if err := waitReady(ctx, base+"/ping", 5*time.Minute); err != nil {
+	if err := waitReady(ctx, cfg.URL+"/ping", 5*time.Minute); err != nil {
 		return err
 	}
 
-	if err := arrApplyRootFolders(ctx, base, hdr, cfg.RootFolders); err != nil {
+	api, err := newClient(cfg.URL, cfg.APIKey)
+	if err != nil {
+		return fmt.Errorf("build %s client: %w", app, err)
+	}
+
+	if err := arrApplyRootFolders(ctx, api, cfg.RootFolders); err != nil {
 		return fmt.Errorf("apply root folders: %w", err)
 	}
-	if err := arrApplyDownloadClient(ctx, base, hdr, cfg); err != nil {
+	if err := arrApplyDownloadClient(ctx, api, cfg); err != nil {
 		return fmt.Errorf("apply download client: %w", err)
 	}
 	return nil
 }
 
-func arrApplyRootFolders(ctx context.Context, base string, hdr map[string]string, folders []string) error {
+func arrApplyRootFolders(ctx context.Context, api arrClient, folders []string) error {
 	if len(folders) == 0 {
 		return nil
 	}
-	status, body, err := request(ctx, http.MethodGet, base+"/api/v3/rootfolder", hdr, nil)
+	have, err := api.RootFolders(ctx)
 	if err != nil {
 		return err
 	}
-	if !ok(status) {
-		return fmt.Errorf("list root folders: status %d: %s", status, body)
-	}
-	var existing []struct {
-		Path string `json:"path"`
-	}
-	if err := jsonUnmarshal(body, &existing); err != nil {
-		return err
-	}
-	have := make(map[string]bool, len(existing))
-	for _, r := range existing {
-		have[r.Path] = true
-	}
-
 	for _, path := range folders {
 		if have[path] {
 			continue
 		}
-		status, resp, err := request(ctx, http.MethodPost, base+"/api/v3/rootfolder", hdr, map[string]any{"path": path})
-		if err != nil {
+		if err := api.AddRootFolder(ctx, path); err != nil {
 			return err
 		}
-		if !ok(status) {
-			return fmt.Errorf("add root folder %q: status %d: %s", path, status, resp)
-		}
-		log.Printf("added %s root folder %q", base, path)
+		log.Printf("added root folder %q", path)
 	}
 	return nil
 }
 
 // arrApplyDownloadClient creates the qBittorrent download client from the API
 // schema if it's missing, or updates the existing one (by name) when a managed
-// field drifts. Idempotent: no PUT/POST when everything already matches.
-func arrApplyDownloadClient(ctx context.Context, base string, hdr map[string]string, cfg arrConfig) error {
+// field drifts. Idempotent: no save when everything already matches.
+func arrApplyDownloadClient(ctx context.Context, api arrClient, cfg arrConfig) error {
 	dc := cfg.DownloadClient
 	if dc == nil {
 		return nil
 	}
-
-	status, body, err := request(ctx, http.MethodGet, base+"/api/v3/downloadclient", hdr, nil)
+	h, err := api.QBittorrentDownloadClient(ctx, dc.Name)
 	if err != nil {
 		return err
 	}
-	if !ok(status) {
-		return fmt.Errorf("list download clients: status %d: %s", status, body)
-	}
-	var clients []map[string]any
-	if err := json.Unmarshal(body, &clients); err != nil {
-		return err
-	}
+	before := h.snapshot()
 
-	var current map[string]any
-	for _, c := range clients {
-		if name, _ := c["name"].(string); name == dc.Name {
-			current = c
-			break
-		}
-	}
-
-	if current == nil {
-		// Build a fresh resource from the QBittorrent schema template.
-		current, err = arrQBittorrentSchema(ctx, base, hdr)
-		if err != nil {
-			return err
-		}
-	}
-	before := mustJSON(current)
-
-	current["name"] = dc.Name
-	current["enable"] = true
+	h.setName(dc.Name)
+	h.setEnable(true)
 	if dc.RemoveCompletedDownloads != nil {
-		current["removeCompletedDownloads"] = *dc.RemoveCompletedDownloads
+		h.setRemoveCompleted(*dc.RemoveCompletedDownloads)
 	}
-	fields, _ := current["fields"].([]any)
-	setArrField(fields, "host", dc.Host)
-	setArrField(fields, "port", dc.Port)
-	setArrField(fields, "useSsl", dc.UseSsl)
-	setArrField(fields, "username", dc.Username)
-	setArrField(fields, "password", dc.Password)
+	h.setField("host", dc.Host)
+	h.setField("port", dc.Port)
+	h.setField("useSsl", dc.UseSsl)
+	h.setField("username", dc.Username)
+	h.setField("password", dc.Password)
 	if dc.Category != "" {
 		// Sonarr calls it tvCategory, Radarr movieCategory; set whichever the
-		// schema exposes.
-		setArrField(fields, "tvCategory", dc.Category)
-		setArrField(fields, "movieCategory", dc.Category)
-		setArrField(fields, "category", dc.Category)
+		// schema exposes (setField is a no-op for absent fields).
+		h.setField("tvCategory", dc.Category)
+		h.setField("movieCategory", dc.Category)
+		h.setField("category", dc.Category)
 	}
 
-	if mustJSON(current) == before {
-		log.Printf("%s download client %q already up to date", base, dc.Name)
+	if h.snapshot() == before {
+		log.Printf("%s download client %q already up to date", cfg.URL, dc.Name)
 		return nil
 	}
-
-	method, path := http.MethodPost, "/api/v3/downloadclient"
-	if id, ok2 := current["id"]; ok2 && id != nil {
-		method, path = http.MethodPut, fmt.Sprintf("/api/v3/downloadclient/%v", id)
-	}
-	status, resp, err := request(ctx, method, base+path, hdr, current)
-	if err != nil {
+	if err := h.save(ctx); err != nil {
 		return err
 	}
-	if !ok(status) {
-		return fmt.Errorf("save download client %q: status %d: %s", dc.Name, status, resp)
-	}
-	log.Printf("saved %s download client %q", base, dc.Name)
+	log.Printf("saved %s download client %q", cfg.URL, dc.Name)
 	return nil
-}
-
-// arrQBittorrentSchema fetches the download-client schema and returns the
-// QBittorrent template (a resource pre-filled with default fields) to populate.
-func arrQBittorrentSchema(ctx context.Context, base string, hdr map[string]string) (map[string]any, error) {
-	status, body, err := request(ctx, http.MethodGet, base+"/api/v3/downloadclient/schema", hdr, nil)
-	if err != nil {
-		return nil, err
-	}
-	if !ok(status) {
-		return nil, fmt.Errorf("get download client schema: status %d: %s", status, body)
-	}
-	var schemas []map[string]any
-	if err := json.Unmarshal(body, &schemas); err != nil {
-		return nil, err
-	}
-	for _, s := range schemas {
-		if impl, _ := s["implementation"].(string); impl == "QBittorrent" {
-			return s, nil
-		}
-	}
-	return nil, fmt.Errorf("QBittorrent implementation not found in download client schema")
-}
-
-// setArrField sets the value of the named field in an /api/v3 fields array, if
-// that field exists (schemas differ between Sonarr and Radarr).
-func setArrField(fields []any, name string, value any) {
-	for _, f := range fields {
-		m, ok := f.(map[string]any)
-		if !ok {
-			continue
-		}
-		if n, _ := m["name"].(string); n == name {
-			m["value"] = value
-			return
-		}
-	}
-}
-
-func mustJSON(v any) string {
-	b, _ := json.Marshal(v)
-	return string(b)
 }
