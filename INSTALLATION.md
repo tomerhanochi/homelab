@@ -135,6 +135,33 @@ At `https://kavita.tomerhanochi.com`, create the first admin, then under
 
 Add libraries: **Comics** → `/library/comics`, **Books** → `/library/books`.
 
+#### qBittorrent
+
+qBittorrent stays internal (no hostname — its egress is tunnelled through the
+gluetun VPN sidecar). Configure it first, over a port-forward, and set the WebUI
+credentials that the Sonarr/Radarr download clients then authenticate with:
+
+1. Forward the WebUI straight from the pod (you're talking to qBittorrent as
+   `localhost`, which it always trusts):
+   ```bash
+   kubectl -n qbittorrent port-forward svc/qbittorrent 8080:8080
+   ```
+2. The official image sets a **temporary** admin password on first boot; grab it
+   from the logs, then open `http://localhost:8080` and sign in as `admin`:
+   ```bash
+   kubectl -n qbittorrent logs deploy/qbittorrent -c qbittorrent | grep -i "temporary password"
+   ```
+3. In **Tools → Options → Web UI → Authentication**, set the **username** (keep
+   `admin`) and a permanent **password**. These are the credentials you give the
+   Sonarr/Radarr download clients below — without them the arr apps can't reach
+   qBittorrent, since it authenticates every client.
+4. Set the default save path to `/data/torrents` (incomplete →
+   `/data/torrents/incomplete`), and add categories `tv-sonarr` →
+   `/data/torrents/tv` and `radarr` → `/data/torrents/movies`. Set a share-ratio
+   limit if you want.
+
+Re-run the port-forward whenever you need the WebUI later.
+
 #### Sonarr and Radarr
 
 These stay internal (no hostname). Port-forward to reach the WebUI, e.g.:
@@ -147,38 +174,11 @@ In each, add a root folder (`/data/media/tv` for Sonarr, `/data/media/movies`
 for Radarr) and a **qBittorrent** download client:
 
 - Host: `qbittorrent.qbittorrent.svc.cluster.local`, port `8080`
-- No username/password — the WebUI trusts the pod network (see qBittorrent below)
+- Username `admin` and the WebUI password you set for qBittorrent (see the
+  qBittorrent section above)
 - Category: `tv-sonarr` (Sonarr) / `radarr` (Radarr)
 - Enable **Remove Completed Downloads** so imports MOVE instead of copy (the
   exFAT no-hardlink workaround)
-
-#### qBittorrent
-
-qBittorrent stays internal (no hostname — its egress is tunnelled through the
-gluetun VPN sidecar). Configure it once over a port-forward so the Sonarr/Radarr
-download clients can reach it with no credentials:
-
-1. Forward the WebUI straight from the pod (you're talking to qBittorrent as
-   `localhost`, which it always trusts):
-   ```bash
-   kubectl -n qbittorrent port-forward svc/qbittorrent 8080:8080
-   ```
-2. The official image sets a **temporary** admin password on first boot; grab it
-   from the logs, then open `http://localhost:8080` and sign in as `admin`:
-   ```bash
-   kubectl -n qbittorrent logs deploy/qbittorrent -c qbittorrent | grep -i "temporary password"
-   ```
-3. In **Tools → Options → Web UI → Authentication**, enable *Bypass
-   authentication for clients in whitelisted IP subnets* and add `10.42.0.0/16`
-   (the pod CIDR) — this is what lets the Sonarr/Radarr download clients reach the
-   WebUI without a login. Set a real admin password too, since it's now the only
-   way in.
-4. Set the default save path to `/data/torrents` (incomplete →
-   `/data/torrents/incomplete`), and add categories `tv-sonarr` →
-   `/data/torrents/tv` and `radarr` → `/data/torrents/movies`. Set a share-ratio
-   limit if you want.
-
-Re-run the port-forward whenever you need the WebUI later.
 
 ### 6. Cluster access via SSO (kubectl + Headlamp)
 
