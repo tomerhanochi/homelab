@@ -13,6 +13,7 @@ resources:
   - ocirepository.yaml
   - helmrelease.yaml
   - route.yaml
+  - cluster-admins-rbac.yaml
   - networkpolicies
 
 # Blueprints are mounted into the worker from this ConfigMap and applied on

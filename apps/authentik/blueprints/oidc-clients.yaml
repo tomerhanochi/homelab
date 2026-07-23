@@ -56,6 +56,15 @@ entries:
     id: group-kavita-admin
     identifiers:
       name: kavita-Admin
+  # Bound to the cluster-admin ClusterRole via apps/authentik/cluster-admins-rbac.yaml.
+  # The k3s apiserver runs with oidc-groups-prefix=oidc:, so this group is seen
+  # inside Kubernetes RBAC as "oidc:kubernetes-cluster-admins". Add users to it in
+  # the authentik UI to grant them Headlamp/kubectl cluster-admin.
+  - model: authentik_core.group
+    state: present
+    id: group-kubernetes-cluster-admins
+    identifiers:
+      name: kubernetes-cluster-admins
 
   # ----------------------------------------------------------------- forgejo --
   - model: authentik_providers_oauth2.oauth2provider
