@@ -3,6 +3,29 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - configmap.yaml
-  - secret.sops.yaml
-  - deployment.yaml
+  - job.yaml
+
+# The bootstrap Job's config (settings + admin password + OIDC client secret)
+# lives in one SOPS-encrypted file. Flux decrypts it before build; the
+# content-hash suffix kustomize appends to the Secret name is what makes the Job
+# re-run on change.
+secretGenerator:
+  - name: jellyfin-bootstrap-config
+    namespace: media
+    files:
+      # secret key = config.json (mounted at /etc/bootstrap/config.json), read
+      # from the SOPS-encrypted source file.
+      - config.json=config.sops.json
+
+# The plugin list is separate and not secret. Unlike the config Secret above, its
+# name must stay stable (disableNameSuffixHash): it's referenced by the
+# install-sso-plugin initContainer in the HelmRelease, which Helm renders
+# independently, so kustomize can't rewrite a hashed name into it.
+configMapGenerator:
+  - name: jellyfin-bootstrap-plugins
+    namespace: media
+    options:
+      disableNameSuffixHash: true
+    files:
+      # configmap key = plugins.json (mounted at /etc/bootstrap/plugins.json).
+      - plugins.json

@@ -1,0 +1,26 @@
+#ENC[AES256_GCM,data:jwlnYW75leh9U5WHF+h81ffNm7mmsVSIK9KkQU7oVRlz+cNtAohx/HrPmvVCcn+Ju71vpwz/tZA17rLqlLlqgY+V4WXWbOcmMPlbryPDIpy61clJ,iv:ljK01NZ/KSjUbVof+7WSTmqrzfXK8lDxR+MXYJyGz7s=,tag:W0bgTlIyueHMmhmNnydTuA==,type:comment]
+#ENC[AES256_GCM,data:+YI9XftHLwSUj6tP4qr9kKbCQmi63Ys9m9Dfzndd6DCC2eDQ2GQ5c+b4gHBLq9njb/8GZAmYpHt16lF9PD4/eAjRJGmETpgVF7uksOToao0=,iv:Gcbgr6CGotu6XWJ4EwpG57nycNaAYAqeYY2xXficiRE=,tag:i9FblIrzzdh5+MaDklkYLQ==,type:comment]
+#ENC[AES256_GCM,data:/1HCMBvquMLVo1asZH6mgQhJoTTb6B9U5P2ALjrGH5EmqVuBDisjVY1HO6oao9nxbAf0aD3lvxpWVfGeRw==,iv:RbrVGYyzkRB/6kYrtbljfbzPFbFADm8eL7NrCOgqpa0=,tag:pcxeg0iPiWiiGsN2JbDyWA==,type:comment]
+apiVersion: v1
+kind: Secret
+metadata:
+    name: sonarr-apikey
+    namespace: media
+type: Opaque
+stringData:
+    apikey: ENC[AES256_GCM,data:HpOr9Uquri8bXMFrzAR8MmxcLW6AOuQvWasczXKxkdc=,iv:iun8ufQnJteeDwkprSEM0VPerxsYmuGYHLrLpCORs0U=,tag:3AvKUsDFpV+gRTg5C2xaxQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBSYjZ2aHRucVVJaktGdW1i
+            MVRZOUtMOVJyd2FNRElXMEVWZWVaR01lUWg4CmZueTJ6aTVINUdNc0JQT2FoLzgw
+            dzBCWjJpQUs0SlBqNC9uK1dncjdOemMKLS0tIGN6aDVDOWpWbDg1NzdveUc4aXdw
+            b1FPWjM5NzlGdnFrVDdnK2JhTzdYZm8KlVb4/e6CE7WmkDrSptV6v+Fwut4wA1bK
+            DeBLPDcD2BP8+00HG/Zd1z2GYSzBgxY8iX8PHNYnUvFH1ZOkFWoHiQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1jjpauwwlhgtvk8k75cdulk3eweu3et8v3fn4clr8gm7sergvj3vsachhh4
+    lastmodified: "2026-07-23T18:30:17Z"
+    mac: ENC[AES256_GCM,data:SRhqABgxpjGyuUBH5evTsaiw/HklaIK0zUsTkvXn7Ag6rw88VMQtVQM8Co8NweRoeM296z1LllCRu6+FF9vfHObpxxgxeaVBc9FsCyxX5tHnYNLo0gL+uK5MyjR/9KVQyq8ujfq9V1hC4dPKgctIisyZ0of90P7xJ0ME26MVkk0=,iv:u5u4L+XLy4k/6ohZPtEsx753BhAZFAVbNLswCaF3xKQ=,tag:WxUOYHYjMFPBBpwHaJxKWA==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type)$
+    version: 3.13.2

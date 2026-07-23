@@ -43,14 +43,16 @@ spec:
         size: 5Gi
         storageClass: ""
         type: pvc
-      # Read-only view of the shared media library via a statically-provisioned
-      # local PV/PVC (see persistentvolume.yaml). restricted PSA forbids the
-      # previous hostPath mount.
+      # Shared media library via a statically-provisioned hostPath PV/PVC
+      # (see persistentvolume.yaml).
       media:
         enabled: true
         type: pvc
         existingClaim: jellyfin-media
-        accessMode: ReadOnlyMany
+        # Read-write so the library metadata savers (saveWithMedia in the
+        # bootstrap config) can write NFO, artwork, subtitles, lyrics and
+        # trickplay images alongside the media.
+        accessMode: ReadWriteOnce
       cache:
         enabled: true
         type: emptyDir
@@ -90,22 +92,21 @@ spec:
     deploymentStrategy:
       type: Recreate
 
-    # Extra pod volume: the jellyfin-bootstrap ConfigMap (plugin.url/sha256/dir),
-    # read by the install-plugin initContainer below. Same config the
-    # jellyfin-bootstrap daemon consumes (see bootstrap.yaml).
+    # Extra pod volume: the jellyfin-bootstrap-plugins ConfigMap (the plugin
+    # list), read by the install-sso-plugin initContainer below.
     volumes:
-      - name: bootstrap-config
+      - name: bootstrap-plugins
         configMap:
-          name: jellyfin-bootstrap-config
+          name: jellyfin-bootstrap-plugins
 
-    # Install the jellyfin-plugin-sso binary into the config volume before
-    # Jellyfin starts, so the plugin is loaded on first boot (the jellyfin-
-    # bootstrap daemon then configures it via the plugin API). Idempotent: skips
-    # if the plugin is already present, so Jellyfin's own updates aren't clobbered.
+    # Install the configured plugins into the config volume before Jellyfin
+    # starts, so they're loaded on first boot (the jellyfin-bootstrap Job then
+    # configures them via the plugin API). Idempotent: skips any plugin already
+    # present, so Jellyfin's own updates aren't clobbered.
     extraInitContainers:
       - name: install-sso-plugin
         image: ghcr.io/tomerhanochi/homelab/internal/bootstrap:0.1.0
-        args: ["jellyfin", "install-plugin"]
+        args: ["jellyfin", "install-plugin", "--config", "/etc/bootstrap/plugins.json"]
         securityContext:
           runAsNonRoot: true
           runAsUser: 1000
@@ -120,8 +121,8 @@ spec:
         volumeMounts:
           - name: config
             mountPath: /config
-          - name: bootstrap-config
-            mountPath: /etc/bootstrap/config.d
+          - name: bootstrap-plugins
+            mountPath: /etc/bootstrap
             readOnly: true
 
     metrics:

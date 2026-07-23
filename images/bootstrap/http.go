@@ -59,6 +59,12 @@ func requestWith(ctx context.Context, client *http.Client, method, url string, h
 // ok reports whether status is a 2xx.
 func ok(status int) bool { return status >= 200 && status < 300 }
 
+// ptr returns a pointer to v. The generated OpenAPI clients model every optional
+// field as a pointer, so building request bodies needs a lot of address-of-a-
+// literal; ptr keeps that readable and avoids sharing one addressable local
+// across several fields.
+func ptr[T any](v T) *T { return &v }
+
 // waitReady polls url with GET until it returns any HTTP response below 500
 // (the app's web server is up) or the timeout/context elapses.
 func waitReady(ctx context.Context, url string, timeout time.Duration) error {
@@ -78,9 +84,14 @@ func waitReady(ctx context.Context, url string, timeout time.Duration) error {
 	}
 }
 
-// jsonUnmarshal is encoding/json.Unmarshal, re-exported so the per-app files can
-// decode responses without each importing encoding/json.
-func jsonUnmarshal(b []byte, v any) error { return json.Unmarshal(b, v) }
+// mustJSON marshals v to a JSON string, ignoring errors. Used for change
+// detection where the input is always a marshalable struct, so the result is
+// only ever compared for equality (a marshal failure would compare equal to
+// itself and simply skip the update).
+func mustJSON(v any) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
 
 // jsonEqual reports whether a and b marshal to the same JSON, so managed fields
 // can be compared regardless of type (e.g. a []string desired value vs a []any

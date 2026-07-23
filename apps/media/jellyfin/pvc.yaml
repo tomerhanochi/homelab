@@ -6,7 +6,7 @@ metadata:
   namespace: media
 spec:
   accessModes:
-    - ReadOnlyMany
+    - ReadWriteOnce
   storageClassName: ""
   volumeName: media-jellyfin-library
   resources:

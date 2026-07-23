@@ -11,6 +11,9 @@ spec:
   path: ./apps/kavita
   prune: true
   wait: true
+  # Recreate resources on immutable-field changes — the bootstrap Job's pod
+  # template changes name when its config Secret's content hash changes.
+  force: true
   sourceRef:
     kind: GitRepository
     name: homelab

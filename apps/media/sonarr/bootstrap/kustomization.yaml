@@ -3,6 +3,15 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - configmap.yaml
-  - secret.sops.yaml
-  - deployment.yaml
+  - job.yaml
+
+# The whole bootstrap config (settings + the API key) lives in one SOPS-encrypted
+# file. Flux decrypts it before build; the content-hash suffix kustomize appends
+# to the Secret name is what makes the Job re-run on change.
+secretGenerator:
+  - name: sonarr-bootstrap-config
+    namespace: media
+    files:
+      # secret key = config.json (mounted at /etc/bootstrap/config.json), read
+      # from the SOPS-encrypted source file.
+      - config.json=config.sops.json

@@ -1,0 +1,18 @@
+{
+  "url": "http://kavita:5000",
+  "admin": {
+    "username": "admin",
+    "email": "admin@tomerhanochi.com",
+    "password": "REPLACE_WITH_RANDOM_PASSWORD"
+  },
+  "oidc": {
+    "authority": "https://sso.tomerhanochi.com/application/o/kavita/",
+    "clientId": "kavita",
+    "clientSecret": "REPLACE_WITH_OIDC_CLIENT_SECRET"
+  },
+  "libraries": [
+    { "name": "Comics", "type": 1, "folders": ["/library/comics"] },
+    { "name": "Books", "type": 2, "folders": ["/library/books"] }
+  ],
+  "deployment": { "name": "kavita", "namespace": "kavita" }
+}

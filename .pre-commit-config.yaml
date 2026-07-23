@@ -1,5 +1,11 @@
 ---
-exclude: '.*\.generated\.yaml|.*\.sops\.yaml'
+exclude: >-
+  (?x)^(
+  .*\.generated\.yaml|
+  .*\.generated\.go|
+  .*\.sops\.yaml|
+  .*/openapi\.json
+  )$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0

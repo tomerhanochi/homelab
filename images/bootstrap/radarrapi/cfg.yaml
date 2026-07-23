@@ -1,0 +1,13 @@
+---
+package: radarrapi
+output: client.generated.go
+generate:
+  models: true
+  client: true
+compatibility:
+  always-prefix-enum-values: true
+output-options:
+  skip-prune: false
+  include-tags:
+    - RootFolder
+    - DownloadClient
