@@ -16,10 +16,10 @@ spec:
       labels:
         app.kubernetes.io/name: sonarr
     spec:
-      # LinuxServer (s6-overlay) image run non-root: with runAsUser set, PUID/PGID
-      # are ignored and the app runs as UID/GID 1000 directly, relying on fsGroup
-      # 1000 + host dirs owned 1000:1000 (restricted PSA forbids the
-      # root-then-drop startup). See https://docs.linuxserver.io/misc/non-root/.
+      # home-operations image: a plain rootless build of Sonarr (no s6-overlay,
+      # no PUID/PGID/root-then-drop), so it runs directly as UID/GID 1000 under
+      # restricted PSA. Relies on fsGroup 1000 for the config PVC + host dirs
+      # owned 1000:1000. See https://github.com/home-operations/containers.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -30,13 +30,11 @@ spec:
       containers:
         # TV PVR backend for seerr (not publicly exposed).
         - name: sonarr
-          image: lscr.io/linuxserver/sonarr:latest@sha256:24acea2956a0ccb11f103877d9f4f8576600fb34bff34820ed749c2256dab89f  # yamllint disable-line rule:line-length
+          image: ghcr.io/home-operations/sonarr:4.0.18.2978@sha256:2cd77fb3d81909a734d61bb8f71462044cb9d2f187e626a28a05a5c4e4be8fd2  # yamllint disable-line rule:line-length
           ports:
             - name: http
               containerPort: 8989
           env:
-            - name: UMASK
-              value: "002"
             - name: TZ
               value: Europe/Amsterdam
             # Pin the API key (else Sonarr generates a random one on first boot)
@@ -54,12 +52,6 @@ spec:
             # /data/torrents into /data/media (exfat can't hardlink).
             - name: data
               mountPath: /data
-            # Writable /run for s6-overlay. fsGroup 1000 makes the emptyDir
-            # group-owned 1000 and group-writable, so s6 writes as our non-root
-            # user — no world-writable /run needed (docs.linuxserver.io non-root
-            # requires /run to match the user's UID/GID under no-new-privileges).
-            - name: run
-              mountPath: /run
           livenessProbe:
             httpGet:
               path: /ping
@@ -92,5 +84,3 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: sonarr-data
-        - name: run
-          emptyDir: {}
