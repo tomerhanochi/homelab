@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: prowlarr-apikey
+    namespace: media
+type: Opaque
+stringData:
+    apikey: ENC[AES256_GCM,data:GJuZbrzKnmYbIl4+9/YLwzUQz1D7OoqpjpBVHoV4ozQ=,iv:bPDDcCF6+O3bZVO5RNDg8IpaKeHz/vNyiabms2AqHfk=,tag:HVXwmeR3pjGZ1oykmKGxTg==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBhUnV1NDk5SjFXTGlWZmF5
+            QlJUaDYxTkliUFkwelN5NHpDdzIxOU9YR1hvClErdGRFN0gvcVh3UmtBY05zQXRE
+            cmpydjlFVlJ6MGF5Q3NnR1UvNW82VEEKLS0tIFlOWGloVTlaajNoZThaSTkyM2Rn
+            U0ZMTExuVU9nUDdrSUVDQmJBNU1qYUEKQkhYc/qvKDLP9Iv4OLXdKEjWgHM+0HH7
+            3qaVcyIUgh2i8s9zyR6FHeDm3SSPrDizgvlEncLd02bi9Fbj9fWyrg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1jjpauwwlhgtvk8k75cdulk3eweu3et8v3fn4clr8gm7sergvj3vsachhh4
+    lastmodified: "2026-07-24T13:55:13Z"
+    mac: ENC[AES256_GCM,data:BAp6I9GJh6RlyThg0s3HRWVYmFaKe3fR2PwJDBEje1MN+/S/5PL23+i7VARpEPmtQJBrKK9BHvmaN0uwi/6TNsle4eTz9Vgx26SGZCpgFO3PW4st84X2ddriSV0BWFWvOFyD5UuA9EEqzSGopSgnoQrCrJCO3QZZ12QZhFwbFg4=,iv:QW3cM5lJrq8gUy6cCsAYdO4PgvhHM0BDdLy08RZYhs4=,tag:2xfM3NbU6jL5pgm+aXOVug==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type)$
+    version: 3.13.2
