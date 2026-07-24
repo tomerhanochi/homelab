@@ -4,4 +4,3 @@ kind: Kustomization
 
 resources:
   - ingress-allow-intra-namespace.yaml
-  - ingress-allow-arr.yaml
