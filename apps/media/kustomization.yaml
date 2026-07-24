@@ -9,10 +9,6 @@ resources:
   - namespace.yaml
   - networkpolicies
   - jellyfin
-  - seerr
-  - sonarr
-  - radarr
-  - prowlarr
 
 labels:
   - pairs:
