@@ -66,6 +66,40 @@ entries:
     identifiers:
       name: kubernetes-cluster-admins
 
+  # Jellyfin authorization groups. jellyfin-users gates login; jellyfin-admins
+  # grants admin. The jellyfin-access-* groups gate library access by content
+  # type. Membership is managed in the authentik UI.
+  - model: authentik_core.group
+    state: present
+    id: group-jellyfin-users
+    identifiers:
+      name: jellyfin-users
+  - model: authentik_core.group
+    state: present
+    id: group-jellyfin-admins
+    identifiers:
+      name: jellyfin-admins
+  - model: authentik_core.group
+    state: present
+    id: group-jellyfin-access-movies
+    identifiers:
+      name: jellyfin-access-movies
+  - model: authentik_core.group
+    state: present
+    id: group-jellyfin-access-books
+    identifiers:
+      name: jellyfin-access-books
+  - model: authentik_core.group
+    state: present
+    id: group-jellyfin-access-shows
+    identifiers:
+      name: jellyfin-access-shows
+  - model: authentik_core.group
+    state: present
+    id: group-jellyfin-access-music
+    identifiers:
+      name: jellyfin-access-music
+
   # ----------------------------------------------------------------- forgejo --
   - model: authentik_providers_oauth2.oauth2provider
     state: present
