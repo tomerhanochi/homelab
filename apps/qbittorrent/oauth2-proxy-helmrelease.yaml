@@ -1,8 +1,8 @@
 ---
 # oauth2-proxy fronting qBittorrent's WebUI. Runs as its own pod (not in gluetun's
-# VPN netns), authenticates against authentik via OIDC, then proxies to the
-# internal qBittorrent Service. Release name is "oauth2-proxy" so the chart's
-# fullname (and thus the Service the HTTPRoute targets) is exactly "oauth2-proxy".
+# VPN netns), authenticates against authentik via OIDC, then proxies to the internal
+# qBittorrent Service. Release name is "oauth2-proxy" so the chart's fullname (and
+# the Service the HTTPRoute targets) is exactly "oauth2-proxy".
 #
 # Temporary shim until Cilium 1.20 native forward-auth; delete this app's oauth2-*
 # files + route + gateway listener + blueprint entry to rip it out.
@@ -30,8 +30,7 @@ spec:
       tag: v7.15.3@sha256:10a1165743a192e1940b4708fb9647027185ce11a681a1c5519b442ff7f1f561  # yamllint disable-line rule:line-length
 
     config:
-      # client-id / client-secret / cookie-secret come from this SOPS-encrypted
-      # secret. client-secret must equal QBITTORRENT_CLIENT_SECRET in authentik-oidc.
+      # client-id / client-secret / cookie-secret come from this SOPS-encrypted secret.
       existingSecret: qbittorrent-oauth2
       # Full proxy config (replaces the chart's default cfg). Credentials are
       # injected from existingSecret as env, so they are not repeated here.
@@ -50,7 +49,6 @@ spec:
 
     service:
       type: ClusterIP
-      # Matches the HTTPRoute backendRef port and the container's 4180.
       portNumber: 4180
 
     securityContext:

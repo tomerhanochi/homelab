@@ -15,6 +15,6 @@ spec:
         - ingress
       toPorts:
         - ports:
-            # http container port (authentik-server Service :80 targets this).
+            # http container port
             - port: "9000"
               protocol: TCP

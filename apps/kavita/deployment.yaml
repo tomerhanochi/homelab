@@ -16,9 +16,6 @@ spec:
       labels:
         app.kubernetes.io/name: kavita
     spec:
-      # Forced rootless under the restricted PSA: the container runs as UID/GID
-      # 1000 and initializes /kavita/config on the fsGroup-owned config PVC
-      # instead of as root.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -28,9 +25,6 @@ spec:
           type: RuntimeDefault
       containers:
         - name: kavita
-          # Reading server for books/manga/comics.
-          # v0.9.x ships native OIDC support: authentication can now be
-          # configured directly in the Kavita UI (Settings > Authentication).
           image: ghcr.io/kareadita/kavita:0.9.0.2@sha256:880a8feff0833e860575f8e08788e4b4f59f8659afd17206566aae88a525130d  # yamllint disable-line rule:line-length
           ports:
             - name: http
@@ -74,9 +68,6 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: kavita-config
-        # Read-only view of the shared media library (see apps/AGENTS.md storage
-        # convention). Kavita libraries point at subfolders of /library. Backed by
-        # a statically-provisioned local PV since restricted PSA forbids hostPath.
         - name: library
           persistentVolumeClaim:
             claimName: kavita-library

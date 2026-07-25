@@ -14,11 +14,10 @@ resources:
   - route.yaml
   - networkpolicies
 
-# oauth2-proxy credentials. client-id is a non-secret literal. client-secret reads
-# the SAME encrypted file authentik uses (../authentik/client-secrets/), so the
-# OIDC client secret lives in exactly one place. cookie-secret is app-local. Flux
-# decrypts both before build. disableNameSuffixHash keeps the name static so the
-# oauth2-proxy HelmRelease's config.existingSecret reference stays valid.
+# oauth2-proxy credentials. client-id is a non-secret literal; client-secret is
+# shared with authentik (single source of truth) and cookie-secret is app-local,
+# both SOPS-encrypted and decrypted by Flux before build. disableNameSuffixHash
+# keeps the name static so the HelmRelease's config.existingSecret ref stays valid.
 # NOTE: the cross-directory file ref requires kustomize LoadRestrictionsNone, which
 # Flux's kustomize-controller uses by default.
 secretGenerator:

@@ -18,9 +18,8 @@ entries:
         return [group.name for group in request.user.ak_groups.all()]
 
   # authentik's built-in email scope hardcodes "email_verified": False, which some
-  # apps (e.g. Kavita) treat as an unverified/unusable account. We have no email
-  # verification step (registration is passkey-only), so emit email_verified: True.
-  # Providers reference this instead of the built-in email scope mapping.
+  # apps (e.g. Kavita) treat as unusable. We have no email verification step
+  # (passkey-only registration), so emit email_verified: True.
   - model: authentik_providers_oauth2.scopemapping
     state: present
     id: scope-email
@@ -56,19 +55,16 @@ entries:
     id: group-kavita-admin
     identifiers:
       name: kavita-Admin
-  # Bound to the cluster-admin ClusterRole via apps/authentik/cluster-admins-rbac.yaml.
-  # The k3s apiserver runs with oidc-groups-prefix=oidc:, so this group is seen
-  # inside Kubernetes RBAC as "oidc:kubernetes-cluster-admins". Add users to it in
-  # the authentik UI to grant them Headlamp/kubectl cluster-admin.
+  # Bound to cluster-admin via cluster-admins-rbac.yaml (the apiserver prefixes it to
+  # "oidc:kubernetes-cluster-admins"). Add users in the authentik UI to grant access.
   - model: authentik_core.group
     state: present
     id: group-kubernetes-cluster-admins
     identifiers:
       name: kubernetes-cluster-admins
 
-  # Jellyfin authorization groups. jellyfin-users gates login; jellyfin-admins
-  # grants admin. The jellyfin-access-* groups gate library access by content
-  # type. Membership is managed in the authentik UI.
+  # jellyfin-users gates login; jellyfin-admins grants admin; jellyfin-access-* gate
+  # library access by content type. Membership managed in the authentik UI.
   - model: authentik_core.group
     state: present
     id: group-jellyfin-users
@@ -100,10 +96,8 @@ entries:
     identifiers:
       name: jellyfin-access-music
 
-  # qBittorrent and filebrowser have no native OIDC; they sit behind a per-app
-  # oauth2-proxy that authenticates against these providers. Membership in these
-  # groups gates access (enforced by oauth2-proxy --allowed-group). Manage
-  # membership in the authentik UI.
+  # qBittorrent and filebrowser have no native OIDC; access is gated by a per-app
+  # oauth2-proxy on membership in these groups. Manage membership in the authentik UI.
   - model: authentik_core.group
     state: present
     id: group-qbittorrent-users
@@ -189,9 +183,7 @@ entries:
       policy_engine_mode: any
 
   # ------------------------------------------------------------- kubernetes ---
-  # Issuer https://sso.tomerhanochi.com/application/o/kubernetes/ — must match the
-  # k3s apiserver oidc-issuer-url and the kubelogin client. localhost redirects
-  # are for kubelogin's local callback server.
+  # localhost redirects are for kubelogin's local callback server.
   - model: authentik_providers_oauth2.oauth2provider
     state: present
     id: kubernetes-provider
@@ -230,8 +222,7 @@ entries:
       policy_engine_mode: any
 
   # --------------------------------------------------------------- jellyfin ---
-  # Configured in Jellyfin's SSO plugin UI; provider name "authentik" gives the
-  # redirect path /sso/OID/redirect/authentik.
+  # Configured in Jellyfin's SSO plugin UI.
   - model: authentik_providers_oauth2.oauth2provider
     state: present
     id: jellyfin-provider
@@ -268,8 +259,8 @@ entries:
       policy_engine_mode: any
 
   # ----------------------------------------------------------------- kavita ---
-  # Configured in Kavita's OIDC settings UI; host-regex redirect keeps it robust
-  # to Kavita's callback path.
+  # Configured in Kavita's OIDC settings UI; regex redirect is robust to Kavita's
+  # callback path.
   - model: authentik_providers_oauth2.oauth2provider
     state: present
     id: kavita-provider
@@ -306,9 +297,7 @@ entries:
       policy_engine_mode: any
 
   # ----------------------------------------------------------- qbittorrent ---
-  # Consumed by the oauth2-proxy in the qbittorrent namespace (not by qBittorrent
-  # itself). redirect_uri is oauth2-proxy's fixed callback path. Access is gated
-  # in oauth2-proxy via --allowed-group=qbittorrent-users.
+  # Consumed by the oauth2-proxy in the qbittorrent namespace, not qBittorrent itself.
   - model: authentik_providers_oauth2.oauth2provider
     state: present
     id: qbittorrent-provider
@@ -345,9 +334,7 @@ entries:
       policy_engine_mode: any
 
   # ----------------------------------------------------------- filebrowser ---
-  # Consumed by the oauth2-proxy in the filebrowser namespace. oauth2-proxy sets
-  # X-Auth-Request-User, which filebrowser trusts (proxy auth). Access is gated in
-  # oauth2-proxy via --allowed-group=filebrowser-users.
+  # Consumed by the oauth2-proxy in the filebrowser namespace.
   - model: authentik_providers_oauth2.oauth2provider
     state: present
     id: filebrowser-provider

@@ -9,11 +9,8 @@ spec:
   chartRef:
     kind: OCIRepository
     name: authentik
-  # authentik = the OIDC provider (replaces pocket-id). Postgres is the external
-  # CloudNativePG cluster; Redis is the in-namespace ephemeral cache. All OIDC
-  # clients and the passkey enrollment flow are declared as blueprints (mounted
-  # from the authentik-blueprints ConfigMap and applied by the worker), so SSO is
-  # fully GitOps — no API/UI bootstrap.
+  # OIDC clients and the passkey flows are declared as authentik blueprints
+  # (applied by the worker on startup), so SSO is fully GitOps — no UI bootstrap.
   values:
     global:
       image:
@@ -50,20 +47,15 @@ spec:
               key: AUTHENTIK_BOOTSTRAP_TOKEN
         - name: AUTHENTIK_BOOTSTRAP_EMAIL
           value: admin@tomerhanochi.com
-      # OIDC client secrets consumed by the blueprints via `!Env` (e.g.
-      # FORGEJO_CLIENT_SECRET). authentik-oidc is assembled by the secretGenerator
-      # in kustomization.yaml from the per-client files under client-secrets/;
-      # envFrom exposes every key in it.
+      # OIDC client secrets the blueprints resolve via `!Env` (e.g. FORGEJO_CLIENT_SECRET).
       envFrom:
         - secretRef:
             name: authentik-oidc
 
     authentik:
-      # Public URL / cookie domain.
       log_level: info
       error_reporting:
         enabled: false
-      # External CloudNativePG database (bundled Bitnami PG stays disabled).
       postgresql:
         host: authentik-database-rw.authentik.svc
         name: authentik
