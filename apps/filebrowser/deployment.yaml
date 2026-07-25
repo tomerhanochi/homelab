@@ -1,8 +1,11 @@
 ---
 # filebrowser has no native OIDC, so auth is delegated to the in-namespace
-# oauth2-proxy via proxy-header auth (X-Auth-Request-User, which filebrowser trusts
-# and auto-creates as a non-admin; promote with `filebrowser users update <name>
-# --perm.admin` for the settings UI).
+# oauth2-proxy via proxy-header auth. In reverse-proxy mode oauth2-proxy forwards the
+# identity to the upstream as X-Forwarded-* (via pass_user_headers, default true) — the
+# X-Auth-Request-* headers only exist as response headers for nginx auth_request mode,
+# so filebrowser must trust X-Forwarded-Preferred-Username, not X-Auth-Request-*.
+# filebrowser trusts this header and auto-creates the user as a non-admin; promote with
+# `filebrowser users update <name> --perm.admin` for the settings UI.
 #
 # SECURITY: filebrowser trusts the auth header blindly (CVE-2026-54089), so its
 # Service is never routed from the Gateway and only oauth2-proxy can reach it.
@@ -36,7 +39,7 @@ spec:
             - |
               DB=/database/filebrowser.db
               [ -f "$DB" ] || filebrowser -d "$DB" config init
-              filebrowser -d "$DB" config set --auth.method=proxy --auth.header=X-Auth-Request-Preferred-Username
+              filebrowser -d "$DB" config set --auth.method=proxy --auth.header=X-Forwarded-Preferred-Username
           volumeMounts:
             - name: config
               mountPath: /database
