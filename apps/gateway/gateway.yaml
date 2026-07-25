@@ -94,7 +94,7 @@ spec:
     # Apps with no native OIDC (qbittorrent, filebrowser) route to a per-namespace
     # oauth2-proxy rather than the app: Cilium Gateway has no forward-auth on stable.
     - name: qbittorrent
-      hostname: qbittorrent.tomerhanochi.com
+      hostname: torrent.tomerhanochi.com
       protocol: HTTPS
       port: 443
       tls:

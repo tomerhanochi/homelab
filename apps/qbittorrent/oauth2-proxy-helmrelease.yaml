@@ -37,7 +37,7 @@ spec:
       configFile: |-
         provider = "oidc"
         oidc_issuer_url = "https://sso.tomerhanochi.com/application/o/qbittorrent/"
-        redirect_url = "https://qbittorrent.tomerhanochi.com/oauth2/callback"
+        redirect_url = "https://torrent.tomerhanochi.com/oauth2/callback"
         upstreams = [ "http://qbittorrent.qbittorrent.svc:8080" ]
         scope = "openid profile email groups"
         allowed_groups = [ "qbittorrent-users" ]

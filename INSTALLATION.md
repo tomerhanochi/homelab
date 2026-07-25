@@ -97,7 +97,7 @@ be configured through their own UI. Each OIDC client secret is committed
 sops -d apps/authentik/client-secrets/jellyfin.sops.txt
 ```
 
-**qBittorrent** (`https://qbittorrent.tomerhanochi.com`) and **filebrowser**
+**qBittorrent** (`https://torrent.tomerhanochi.com`) and **filebrowser**
 (`https://files.tomerhanochi.com`) sit behind an oauth2-proxy that authenticates
 against authentik, so they need no OIDC setup — just add users to the
 `qbittorrent-users` / `filebrowser-users` groups. filebrowser auto-creates each
@@ -129,7 +129,7 @@ Add libraries: **Comics** → `/library/comics`, **Books** → `/library/books`.
 
 #### qBittorrent
 
-The WebUI is SSO-gated at `https://qbittorrent.tomerhanochi.com`, but the official
+The WebUI is SSO-gated at `https://torrent.tomerhanochi.com`, but the official
 image sets a temporary admin password on first boot. Grab it and set a permanent
 one over a port-forward:
 

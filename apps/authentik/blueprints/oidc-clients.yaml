@@ -316,7 +316,7 @@ entries:
         - refresh_token
       redirect_uris:
         - matching_mode: strict
-          url: https://qbittorrent.tomerhanochi.com/oauth2/callback
+          url: https://torrent.tomerhanochi.com/oauth2/callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !KeyOf scope-email
@@ -330,7 +330,7 @@ entries:
       name: qBittorrent
       slug: qbittorrent
       provider: !KeyOf qbittorrent-provider
-      meta_launch_url: https://qbittorrent.tomerhanochi.com
+      meta_launch_url: https://torrent.tomerhanochi.com
       policy_engine_mode: any
 
   # ----------------------------------------------------------- filebrowser ---
