@@ -44,7 +44,6 @@ spec:
         cookie_secure = true
         skip_provider_button = true
         reverse_proxy = true
-        set_xauthrequest = true
 
     service:
       type: ClusterIP
