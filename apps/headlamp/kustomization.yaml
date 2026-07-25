@@ -4,11 +4,27 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - oidc-secret.sops.yaml
   - helmrepository.yaml
   - helmrelease.yaml
   - route.yaml
   - networkpolicies
+
+# Headlamp's OIDC secret. Only OIDC_CLIENT_SECRET is actually secret and it reads
+# the SAME encrypted file as authentik (../authentik/client-secrets/headlamp.sops.txt),
+# so it lives in exactly one place. The rest are non-secret literals, matching the
+# values from the previous headlamp-oidc secret (OIDC_SCOPES is comma-separated).
+secretGenerator:
+  - name: headlamp-oidc
+    namespace: headlamp
+    type: Opaque
+    literals:
+      - OIDC_CLIENT_ID=headlamp
+      - OIDC_ISSUER_URL=https://sso.tomerhanochi.com/application/o/headlamp/
+      - OIDC_SCOPES=openid,profile,email,groups,offline_access
+    files:
+      - OIDC_CLIENT_SECRET=../authentik/client-secrets/headlamp.sops.txt
+    options:
+      disableNameSuffixHash: true
 
 labels:
   - pairs:

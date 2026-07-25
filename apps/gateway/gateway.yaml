@@ -24,8 +24,10 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: authentik
     # jellyfin and seerr both live in the consolidated `media` namespace and are
-    # the only media apps exposed via the gateway (sonarr/radarr/qbittorrent are
-    # internal).
+    # the only media apps exposed via the gateway from there. qBittorrent and
+    # filebrowser are exposed via their own namespaces, each fronted by an
+    # oauth2-proxy that authenticates against authentik (Cilium Gateway has no
+    # forward-auth on stable; revisit when upgrading to Cilium 1.20).
     - name: jellyfin
       hostname: jellyfin.tomerhanochi.com
       protocol: HTTPS
@@ -108,3 +110,33 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: headlamp
+    # Routes to the oauth2-proxy in the qbittorrent namespace, not qBittorrent.
+    - name: qbittorrent
+      hostname: qbittorrent.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: qbittorrent-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbittorrent
+    # Routes to the oauth2-proxy in the filebrowser namespace, not filebrowser.
+    - name: filebrowser
+      hostname: files.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: filebrowser-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: filebrowser

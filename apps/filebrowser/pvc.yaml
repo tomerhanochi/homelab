@@ -1,0 +1,29 @@
+---
+# The browsable data tree (downloads + media), bound to the hostPath PV.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: filebrowser-data
+  namespace: filebrowser
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: filebrowser-data
+  resources:
+    requests:
+      storage: 1Ti
+---
+# filebrowser's own state (the SQLite database). Kept on its own volume so it is
+# never exposed in the file UI. Uses the default local-path provisioner.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: filebrowser-config
+  namespace: filebrowser
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

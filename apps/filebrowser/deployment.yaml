@@ -1,0 +1,107 @@
+---
+# filebrowser (the original filebrowser/filebrowser). No native OIDC, so auth is
+# delegated to the oauth2-proxy in this namespace via proxy-header auth: the proxy
+# authenticates against authentik and injects X-Auth-Request-User, which
+# filebrowser trusts (auto-creating the user on first request as a non-admin with
+# file-operation perms — promote with `filebrowser users update <name>
+# --perm.admin` if you want the settings UI).
+#
+# SECURITY: filebrowser trusts the auth header blindly (CVE-2026-54089), so its
+# Service is never routed from the Gateway and only oauth2-proxy (same namespace)
+# can reach it — see route.yaml (points at oauth2-proxy) and the networkpolicies.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebrowser
+  namespace: filebrowser
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: filebrowser
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: filebrowser
+    spec:
+      securityContext:
+        fsGroup: 1000
+      # Initialise the DB (once) and (re)assert proxy auth on every start, so the
+      # auth config is declarative and survives DB restores.
+      initContainers:
+        - name: init-config
+          image: docker.io/filebrowser/filebrowser:v2.63.18@sha256:c4c627f687668c5a02ab410d8473712c77be7f1f0ea4f8d624d2a1392c495e76  # yamllint disable-line rule:line-length
+          command:
+            - sh
+            - -euc
+            - |
+              DB=/database/filebrowser.db
+              [ -f "$DB" ] || filebrowser -d "$DB" config init
+              filebrowser -d "$DB" config set --auth.method=proxy --auth.header=X-Auth-Request-User
+          volumeMounts:
+            - name: config
+              mountPath: /database
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+      containers:
+        - name: filebrowser
+          image: docker.io/filebrowser/filebrowser:v2.63.18@sha256:c4c627f687668c5a02ab410d8473712c77be7f1f0ea4f8d624d2a1392c495e76  # yamllint disable-line rule:line-length
+          # Port 8080 (not 80): a non-root uid with all caps dropped cannot bind a
+          # privileged port.
+          args:
+            - -d
+            - /database/filebrowser.db
+            - -r
+            - /srv
+            - -a
+            - 0.0.0.0
+            - -p
+            - "8080"
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: data
+              mountPath: /srv
+            - name: config
+              mountPath: /database
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: filebrowser-data
+        - name: config
+          persistentVolumeClaim:
+            claimName: filebrowser-config
+        - name: tmp
+          emptyDir: {}
