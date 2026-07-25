@@ -43,7 +43,6 @@ spec:
                 secretKeyRef:
                   name: qbittorrent-vpn
                   key: WIREGUARD_ADDRESSES
-            # Country to exit from; edit to taste.
             - name: SERVER_COUNTRIES
               value: Netherlands
             # ProtonVPN port forwarding for inbound BitTorrent connections.
@@ -78,7 +77,6 @@ spec:
             # Required by the official image to acknowledge the legal notice.
             - name: QBT_LEGAL_NOTICE
               value: confirm
-            # WebUI on 8080 to match the Service and gluetun FIREWALL_INPUT_PORTS.
             - name: QBT_WEBUI_PORT
               value: "8080"
             - name: TZ
@@ -112,8 +110,6 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: qbittorrent-config
-        # Shared download/library volume (see storage convention). exfat can't
-        # hardlink, so sonarr/radarr move completed downloads instead of copying.
         - name: data
           persistentVolumeClaim:
             claimName: qbittorrent-data

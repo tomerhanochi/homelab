@@ -44,14 +44,12 @@ spec:
     ingress:
       enabled: false
 
-    # Config/state on a dynamically-provisioned PVC (default StorageClass).
     persistence:
       enabled: true
       size: 10Gi
       storageClass: ""
 
     gitea:
-      # Inject the external Postgres password from the CNPG credentials secret.
       additionalConfigFromEnvs:
         - name: FORGEJO__database__PASSWD
           valueFrom:
@@ -59,9 +57,8 @@ spec:
               name: forgejo-database-credentials
               key: password
 
-      # OIDC login via authentik. The chart reads `key` (client id) and
-      # `secret` (client secret) from the existing secret forgejo-oauth. The
-      # source name "authentik" sets the callback path /user/oauth2/authentik/...
+      # OIDC login via authentik. The source name "authentik" sets the callback
+      # path /user/oauth2/authentik/... (must match the provider's redirect URI).
       oauth:
         - name: authentik
           provider: openidConnect

@@ -9,10 +9,9 @@ resources:
   - route.yaml
   - networkpolicies
 
-# Headlamp's OIDC secret. Only OIDC_CLIENT_SECRET is actually secret and it reads
-# the SAME encrypted file as authentik (../authentik/client-secrets/headlamp.sops.txt),
-# so it lives in exactly one place. The rest are non-secret literals, matching the
-# values from the previous headlamp-oidc secret (OIDC_SCOPES is comma-separated).
+# Headlamp's OIDC secret. Only OIDC_CLIENT_SECRET is secret (shared with authentik,
+# single source of truth, SOPS-encrypted); the rest are non-secret literals.
+# OIDC_SCOPES is comma-separated.
 secretGenerator:
   - name: headlamp-oidc
     namespace: headlamp

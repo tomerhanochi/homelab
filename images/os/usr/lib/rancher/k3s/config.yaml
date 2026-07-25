@@ -1,27 +1,15 @@
 ---
 cluster-init: true
 
-##############################
-##### NODE CONFIGURATION #####
-##############################
 node-name: control-plane
 
-##############################
-######### NETWORKING #########
-##############################
 cluster-cidr: 10.42.0.0/16
 service-cidr: 10.43.0.0/16
 
-##############################
-########### ADDONS ###########
-##############################
 disable:
   - traefik
   - servicelb
 
-##############################
-######### COMPONENTS #########
-##############################
 disable-cloud-controller: true
 disable-helm-controller: true
 # Disable network policy controller as cilium brings its own.
@@ -31,28 +19,16 @@ disable-kube-proxy: true
 # Disable flannel as cillium is installed.
 flannel-backend: "none"
 
-##############################
-############ ETCD ############
-##############################
 # Every day, at 04:00.
 etcd-snapshot-schedule-cron: "0 4 * * *"
-etcd-snapshot-retention: 7  # snapshots
+etcd-snapshot-retention: 7
 
-##############################
-######### KUBECONFIG #########
-##############################
 write-kubeconfig: /var/lib/rancher/k3s/kubeconfig
 write-kubeconfig-mode: "0640"
 write-kubeconfig-group: root
 
-##############################
-######## OBSERVABILITY #######
-##############################
 etcd-expose-metrics: true
 
-##############################
-########## SECURITY ##########
-##############################
 selinux: true
 # https://docs.k3s.io/security/hardening-guide#configuration-for-kubernetes-components
 protect-kernel-defaults: true
@@ -67,13 +43,9 @@ kube-apiserver-arg:
   - "audit-log-maxsize=100"
   - "feature-gates=ImageVolume=true"
   - "request-timeout=60s"
-  # OIDC / SSO via authentik. The issuer is authentik's per-application URL for
-  # the "kubernetes" OIDC provider (declared as a blueprint). These become active
-  # once authentik is deployed and reachable; an unreachable issuer at boot is
-  # non-fatal (OIDC auth simply fails until it resolves). authentik is served
-  # with a publicly-trusted Let's Encrypt certificate, so no custom CA file is
-  # needed. Authenticated users/groups are bound via RBAC using the oidc:
-  # prefixes; authenticate kubectl with kubelogin (see INSTALLATION.md).
+  # OIDC / SSO via authentik's "kubernetes" OIDC provider. An unreachable issuer
+  # at boot is non-fatal (auth simply fails until it resolves). Users/groups are
+  # bound via RBAC using the oidc: prefixes.
   - "oidc-issuer-url=https://sso.tomerhanochi.com/application/o/kubernetes/"
   - "oidc-client-id=kubernetes"
   - "oidc-username-claim=email"

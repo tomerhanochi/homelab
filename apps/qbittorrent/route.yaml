@@ -1,7 +1,6 @@
 ---
 # Public entrypoint for qBittorrent. Points at the oauth2-proxy Service, NOT the
-# qBittorrent Service — qBittorrent is never exposed directly. oauth2-proxy
-# authenticates against authentik, then proxies to qbittorrent.qbittorrent.svc.
+# qBittorrent Service — qBittorrent is never exposed directly.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

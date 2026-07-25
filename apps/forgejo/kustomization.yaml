@@ -12,11 +12,9 @@ resources:
   - ssh-route.yaml
   - networkpolicies
 
-# Forgejo's OIDC secret. The chart reads `key` (client id, non-secret literal) and
-# `secret` (client secret) from forgejo-oauth. The client secret reads the SAME
-# encrypted file as authentik (../authentik/client-secrets/forgejo.sops.txt), so it
-# lives in exactly one place. disableNameSuffixHash keeps the name static for the
-# HelmRelease's existingSecret ref.
+# Forgejo's OIDC secret. `key` is a non-secret literal client id; `secret` is the
+# client secret, shared with authentik (single source of truth) and SOPS-encrypted.
+# disableNameSuffixHash keeps the name static for the HelmRelease's existingSecret ref.
 secretGenerator:
   - name: forgejo-oauth
     namespace: forgejo

@@ -22,12 +22,10 @@ spec:
       tag: v0.43.0@sha256:5d03caa26df7a715079405df2949907160518750b9b62b6bf4de8d1a6142c541
 
     config:
-      # Served at a subdomain root, so no base URL sub-path.
       baseURL: ""
-      # OIDC/SSO login against authentik. The client id/secret/issuer/scopes come
-      # from the existing (SOPS-encrypted) headlamp-oidc secret. Headlamp forwards
-      # the OIDC id_token to the kube-apiserver, which trusts the same authentik
-      # issuer; authorization is via cluster RBAC bound to oidc: users/groups.
+      # OIDC/SSO login against authentik. Headlamp forwards the OIDC id_token to the
+      # kube-apiserver, which trusts the same authentik issuer; authorization is via
+      # cluster RBAC bound to oidc: users/groups.
       oidc:
         secret:
           create: false
@@ -63,10 +61,8 @@ spec:
       seccompProfile:
         type: RuntimeDefault
 
-    # Container-level securityContext (the chart maps this onto the headlamp
-    # container). readOnlyRootFilesystem is left false: headlamp writes plugin
-    # and runtime data under its home directory, and no writable volume is
-    # mounted here.
+    # readOnlyRootFilesystem is left false: headlamp writes plugin and runtime data
+    # under its home directory, and no writable volume is mounted here.
     securityContext:
       runAsNonRoot: true
       runAsUser: 100

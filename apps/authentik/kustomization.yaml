@@ -15,8 +15,7 @@ resources:
   - cluster-admins-rbac.yaml
   - networkpolicies
 
-# Blueprints are mounted into the worker from this ConfigMap and applied on
-# startup (referenced by name in helmrelease.yaml -> blueprints.configMaps).
+# Blueprints applied on startup from this ConfigMap.
 configMapGenerator:
   - name: authentik-blueprints
     namespace: authentik
@@ -27,15 +26,10 @@ configMapGenerator:
     options:
       disableNameSuffixHash: true
 
-# The single source of truth for every OIDC client secret. Each client's secret is
-# one encrypted file under client-secrets/ holding just the raw value; this
-# generator assembles them into the authentik-oidc Secret (consumed by the
-# server/worker via helmrelease envFrom, resolved in blueprints with !Env). Apps
-# that also need their own client secret (forgejo, headlamp, oauth2-proxy) read the
-# SAME file via ../authentik/client-secrets/<app>.sops.txt, so each secret lives in
-# exactly one place. Adding a client = one new file here + one line below.
-# disableNameSuffixHash keeps the envFrom ref static (kustomize can't rewrite names
-# inside HelmRelease values).
+# One encrypted file per client under client-secrets/ holds just the raw secret;
+# this generator assembles them into the authentik-oidc Secret. Apps that need
+# their own client secret read the SAME file, so each secret lives in one place.
+# disableNameSuffixHash keeps the Secret name stable for static references.
 secretGenerator:
   - name: authentik-oidc
     namespace: authentik

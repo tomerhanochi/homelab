@@ -1,7 +1,6 @@
 ---
-# oauth2-proxy fronting filebrowser. Authenticates against authentik via OIDC, then
-# proxies to the internal filebrowser Service, injecting X-Auth-Request-User (which
-# filebrowser trusts via proxy-header auth). Release name is "oauth2-proxy" so the
+# oauth2-proxy fronting filebrowser: authenticates against authentik via OIDC, then
+# proxies to the internal filebrowser Service. Release name is "oauth2-proxy" so the
 # chart's fullname (and the Service the HTTPRoute targets) is exactly "oauth2-proxy".
 #
 # Temporary shim until Cilium 1.20 native forward-auth; delete this app's oauth2-*
@@ -30,8 +29,7 @@ spec:
       tag: v7.15.3@sha256:10a1165743a192e1940b4708fb9647027185ce11a681a1c5519b442ff7f1f561  # yamllint disable-line rule:line-length
 
     config:
-      # client-id / client-secret / cookie-secret come from this SOPS-encrypted
-      # secret. client-secret must equal FILEBROWSER_CLIENT_SECRET in authentik-oidc.
+      # client-id / client-secret / cookie-secret come from this SOPS-encrypted secret.
       existingSecret: filebrowser-oauth2
       # Full proxy config (replaces the chart's default cfg). Credentials are
       # injected from existingSecret as env, so they are not repeated here.
@@ -50,7 +48,6 @@ spec:
 
     service:
       type: ClusterIP
-      # Matches the HTTPRoute backendRef port and the container's 4180.
       portNumber: 4180
 
     securityContext:

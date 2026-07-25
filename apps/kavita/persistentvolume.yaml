@@ -1,8 +1,7 @@
 ---
-# Statically-provisioned hostPath PV (not `local`) pinned to the node that owns
-# /var/mnt/data, because kubelet relabels `local` volumes and that fails on the
-# exfat context= mount (no xattrs); hostPath volumes are never relabeled.
-# hostPath-via-PVC stays restricted-PSA compliant (PSA only checks the pod).
+# Statically-provisioned hostPath PV (not `local`): kubelet relabels `local`
+# volumes, which fails on the exfat `context=` mount (no xattrs). hostPath is
+# never relabeled and stays restricted-PSA compliant (PSA only checks the pod).
 # Read-only view of the clean library. Host dir must be owned by 1000:1000.
 apiVersion: v1
 kind: PersistentVolume

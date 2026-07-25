@@ -9,7 +9,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: headlamp
   ingress:
-    # Gateway targets the container port (4466), not the Service port (80).
     - fromEntities:
         - ingress
       toPorts:
