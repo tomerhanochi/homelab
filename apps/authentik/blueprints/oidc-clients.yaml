@@ -100,6 +100,21 @@ entries:
     identifiers:
       name: jellyfin-access-music
 
+  # qBittorrent and filebrowser have no native OIDC; they sit behind a per-app
+  # oauth2-proxy that authenticates against these providers. Membership in these
+  # groups gates access (enforced by oauth2-proxy --allowed-group). Manage
+  # membership in the authentik UI.
+  - model: authentik_core.group
+    state: present
+    id: group-qbittorrent-users
+    identifiers:
+      name: qbittorrent-users
+  - model: authentik_core.group
+    state: present
+    id: group-filebrowser-users
+    identifiers:
+      name: filebrowser-users
+
   # ----------------------------------------------------------------- forgejo --
   - model: authentik_providers_oauth2.oauth2provider
     state: present
@@ -288,4 +303,82 @@ entries:
       slug: kavita
       provider: !KeyOf kavita-provider
       meta_launch_url: https://kavita.tomerhanochi.com
+      policy_engine_mode: any
+
+  # ----------------------------------------------------------- qbittorrent ---
+  # Consumed by the oauth2-proxy in the qbittorrent namespace (not by qBittorrent
+  # itself). redirect_uri is oauth2-proxy's fixed callback path. Access is gated
+  # in oauth2-proxy via --allowed-group=qbittorrent-users.
+  - model: authentik_providers_oauth2.oauth2provider
+    state: present
+    id: qbittorrent-provider
+    identifiers:
+      name: qbittorrent
+    attrs:
+      name: qbittorrent
+      client_type: confidential
+      client_id: qbittorrent
+      client_secret: !Env QBITTORRENT_CLIENT_SECRET
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+      redirect_uris:
+        - matching_mode: strict
+          url: https://qbittorrent.tomerhanochi.com/oauth2/callback
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !KeyOf scope-groups
+  - model: authentik_core.application
+    state: present
+    identifiers:
+      slug: qbittorrent
+    attrs:
+      name: qBittorrent
+      slug: qbittorrent
+      provider: !KeyOf qbittorrent-provider
+      meta_launch_url: https://qbittorrent.tomerhanochi.com
+      policy_engine_mode: any
+
+  # ----------------------------------------------------------- filebrowser ---
+  # Consumed by the oauth2-proxy in the filebrowser namespace. oauth2-proxy sets
+  # X-Auth-Request-User, which filebrowser trusts (proxy auth). Access is gated in
+  # oauth2-proxy via --allowed-group=filebrowser-users.
+  - model: authentik_providers_oauth2.oauth2provider
+    state: present
+    id: filebrowser-provider
+    identifiers:
+      name: filebrowser
+    attrs:
+      name: filebrowser
+      client_type: confidential
+      client_id: filebrowser
+      client_secret: !Env FILEBROWSER_CLIENT_SECRET
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+      redirect_uris:
+        - matching_mode: strict
+          url: https://files.tomerhanochi.com/oauth2/callback
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !KeyOf scope-groups
+  - model: authentik_core.application
+    state: present
+    identifiers:
+      slug: filebrowser
+    attrs:
+      name: Filebrowser
+      slug: filebrowser
+      provider: !KeyOf filebrowser-provider
+      meta_launch_url: https://files.tomerhanochi.com
       policy_engine_mode: any

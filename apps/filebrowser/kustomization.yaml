@@ -6,7 +6,6 @@ resources:
   - namespace.yaml
   - persistentvolume.yaml
   - pvc.yaml
-  - vpn-secret.sops.yaml
   - deployment.yaml
   - service.yaml
   - oauth2-proxy-helmrepository.yaml
@@ -22,17 +21,17 @@ resources:
 # NOTE: the cross-directory file ref requires kustomize LoadRestrictionsNone, which
 # Flux's kustomize-controller uses by default.
 secretGenerator:
-  - name: qbittorrent-oauth2
-    namespace: qbittorrent
+  - name: filebrowser-oauth2
+    namespace: filebrowser
     type: Opaque
     literals:
-      - client-id=qbittorrent
+      - client-id=filebrowser
     files:
-      - client-secret=../authentik/client-secrets/qbittorrent.sops.txt
+      - client-secret=../authentik/client-secrets/filebrowser.sops.txt
       - cookie-secret=oauth2-cookie-secret.sops.txt
     options:
       disableNameSuffixHash: true
 
 labels:
   - pairs:
-      app.kubernetes.io/part-of: qbittorrent
+      app.kubernetes.io/part-of: filebrowser

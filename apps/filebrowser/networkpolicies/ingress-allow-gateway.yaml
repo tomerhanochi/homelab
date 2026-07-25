@@ -1,0 +1,20 @@
+---
+# Only the oauth2-proxy pod is gateway-facing; filebrowser itself is reachable
+# only intra-namespace (from oauth2-proxy) via ingress-allow-intra-namespace,
+# which is what keeps its trusted auth header un-forgeable (CVE-2026-54089).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ingress-allow-gateway
+  namespace: filebrowser
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: oauth2-proxy
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "4180"
+              protocol: TCP

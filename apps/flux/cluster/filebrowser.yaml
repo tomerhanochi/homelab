@@ -2,13 +2,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: qbittorrent
+  name: filebrowser
   namespace: flux-system
 spec:
   interval: 10m
   retryInterval: 1m
   timeout: 5m
-  path: ./apps/qbittorrent
+  path: ./apps/filebrowser
   prune: true
   wait: true
   # Recreate resources on immutable-field changes (e.g. Service/selectors).

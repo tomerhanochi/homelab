@@ -6,12 +6,27 @@ resources:
   - namespace.yaml
   - postgres-cluster.yaml
   - postgres-cluster-credentials.sops.yaml
-  - oauth-secret.sops.yaml
   - ocirepository.yaml
   - helmrelease.yaml
   - route.yaml
   - ssh-route.yaml
   - networkpolicies
+
+# Forgejo's OIDC secret. The chart reads `key` (client id, non-secret literal) and
+# `secret` (client secret) from forgejo-oauth. The client secret reads the SAME
+# encrypted file as authentik (../authentik/client-secrets/forgejo.sops.txt), so it
+# lives in exactly one place. disableNameSuffixHash keeps the name static for the
+# HelmRelease's existingSecret ref.
+secretGenerator:
+  - name: forgejo-oauth
+    namespace: forgejo
+    type: Opaque
+    literals:
+      - key=forgejo
+    files:
+      - secret=../authentik/client-secrets/forgejo.sops.txt
+    options:
+      disableNameSuffixHash: true
 
 labels:
   - pairs:

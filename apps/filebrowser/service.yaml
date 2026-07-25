@@ -1,0 +1,15 @@
+---
+# Internal only — reached solely by the in-namespace oauth2-proxy, never the
+# Gateway (see route.yaml).
+apiVersion: v1
+kind: Service
+metadata:
+  name: filebrowser
+  namespace: filebrowser
+spec:
+  selector:
+    app.kubernetes.io/name: filebrowser
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

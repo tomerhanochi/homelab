@@ -1,0 +1,33 @@
+---
+# Statically-provisioned hostPath PV (not `local`) pinned to the node that owns
+# /var/mnt/data, because kubelet relabels `local` volumes and that fails on the
+# exfat context= mount (no xattrs); hostPath volumes are never relabeled.
+# hostPath-via-PVC stays restricted-PSA compliant (PSA only checks the pod).
+#
+# This mounts the WHOLE /var/mnt/data tree (qBittorrent downloads live here,
+# Jellyfin's library at /var/mnt/data/media underneath) so filebrowser can move a
+# finished download into the media library as an instant same-filesystem rename.
+# A second PV to the same host path is fine: RWO binds per PV/PVC, not per path,
+# and filebrowser co-locates with qbittorrent on control-plane. Owned by 1000:1000.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: filebrowser-data
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: /var/mnt/data
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - control-plane

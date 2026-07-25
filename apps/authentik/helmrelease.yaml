@@ -51,7 +51,9 @@ spec:
         - name: AUTHENTIK_BOOTSTRAP_EMAIL
           value: admin@tomerhanochi.com
       # OIDC client secrets consumed by the blueprints via `!Env` (e.g.
-      # FORGEJO_CLIENT_SECRET). envFrom exposes every key in the secret.
+      # FORGEJO_CLIENT_SECRET). authentik-oidc is assembled by the secretGenerator
+      # in kustomization.yaml from the per-client files under client-secrets/;
+      # envFrom exposes every key in it.
       envFrom:
         - secretRef:
             name: authentik-oidc
