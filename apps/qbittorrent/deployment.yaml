@@ -62,6 +62,13 @@ spec:
               value: 10.42.0.0/16,10.43.0.0/16
             - name: TZ
               value: Europe/Amsterdam
+            # DOT appears to experience slowness, DOH appears to be much faster.
+            - name: DNS_UPSTREAM_RESOLVER_TYPE
+              value: "doh"
+            - name: DNS_UPSTREAM_RESOLVERS
+              value: "cloudflare"
+            - name: DNS_UPSTREAM_IPV6
+              value: "off"
           resources:
             requests:
               cpu: 25m
