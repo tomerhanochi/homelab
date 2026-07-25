@@ -1,14 +1,11 @@
 ---
-# filebrowser (the original filebrowser/filebrowser). No native OIDC, so auth is
-# delegated to the oauth2-proxy in this namespace via proxy-header auth: the proxy
-# authenticates against authentik and injects X-Auth-Request-User, which
-# filebrowser trusts (auto-creating the user on first request as a non-admin with
-# file-operation perms — promote with `filebrowser users update <name>
-# --perm.admin` if you want the settings UI).
+# filebrowser has no native OIDC, so auth is delegated to the in-namespace
+# oauth2-proxy via proxy-header auth (X-Auth-Request-User, which filebrowser trusts
+# and auto-creates as a non-admin; promote with `filebrowser users update <name>
+# --perm.admin` for the settings UI).
 #
 # SECURITY: filebrowser trusts the auth header blindly (CVE-2026-54089), so its
-# Service is never routed from the Gateway and only oauth2-proxy (same namespace)
-# can reach it — see route.yaml (points at oauth2-proxy) and the networkpolicies.
+# Service is never routed from the Gateway and only oauth2-proxy can reach it.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,7 +36,7 @@ spec:
             - |
               DB=/database/filebrowser.db
               [ -f "$DB" ] || filebrowser -d "$DB" config init
-              filebrowser -d "$DB" config set --auth.method=proxy --auth.header=X-Auth-Request-User
+              filebrowser -d "$DB" config set --auth.method=proxy --auth.header=X-Auth-Request-Preferred-Username
           volumeMounts:
             - name: config
               mountPath: /database
