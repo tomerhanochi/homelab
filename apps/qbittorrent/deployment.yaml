@@ -62,6 +62,9 @@ spec:
               value: 10.0.0.0/8
             - name: TZ
               value: Europe/Amsterdam
+            # Some addresses are missing from cloudflare
+            - name: DNS_UPSTREAM_RESOLVERS
+              value: google,cloudflare,quad9 secured
           resources:
             requests:
               cpu: 25m
