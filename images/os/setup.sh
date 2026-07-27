@@ -24,7 +24,7 @@ dnf \
   --assumeyes \
   --disablerepo='*' \
   --enablerepo='fedora,updates,k3s-selinux' \
-  install audit k3s-selinux NetworkManager openssh-server polkit;
+  install audit k3s-selinux NetworkManager openssh-server polkit helix;
 
 systemctl enable var-home.mount var-mnt-data.mount k3s.service;
 
