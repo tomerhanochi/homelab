@@ -9,19 +9,16 @@ resources:
   - route.yaml
   - networkpolicies
 
-# Headlamp's OIDC secret. Only OIDC_CLIENT_SECRET is secret (shared with authentik,
-# single source of truth, SOPS-encrypted); the rest are non-secret literals.
-# OIDC_SCOPES is comma-separated.
 secretGenerator:
   - name: headlamp-oidc
     namespace: headlamp
     type: Opaque
     literals:
-      - OIDC_CLIENT_ID=headlamp
-      - OIDC_ISSUER_URL=https://sso.tomerhanochi.com/application/o/headlamp/
+      - OIDC_CLIENT_ID=kubernetes
+      - OIDC_ISSUER_URL=https://sso.tomerhanochi.com/application/o/kubernetes/
       - OIDC_SCOPES=openid,profile,email,groups,offline_access
     files:
-      - OIDC_CLIENT_SECRET=../authentik/client-secrets/headlamp.sops.txt
+      - OIDC_CLIENT_SECRET=../authentik/client-secrets/kubernetes.sops.txt
     options:
       disableNameSuffixHash: true
 

@@ -145,43 +145,6 @@ entries:
       meta_launch_url: https://git.tomerhanochi.com
       policy_engine_mode: any
 
-  # --------------------------------------------------------------- headlamp ---
-  - model: authentik_providers_oauth2.oauth2provider
-    state: present
-    id: headlamp-provider
-    identifiers:
-      name: headlamp
-    attrs:
-      name: headlamp
-      client_type: confidential
-      client_id: headlamp
-      client_secret: !Env HEADLAMP_CLIENT_SECRET
-      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
-      grant_types:
-        - authorization_code
-        - refresh_token
-      redirect_uris:
-        - matching_mode: strict
-          url: https://headlamp.tomerhanochi.com/oidc-callback
-      property_mappings:
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
-        - !KeyOf scope-groups
-  - model: authentik_core.application
-    state: present
-    identifiers:
-      slug: headlamp
-    attrs:
-      name: Headlamp
-      slug: headlamp
-      provider: !KeyOf headlamp-provider
-      meta_launch_url: https://headlamp.tomerhanochi.com
-      policy_engine_mode: any
-
   # ------------------------------------------------------------- kubernetes ---
   # localhost redirects are for kubelogin's local callback server.
   - model: authentik_providers_oauth2.oauth2provider
@@ -205,6 +168,8 @@ entries:
           url: http://localhost:8000
         - matching_mode: strict
           url: http://localhost:18000
+        - matching_mode: strict
+          url: https://headlamp.tomerhanochi.com/oidc-callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !KeyOf scope-email
@@ -219,6 +184,7 @@ entries:
       name: Kubernetes
       slug: kubernetes
       provider: !KeyOf kubernetes-provider
+      meta_launch_url: https://headlamp.tomerhanochi.com
       policy_engine_mode: any
 
   # --------------------------------------------------------------- jellyfin ---
