@@ -35,7 +35,7 @@ secretGenerator:
     type: Opaque
     files:
       - FORGEJO_CLIENT_SECRET=client-secrets/forgejo.sops.txt
-      - KUBERNETES_CLIENT_SECRET=client-secrets/kubernetes.sops.txt
+      - HEADLAMP_CLIENT_SECRET=client-secrets/headlamp.sops.txt
       - JELLYFIN_CLIENT_SECRET=client-secrets/jellyfin.sops.txt
       - KAVITA_CLIENT_SECRET=client-secrets/kavita.sops.txt
       - QBITTORRENT_CLIENT_SECRET=client-secrets/qbittorrent.sops.txt

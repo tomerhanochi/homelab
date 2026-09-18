@@ -36,6 +36,7 @@ secrets-encryption: true
 kube-apiserver-arg:
   - "enable-admission-plugins=NodeRestriction"
   - "admission-control-config-file=/usr/lib/rancher/k3s/server/admissionconfigurations/pod-security.yaml"
+  - "authentication-config=/usr/lib/rancher/k3s/server/authenticationconfiguration.yaml"
   - "audit-policy-file=/usr/lib/rancher/k3s/server/policies/audit.yaml"
   - "audit-log-path=/var/log/rancher/k3s/audit.log"
   - "audit-log-maxage=30"
@@ -43,15 +44,6 @@ kube-apiserver-arg:
   - "audit-log-maxsize=100"
   - "feature-gates=ImageVolume=true"
   - "request-timeout=60s"
-  # OIDC / SSO via authentik's "kubernetes" OIDC provider. An unreachable issuer
-  # at boot is non-fatal (auth simply fails until it resolves). Users/groups are
-  # bound via RBAC using the oidc: prefixes.
-  - "oidc-issuer-url=https://sso.tomerhanochi.com/application/o/kubernetes/"
-  - "oidc-client-id=kubernetes"
-  - "oidc-username-claim=email"
-  - "oidc-username-prefix=oidc:"
-  - "oidc-groups-claim=groups"
-  - "oidc-groups-prefix=oidc:"
 kube-controller-manager-arg:
   - 'terminated-pod-gc-threshold=10'
 kubelet-arg:
