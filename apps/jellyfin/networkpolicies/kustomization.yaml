@@ -5,3 +5,4 @@ kind: Kustomization
 # Opens intra-namespace traffic; cluster-wide default-deny lives in apps/cilium.
 resources:
   - ingress-allow-intra-namespace.yaml
+  - ingress-allow-gateway.yaml
