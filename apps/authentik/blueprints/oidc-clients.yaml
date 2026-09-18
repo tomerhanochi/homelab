@@ -145,18 +145,17 @@ entries:
       meta_launch_url: https://git.tomerhanochi.com
       policy_engine_mode: any
 
-  # ------------------------------------------------------------- kubernetes ---
-  # localhost redirects are for kubelogin's local callback server.
+  # --------------------------------------------------------------- headlamp ---
   - model: authentik_providers_oauth2.oauth2provider
     state: present
-    id: kubernetes-provider
+    id: headlamp-provider
     identifiers:
-      name: kubernetes
+      name: headlamp
     attrs:
-      name: kubernetes
+      name: headlamp
       client_type: confidential
-      client_id: kubernetes
-      client_secret: !Env KUBERNETES_CLIENT_SECRET
+      client_id: headlamp
+      client_secret: !Env HEADLAMP_CLIENT_SECRET
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
@@ -164,10 +163,6 @@ entries:
         - authorization_code
         - refresh_token
       redirect_uris:
-        - matching_mode: strict
-          url: http://localhost:8000
-        - matching_mode: strict
-          url: http://localhost:18000
         - matching_mode: strict
           url: https://headlamp.tomerhanochi.com/oidc-callback
       property_mappings:
@@ -179,12 +174,50 @@ entries:
   - model: authentik_core.application
     state: present
     identifiers:
-      slug: kubernetes
+      slug: headlamp
     attrs:
-      name: Kubernetes
-      slug: kubernetes
-      provider: !KeyOf kubernetes-provider
+      name: Headlamp
+      slug: headlamp
+      provider: !KeyOf headlamp-provider
       meta_launch_url: https://headlamp.tomerhanochi.com
+      policy_engine_mode: any
+
+  # ------------------------------------------------------------- kubectl ---
+  - model: authentik_providers_oauth2.oauth2provider
+    state: present
+    id: kubectl-provider
+    identifiers:
+      name: kubectl
+    attrs:
+      name: kubectl
+      client_type: public
+      client_id: kubectl
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+        - device_code
+      redirect_uris:
+        - matching_mode: strict
+          url: http://localhost:8000
+        - matching_mode: strict
+          url: http://localhost:18000
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
+        - !KeyOf scope-groups
+  - model: authentik_core.application
+    state: present
+    identifiers:
+      slug: kubectl
+    attrs:
+      name: Kubectl
+      slug: kubectl
+      provider: !KeyOf kubectl-provider
       policy_engine_mode: any
 
   # --------------------------------------------------------------- jellyfin ---
