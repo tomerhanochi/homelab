@@ -15,7 +15,7 @@ entries:
       scope_name: groups
       description: "Group membership"
       expression: |
-        return [group.name for group in request.user.ak_groups.all()]
+        return [group.name for group in request.user.all_groups()]
 
   # authentik's built-in email scope hardcodes "email_verified": False, which some
   # apps (e.g. Kavita) treat as unusable. We have no email verification step
@@ -129,9 +129,9 @@ entries:
           url: https://git.tomerhanochi.com/user/oauth2/authentik/callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !KeyOf scope-groups
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
   - model: authentik_core.application
     state: present
     identifiers:
@@ -165,10 +165,10 @@ entries:
           url: https://headlamp.tomerhanochi.com/oidc-callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
-        - !KeyOf scope-groups
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
   - model: authentik_core.application
     state: present
     identifiers:
@@ -204,10 +204,10 @@ entries:
           url: http://localhost:18000
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
-        - !KeyOf scope-groups
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
   - model: authentik_core.application
     state: present
     identifiers:
@@ -241,9 +241,9 @@ entries:
           url: https://jellyfin.tomerhanochi.com/sso/OID/redirect/authentik
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !KeyOf scope-groups
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
   - model: authentik_core.application
     state: present
     identifiers:
@@ -279,9 +279,9 @@ entries:
           url: "https://kavita\\.tomerhanochi\\.com/.*"
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !KeyOf scope-groups
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
   - model: authentik_core.application
     state: present
     identifiers:
@@ -316,9 +316,9 @@ entries:
           url: https://torrent.tomerhanochi.com/oauth2/callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !KeyOf scope-groups
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
   - model: authentik_core.application
     state: present
     identifiers:
@@ -353,9 +353,9 @@ entries:
           url: https://files.tomerhanochi.com/oauth2/callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
-        - !KeyOf scope-email
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !KeyOf scope-groups
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
   - model: authentik_core.application
     state: present
     identifiers:
