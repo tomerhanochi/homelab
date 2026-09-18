@@ -156,10 +156,6 @@ The API server trusts authentik's `kubernetes` OIDC application as its issuer.
     --oidc-client-secret="$(sops -d apps/authentik/client-secrets/kubernetes.sops.txt)"
   ```
 
-Authorization is via RBAC: bind your authentik identity/group (subjects are
-prefixed `oidc:`) to a Role/ClusterRole — e.g. a `ClusterRoleBinding` for the group
-`oidc:kubernetes-cluster-admins` (see `apps/authentik/cluster-admins-rbac.yaml`).
-
 ### 7. Cleanup
 
 ```bash

@@ -55,8 +55,6 @@ entries:
     id: group-kavita-admin
     identifiers:
       name: kavita-Admin
-  # Bound to cluster-admin via cluster-admins-rbac.yaml (the apiserver prefixes it to
-  # "oidc:kubernetes-cluster-admins"). Add users in the authentik UI to grant access.
   - model: authentik_core.group
     state: present
     id: group-kubernetes-cluster-admins

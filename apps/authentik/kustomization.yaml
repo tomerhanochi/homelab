@@ -12,7 +12,6 @@ resources:
   - ocirepository.yaml
   - helmrelease.yaml
   - route.yaml
-  - cluster-admins-rbac.yaml
   - networkpolicies
 
 # Blueprints applied on startup from this ConfigMap.
