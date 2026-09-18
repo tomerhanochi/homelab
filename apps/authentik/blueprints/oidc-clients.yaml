@@ -196,7 +196,8 @@ entries:
       grant_types:
         - authorization_code
         - refresh_token
-        - device_code
+        # Taken from https://github.com/goauthentik/authentik/blob/bafc5e1e/authentik/common/oauth/constants.py#L6-L13
+        - urn:ietf:params:oauth:grant-type:device_code
       redirect_uris:
         - matching_mode: strict
           url: http://localhost:8000
