@@ -3,7 +3,7 @@ apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: jellyfin-ingress-gateway
-  namespace: media
+  namespace: jellyfin
 spec:
   endpointSelector:
     matchLabels:
