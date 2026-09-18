@@ -8,7 +8,6 @@ resources:
   - helmrelease.yaml
   - persistentvolume.yaml
   - pvc.yaml
-  - route.yaml
   - networkpolicies
 
 labels:
