@@ -14,6 +14,10 @@ spec:
         kind: HelmRepository
         name: jellyfin
   values:
+    image:
+      repository: docker.io/jellyfin/jellyfin
+      tag: 12.1.20260915-010956@sha256:78d3ea1207d1322471fcac39a614f004f2ccf7e878f95ab2977d752f07e4dd7e
+
     # Disable DLNA and service discovery (not needed with static DNS).
     jellyfin:
       enableDLNA: false
@@ -34,6 +38,19 @@ spec:
     # Exposed via the Gateway API HTTPRoute (route.yaml), not the chart ingress.
     ingress:
       enabled: false
+
+    httpRoute:
+      enabled: true
+      parentRefs:
+        - name: default
+          namespace: gateway
+          sectionName: jellyfin
+      hostnames:
+        - jellyfin.tomerhanochi.com
+      rules:
+        - backendRefs:
+            - name: jellyfin
+              port: 8096
 
     persistence:
       config:
