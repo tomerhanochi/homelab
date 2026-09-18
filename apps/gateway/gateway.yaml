@@ -36,7 +36,7 @@ spec:
           from: Selector
           selector:
             matchLabels:
-              kubernetes.io/metadata.name: media
+              kubernetes.io/metadata.name: jellyfin
     - name: forgejo
       hostname: git.tomerhanochi.com
       protocol: HTTPS
