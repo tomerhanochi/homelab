@@ -19,14 +19,15 @@ configMapGenerator:
   - name: authentik-blueprints-apps
     namespace: authentik
     files:
-      - blueprints/apps/000_scopes.yaml
-      - blueprints/apps/100_filebrowser.yaml
-      - blueprints/apps/100_forgejo.yaml
-      - blueprints/apps/100_headlamp.yaml
-      - blueprints/apps/100_jellyfin.yaml
-      - blueprints/apps/100_kavita.yaml
-      - blueprints/apps/100_kubectl.yaml
-      - blueprints/apps/100_qbittorrent.yaml
+      - blueprints/apps/scopes.yaml
+      - blueprints/apps/groups.yaml
+      - blueprints/apps/filebrowser.yaml
+      - blueprints/apps/forgejo.yaml
+      - blueprints/apps/headlamp.yaml
+      - blueprints/apps/jellyfin.yaml
+      - blueprints/apps/kavita.yaml
+      - blueprints/apps/kubectl.yaml
+      - blueprints/apps/qbittorrent.yaml
       - blueprints/apps/index.yaml
     options:
       disableNameSuffixHash: true
