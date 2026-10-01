@@ -9,16 +9,11 @@ spec:
   chartRef:
     kind: OCIRepository
     name: authentik
-  # OIDC clients and the passkey flows are declared as authentik blueprints
-  # (applied by the worker on startup), so SSO is fully GitOps — no UI bootstrap.
   values:
     global:
       image:
         # Pin the server/worker image by digest (chart default tag == appVersion).
         digest: sha256:50a833c48a714709f15d4f8846ec6b81a41d0d6a6bd2975087dfed3000d0d72e
-      # Applied to BOTH the server and worker deployments. Secret material is
-      # injected here (env overrides the chart's generated config secret); the
-      # worker needs these so blueprint `!Env` lookups resolve.
       env:
         - name: AUTHENTIK_SECRET_KEY
           valueFrom:
@@ -32,9 +27,6 @@ spec:
               key: password
         - name: AUTHENTIK_REDIS__HOST
           value: authentik-redis.authentik.svc
-        # Initial akadmin credentials (first-startup only). akadmin retains
-        # password login via the default authentication flow so it can enroll a
-        # passkey; self-service registration is passkey-only (see blueprints).
         - name: AUTHENTIK_BOOTSTRAP_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -47,7 +39,6 @@ spec:
               key: AUTHENTIK_BOOTSTRAP_TOKEN
         - name: AUTHENTIK_BOOTSTRAP_EMAIL
           value: admin@tomerhanochi.com
-      # OIDC client secrets the blueprints resolve via `!Env` (e.g. FORGEJO_CLIENT_SECRET).
       envFrom:
         - secretRef:
             name: authentik-oidc
@@ -62,14 +53,13 @@ spec:
         user: authentik
         port: 5432
 
-    # Do not deploy the chart's bundled Bitnami PostgreSQL; we use CloudNativePG.
     postgresql:
       enabled: false
 
-    # Discover and apply every *.yaml key in this ConfigMap on worker startup.
     blueprints:
       configMaps:
-        - authentik-blueprints
+        - authentik-blueprints-apps
+        - authentik-blueprints-passkey
 
     server:
       replicas: 1

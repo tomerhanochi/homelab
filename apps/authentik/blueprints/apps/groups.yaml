@@ -1,0 +1,13 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-groups
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_core.group
+    identifiers:
+      name: homelab-users
+  - model: authentik_core.group
+    identifiers:
+      name: homelab-admins

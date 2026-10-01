@@ -1,0 +1,52 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-qbittorrent
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_providers_oauth2.oauth2provider
+    id: provider
+    identifiers:
+      name: qbittorrent
+    attrs:
+      client_type: confidential
+      client_id: qbittorrent
+      client_secret: !Env QBITTORRENT_CLIENT_SECRET
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+      redirect_uris:
+        - matching_mode: strict
+          url: https://torrent.tomerhanochi.com/oauth2/callback
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-groups]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
+  - model: authentik_core.application
+    id: application
+    identifiers:
+      slug: qbittorrent
+      name: qBittorrent
+    attrs:
+      provider: !KeyOf provider
+      meta_launch_url: https://torrent.tomerhanochi.com
+      policy_engine_mode: any
+  - model: authentik_core.applicationentitlement
+    id: entitlement-login
+    identifiers:
+      app: !KeyOf application
+      name: login
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-login
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  # TODO: Remove once migration to entitlements finishes
+  - model: authentik_core.group
+    identifiers:
+      name: qbittorrent-users
