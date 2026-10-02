@@ -1,0 +1,41 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-index
+entries:
+  # Shared Models
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/groups.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/scopes.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  # Flows
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/flow-enrollment.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/flow-authentication.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  # Applications
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/apps-filebrowser.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/apps-forgejo.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/apps-headlamp.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/apps-jellyfin.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/apps-kavita.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/apps-kubectl.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
+      path: mounted/cm-authentik-blueprints/apps-qbittorrent.yaml
+    model: authentik_blueprints.metaapplyblueprint
