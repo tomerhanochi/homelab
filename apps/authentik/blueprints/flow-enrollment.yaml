@@ -2,8 +2,6 @@
 version: 1
 metadata:
   name: homelab-flow-enrollment
-  labels:
-    blueprints.goauthentik.io/instantiate: "false"
 entries:
   - model: authentik_flows.flow
     id: flow
