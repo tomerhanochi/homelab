@@ -1,10 +1,42 @@
 FROM quay.io/bootc-devel/fedora-bootc-44-minimal:20260715-142243@sha256:17a7230c2e41360beef7c93fb1468acc5dff9aab23c9660d6020564c073c56f5
 
+RUN <<EOFRUN
+# Taken from https://github.com/k3s-io/k3s/blob/bdb2a3e5/install.sh#L371-L383
+K3S_VERSION=$(curl -w '%{url_effective}' -l -s -s https://update.k3s.io/v1-release/channels/stable -o /dev/null | sed -e 's|.*/||')
+curl \
+  -sfL "https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3s" \
+  -o /usr/local/bin/k3s;
+chmod +x /usr/local/bin/k3s;
+
+# Taken from https://github.com/k3s-io/k3s/blob/bdb2a3e5/install.sh#L780-797
+for tool in kubectl crictl ctr; do
+  ln -sf /usr/local/bin/k3s "/usr/local/bin/${tool}";
+done
+EOFRUN
+
+RUN --mount=type=tmpfs,target=/var <<EOFRUN
+dnf \
+  --repofrompath=k3s-selinux,https://rpm.rancher.io/k3s/stable/common/centos/9/noarch \
+  --setopt=k3s-selinux.gpgcheck=1 \
+  --setopt=k3s-selinux.gpgkey=https://rpm.rancher.io/public.key \
+  --assumeyes \
+  --disablerepo='*' \
+  --enablerepo='fedora,updates,k3s-selinux' \
+  install audit k3s-selinux NetworkManager openssh-server polkit helix;
+
+dnf clean all;
+EOFRUN
+
 COPY /usr /usr
 
-RUN \
-  --mount=type=tmpfs,target=/var \
-  --mount=type=bind,source=setup.sh,target=/setup.sh,relabel=private,ro=true \
-  /setup.sh
+RUN <<EOFRUN
+mkdir -p /var/opt;
+rm -rf /opt;
+ln -s var/opt /opt;
+
+systemctl enable var-home.mount var-mnt-data.mount k3s.service;
+
+systemctl set-default multi-user.target;
+EOFRUN
 
 RUN bootc container lint
