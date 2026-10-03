@@ -1,7 +1,7 @@
 ---
 version: 1
 metadata:
-  name: homelab-apps-scopes
+  name: homelab-scopes
   labels:
     blueprints.goauthentik.io/instantiate: "false"
 entries:

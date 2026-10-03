@@ -1,7 +1,7 @@
 ---
 version: 1
 metadata:
-  name: homelab-apps-index
+  name: homelab-index
 entries:
   # Shared Models
   - identifiers:

@@ -1,7 +1,7 @@
 ---
 version: 1
 metadata:
-  name: homelab-enrollment-invitiation-generation
+  name: homelab-flow-enrollment-invitiation-generation
   labels:
     blueprints.goauthentik.io/instantiate: "false"
 entries:
