@@ -1,7 +1,7 @@
 ---
 version: 1
 metadata:
-  name: homelab-apps-groups
+  name: homelab-groups
   labels:
     blueprints.goauthentik.io/instantiate: "false"
 entries:
