@@ -15,6 +15,9 @@ entries:
       path: mounted/cm-authentik-blueprints/flow-enrollment.yaml
     model: authentik_blueprints.metaapplyblueprint
   - identifiers:
+      path: mounted/cm-authentik-blueprints/flow-enrollment-invitation-generation.yaml
+    model: authentik_blueprints.metaapplyblueprint
+  - identifiers:
       path: mounted/cm-authentik-blueprints/flow-authentication.yaml
     model: authentik_blueprints.metaapplyblueprint
   # Applications

@@ -19,6 +19,11 @@ configMapGenerator:
   - name: authentik-blueprints-apps
     namespace: authentik
     files:
+      - blueprints/groups.yaml
+      - blueprints/scopes.yaml
+      - blueprints/flow-enrollment.yaml
+      - blueprints/flow-enrollment-invitation-generation.yaml
+      - blueprints/flow-authentication.yaml
       - blueprints/apps-filebrowser.yaml
       - blueprints/apps-forgejo.yaml
       - blueprints/apps-headlamp.yaml
@@ -26,12 +31,7 @@ configMapGenerator:
       - blueprints/apps-kavita.yaml
       - blueprints/apps-kubectl.yaml
       - blueprints/apps-qbittorrent.yaml
-      - blueprints/flow-authentication.yaml
-      - blueprints/flow-authorization.yaml
-      - blueprints/flow-enrollment.yaml
-      - blueprints/groups.yaml
       - blueprints/index.yaml
-      - blueprints/scopes.yaml
     options:
       disableNameSuffixHash: true
 
