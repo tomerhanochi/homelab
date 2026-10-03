@@ -31,7 +31,6 @@ configMapGenerator:
       - blueprints/apps-kavita.yaml
       - blueprints/apps-kubectl.yaml
       - blueprints/apps-qbittorrent.yaml
-      - blueprints/index.yaml
     options:
       disableNameSuffixHash: true
 
