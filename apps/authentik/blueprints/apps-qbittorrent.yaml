@@ -42,7 +42,7 @@ entries:
       name: login
   - model: authentik_policies.policybinding
     identifiers:
-      target: !KeyOf entitlement-login
+      target: !Find [authentik_core.applicationentitlement, [app, !KeyOf application], [name, login]]
       group: !Find [authentik_core.group, [name, homelab-admins]]
   # TODO: Remove once migration to entitlements finishes
   - model: authentik_core.group
