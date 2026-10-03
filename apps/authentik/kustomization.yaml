@@ -16,7 +16,7 @@ resources:
 
 # Blueprints applied on startup from this ConfigMap.
 configMapGenerator:
-  - name: authentik-blueprints-apps
+  - name: authentik-blueprints
     namespace: authentik
     files:
       - blueprints/groups.yaml

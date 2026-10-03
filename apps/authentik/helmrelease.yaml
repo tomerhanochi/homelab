@@ -58,8 +58,7 @@ spec:
 
     blueprints:
       configMaps:
-        - authentik-blueprints-apps
-        - authentik-blueprints-passkey
+        - authentik-blueprints
 
     server:
       replicas: 1
