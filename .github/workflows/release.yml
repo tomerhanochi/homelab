@@ -49,8 +49,8 @@ jobs:
 
           sudo podman build \
             --tag "${unchunked_image}" \
-            --cache-from="type=registry,ref=ghcr.io/${{ github.repository }}/cache" \
-            --cache-to="type=registry,ref=ghcr.io/${{ github.repository }}/cache" \
+            --cache-from="type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/cache" \
+            --cache-to="type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/cache" \
             $(echo -en "${{ steps.meta.outputs.labels }}" | xargs -i echo '--label={}') \
             $(echo -en "${{ steps.meta.outputs.annotations }}" | xargs -i echo '--annotation={}') \
             ./images/os
