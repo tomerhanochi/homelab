@@ -17,7 +17,7 @@ entries:
   # Some apps don't like that, so we use a fake, internal email and mark it as verified.
   - model: authentik_providers_oauth2.scopemapping
     identifiers:
-      name: homelab-scope-groups
+      name: homelab-scope-email
     attrs:
       scope_name: email
       description: "Email address (verified)"
