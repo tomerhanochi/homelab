@@ -5,64 +5,64 @@ metadata:
 entries:
   # Shared Models
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/groups.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/groups.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/scopes.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/scopes.yaml
       required: true
   # Flows
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/flow-enrollment.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/flow-enrollment.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/flow-enrollment-invitation-generation.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/flow-enrollment-invitation-generation.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/flow-authentication.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/flow-authentication.yaml
       required: true
   # Applications
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/apps-filebrowser.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/apps-filebrowser.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/apps-forgejo.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/apps-forgejo.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/apps-headlamp.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/apps-headlamp.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/apps-jellyfin.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/apps-jellyfin.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/apps-kavita.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/apps-kavita.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/apps-kubectl.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/apps-kubectl.yaml
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    identifiers:
-      path: mounted/cm-authentik-blueprints/apps-qbittorrent.yaml
     attrs:
+      identifiers:
+        path: mounted/cm-authentik-blueprints/apps-qbittorrent.yaml
       required: true
