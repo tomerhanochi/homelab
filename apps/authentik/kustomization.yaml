@@ -16,12 +16,22 @@ resources:
 
 # Blueprints applied on startup from this ConfigMap.
 configMapGenerator:
-  - name: authentik-blueprints
+  - name: authentik-blueprints-apps
     namespace: authentik
     files:
-      - blueprints/oidc-clients.yaml
-      - blueprints/passkey-enrollment.yaml
-      - blueprints/passkey-login.yaml
+      - blueprints/groups.yaml
+      - blueprints/scopes.yaml
+      - blueprints/flow-enrollment.yaml
+      - blueprints/flow-enrollment-invitation-generation.yaml
+      - blueprints/flow-authentication.yaml
+      - blueprints/apps-filebrowser.yaml
+      - blueprints/apps-forgejo.yaml
+      - blueprints/apps-headlamp.yaml
+      - blueprints/apps-jellyfin.yaml
+      - blueprints/apps-kavita.yaml
+      - blueprints/apps-kubectl.yaml
+      - blueprints/apps-qbittorrent.yaml
+      - blueprints/index.yaml
     options:
       disableNameSuffixHash: true
 

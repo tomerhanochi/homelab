@@ -1,0 +1,67 @@
+---
+version: 1
+metadata:
+  name: homelab-flow-enrollment
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_flows.flow
+    id: flow
+    identifiers:
+      slug: homelab-flow-enrollment
+    attrs:
+      name: homelab-flow-enrollment
+      title: Register Your Passkey
+      designation: enrollment
+      authentication: require_unauthenticated
+
+  - model: authentik_stages_invitation.invitationstage
+    id: stage-invitation
+    identifiers:
+      name: homelab-invitation
+    attrs:
+      continue_flow_without_invitation: false
+
+  - model: authentik_stages_authenticator_webauthn.authenticatorwebauthnstage
+    id: stage-authenticator-webauthn
+    identifiers:
+      name: homelab-authenticator-webauthn
+    attrs:
+      user_verification: required
+      resident_key_requirement: required
+
+  - model: authentik_stages_user_write.userwritestage
+    id: stage-user-write
+    identifiers:
+      name: homelab-user-write
+    attrs:
+      user_creation_mode: always_create
+
+  - model: authentik_stages_user_login.userloginstage
+    id: stage-user-login
+    identifiers:
+      name: homelab-user-login
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf stage-invitation
+      order: 10
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf stage-authenticator-webauthn
+      order: 20
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf stage-user-write
+      order: 30
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !KeyOf flow
+      stage: !KeyOf stage-user-login
+      order: 40

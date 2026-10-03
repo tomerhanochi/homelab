@@ -1,0 +1,72 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-kavita
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_providers_oauth2.oauth2provider
+    id: provider
+    identifiers:
+      name: kavita
+    attrs:
+      client_type: confidential
+      client_id: kavita
+      client_secret: !Env KAVITA_CLIENT_SECRET
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+      redirect_uris:
+        - matching_mode: strict
+          url: https://kavita.tomerhanochi.com/signin-oidc
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-groups]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
+  - model: authentik_core.application
+    identifiers:
+      slug: kavita
+      name: Kavita
+    attrs:
+      provider: !KeyOf provider
+      meta_launch_url: https://kavita.tomerhanochi.com
+      policy_engine_mode: any
+  - model: authentik_core.applicationentitlement
+    id: entitlement-login
+    identifiers:
+      app: !KeyOf application
+      name: Login
+  - model: authentik_core.applicationentitlement
+    id: entitlement-download
+    identifiers:
+      app: !KeyOf application
+      name: Download
+  - model: authentik_core.applicationentitlement
+    id: entitlement-admin
+    identifiers:
+      app: !KeyOf application
+      name: Admin
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-login
+      group: !Find [authentik_core.group, [name, homelab-users]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-download
+      group: !Find [authentik_core.group, [name, homelab-users]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-admin
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  # TODO: Remove once migration to entitlements finishes
+  - model: authentik_core.group
+    identifiers:
+      name: kavita-Login
+  - model: authentik_core.group
+    identifiers:
+      name: kavita-Admin

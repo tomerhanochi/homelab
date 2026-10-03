@@ -1,0 +1,49 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-headlamp
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_providers_oauth2.oauth2provider
+    id: provider
+    identifiers:
+      name: headlamp
+    attrs:
+      client_type: confidential
+      client_id: headlamp
+      client_secret: !Env HEADLAMP_CLIENT_SECRET
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+      redirect_uris:
+        - matching_mode: strict
+          url: https://headlamp.tomerhanochi.com/oidc-callback
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-groups]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
+  - model: authentik_core.application
+    id: application
+    identifiers:
+      slug: headlamp
+      name: Headlamp
+    attrs:
+      provider: !KeyOf provider
+      meta_launch_url: https://headlamp.tomerhanochi.com
+      policy_engine_mode: any
+  - model: authentik_core.applicationentitlement
+    id: entitlement-cluster-admin
+    identifiers:
+      app: !KeyOf application
+      name: cluster-admin
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-cluster-admin
+      group: !Find [authentik_core.group, [name, homelab-admins]]

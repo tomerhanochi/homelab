@@ -1,0 +1,55 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-kubectl
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_providers_oauth2.oauth2provider
+    id: provider
+    identifiers:
+      name: kubectl
+    attrs:
+      client_type: public
+      client_id: kubectl
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+        # Taken from https://github.com/goauthentik/authentik/blob/bafc5e1e/authentik/common/oauth/constants.py#L6-L13
+        - urn:ietf:params:oauth:grant-type:device_code
+      redirect_uris:
+        - matching_mode: strict
+          url: http://localhost:8000
+        - matching_mode: strict
+          url: http://localhost:18000
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-groups]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
+  - model: authentik_core.application
+    id: application
+    identifiers:
+      slug: kubectl
+      name: Kubectl
+    attrs:
+      provider: !KeyOf provider
+      policy_engine_mode: any
+  - model: authentik_core.applicationentitlement
+    id: entitlement-cluster-admin
+    identifiers:
+      app: !KeyOf application
+      name: cluster-admin
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-cluster-admin
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  # TODO: Remove once migration to entitlements finishes
+  - model: authentik_core.group
+    identifiers:
+      name: kubernetes-cluster-admins

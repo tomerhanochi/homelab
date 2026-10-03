@@ -1,0 +1,124 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-jellyfin
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_providers_oauth2.oauth2provider
+    id: provider
+    identifiers:
+      name: jellyfin
+    attrs:
+      client_type: confidential
+      client_id: jellyfin
+      client_secret: !Env JELLYFIN_CLIENT_SECRET
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+      redirect_uris:
+        - matching_mode: strict
+          url: https://jellyfin.tomerhanochi.com/sso/OID/redirect/authentik
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-groups]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
+  - model: authentik_core.application
+    id: application
+    identifiers:
+      slug: jellyfin
+      name: Jellyfin
+    attrs:
+      provider: !KeyOf provider
+      meta_launch_url: https://jellyfin.tomerhanochi.com
+      policy_engine_mode: any
+  - model: authentik_core.applicationentitlement
+    id: entitlement-user
+    identifiers:
+      app: !KeyOf application
+      name: user
+  - model: authentik_core.applicationentitlement
+    id: entitlement-access-movies
+    identifiers:
+      app: !KeyOf application
+      name: access-movies
+  - model: authentik_core.applicationentitlement
+    id: entitlement-access-shows
+    identifiers:
+      app: !KeyOf application
+      name: access-shows
+  - model: authentik_core.applicationentitlement
+    id: entitlement-access-music
+    identifiers:
+      app: !KeyOf application
+      name: access-music
+  - model: authentik_core.applicationentitlement
+    id: entitlement-access-books
+    identifiers:
+      app: !KeyOf application
+      name: access-books
+  - model: authentik_core.applicationentitlement
+    id: entitlement-admin
+    identifiers:
+      app: !KeyOf application
+      name: admin
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-user
+      group: !Find [authentik_core.group, [name, homelab-users]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-access-movies
+      group: !Find [authentik_core.group, [name, homelab-users]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-access-shows
+      group: !Find [authentik_core.group, [name, homelab-users]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-user
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-access-movies
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-access-shows
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-access-music
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-access-books
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-admin
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+  # TODO: Remove once migration to entitlements finishes
+  - model: authentik_core.group
+    identifiers:
+      name: jellyfin-users
+  - model: authentik_core.group
+    identifiers:
+      name: jellyfin-admins
+  - model: authentik_core.group
+    identifiers:
+      name: jellyfin-access-movies
+  - model: authentik_core.group
+    identifiers:
+      name: jellyfin-access-books
+  - model: authentik_core.group
+    identifiers:
+      name: jellyfin-access-shows
+  - model: authentik_core.group
+    identifiers:
+      name: jellyfin-access-music
