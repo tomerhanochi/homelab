@@ -5,52 +5,64 @@ metadata:
 entries:
   # Shared Models
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/groups.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/scopes.yaml
+    attrs:
       required: true
   # Flows
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/flow-enrollment.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/flow-enrollment-invitation-generation.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/flow-authentication.yaml
+    attrs:
       required: true
   # Applications
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/apps-filebrowser.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/apps-forgejo.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/apps-headlamp.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/apps-jellyfin.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/apps-kavita.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/apps-kubectl.yaml
+    attrs:
       required: true
   - model: authentik_blueprints.metaapplyblueprint
-    attrs:
+    identifiers:
       path: mounted/cm-authentik-blueprints/apps-qbittorrent.yaml
+    attrs:
       required: true
