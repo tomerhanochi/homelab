@@ -11,7 +11,7 @@ jwt:
         claim: email
         prefix: "oidc:"
       groups:
-        claim: groups
+        claim: roles
         prefix: "oidc:"
   - issuer:
       url: https://sso.tomerhanochi.com/application/o/headlamp/
@@ -22,5 +22,5 @@ jwt:
         claim: email
         prefix: "oidc:"
       groups:
-        claim: groups
+        claim: roles
         prefix: "oidc:"
