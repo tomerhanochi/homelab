@@ -110,22 +110,3 @@ entries:
       target: !KeyOf entitlement-admin
       group: !Find [authentik_core.group, [name, homelab-admins]]
       order: 0
-  # TODO: Remove once migration to entitlements finishes
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-users
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-admins
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-movies
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-books
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-shows
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-music

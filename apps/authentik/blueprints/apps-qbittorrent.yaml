@@ -40,7 +40,3 @@ entries:
       target: !KeyOf application
       group: !Find [authentik_core.group, [name, homelab-admins]]
       order: 0
-  # TODO: Remove once migration to entitlements finishes
-  - model: authentik_core.group
-    identifiers:
-      name: qbittorrent-users
