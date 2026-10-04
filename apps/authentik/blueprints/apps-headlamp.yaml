@@ -45,3 +45,4 @@ entries:
     identifiers:
       target: !KeyOf entitlement-cluster-admin
       group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
