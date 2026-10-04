@@ -16,7 +16,3 @@ spec:
     name: homelab
   dependsOn:
     - name: tailscale-operator
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
