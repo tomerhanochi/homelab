@@ -8,7 +8,7 @@ entries:
     identifiers:
       slug: homelab-enrollment-invitiation-generation
     attrs:
-      name: Generate Passkey Invitation
+      name: homelab-enrollment-invitiation-generation
       title: Create Pre-seeded User Invitation
       designation: stage_configuration
       authentication: require_authenticated
@@ -27,6 +27,7 @@ entries:
       name: homelab-create-invitation
     attrs:
       expression: |
+        from authentik.flows.models import Flow
         from authentik.stages.invitation.models import Invitation
 
         prompt_data = request.context.get("prompt_data", {})
@@ -39,17 +40,13 @@ entries:
             name=f"enroll-{username}",
             single_use=True,
             fixed_data={"username": username},
-            created_by=request.user
+            created_by=request.user,
+            flow=Flow.objects.get(slug="homelab-enrollment"),
         )
 
         request.context["redirect_url"] = f"/if/admin/#/directory/invitations/{invitation.pk}"
 
         return True
-
-  - model: authentik_stages_redirect.redirectstage
-    id: stage-redirect
-    identifiers:
-      name: homelab-redirect
 
   - model: authentik_flows.flowstagebinding
     id: binding-prompt
@@ -63,9 +60,3 @@ entries:
       policy: !KeyOf policy-create-invitation
       target: !KeyOf binding-prompt
       order: 0
-
-  - model: authentik_flows.flowstagebinding
-    identifiers:
-      target: !KeyOf flow
-      stage: !KeyOf stage-redirect
-      order: 20

@@ -6,9 +6,9 @@ entries:
   - model: authentik_flows.flow
     id: flow
     identifiers:
-      slug: homelab-flow-enrollment
+      slug: homelab-enrollment
     attrs:
-      name: homelab-flow-enrollment
+      name: homelab-enrollment
       title: Register Your Passkey
       designation: enrollment
       authentication: require_unauthenticated
