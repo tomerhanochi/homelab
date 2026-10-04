@@ -39,3 +39,4 @@ entries:
     identifiers:
       target: !KeyOf application
       group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
