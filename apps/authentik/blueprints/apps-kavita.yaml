@@ -53,18 +53,14 @@ entries:
     identifiers:
       target: !KeyOf entitlement-login
       group: !Find [authentik_core.group, [name, homelab-users]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-download
       group: !Find [authentik_core.group, [name, homelab-users]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-admin
       group: !Find [authentik_core.group, [name, homelab-admins]]
-  # TODO: Remove once migration to entitlements finishes
-  - model: authentik_core.group
-    identifiers:
-      name: kavita-Login
-  - model: authentik_core.group
-    identifiers:
-      name: kavita-Admin
+      order: 0

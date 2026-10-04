@@ -69,54 +69,44 @@ entries:
     identifiers:
       target: !KeyOf entitlement-user
       group: !Find [authentik_core.group, [name, homelab-users]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-access-movies
       group: !Find [authentik_core.group, [name, homelab-users]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-access-shows
       group: !Find [authentik_core.group, [name, homelab-users]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-user
       group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-access-movies
       group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-access-shows
       group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-access-music
       group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-access-books
       group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-admin
       group: !Find [authentik_core.group, [name, homelab-admins]]
-  # TODO: Remove once migration to entitlements finishes
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-users
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-admins
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-movies
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-books
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-shows
-  - model: authentik_core.group
-    identifiers:
-      name: jellyfin-access-music
+      order: 0

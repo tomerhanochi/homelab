@@ -35,16 +35,8 @@ entries:
       provider: !KeyOf provider
       meta_launch_url: https://torrent.tomerhanochi.com
       policy_engine_mode: any
-  - model: authentik_core.applicationentitlement
-    id: entitlement-login
-    identifiers:
-      app: !KeyOf application
-      name: login
   - model: authentik_policies.policybinding
     identifiers:
-      target: !Find [authentik_core.applicationentitlement, [app, !KeyOf application], [name, login]]
+      target: !KeyOf application
       group: !Find [authentik_core.group, [name, homelab-admins]]
-  # TODO: Remove once migration to entitlements finishes
-  - model: authentik_core.group
-    identifiers:
-      name: qbittorrent-users
+      order: 0

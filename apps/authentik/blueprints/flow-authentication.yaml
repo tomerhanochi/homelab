@@ -7,9 +7,9 @@ entries:
     state: present
     id: flow
     identifiers:
-      slug: homelab-flow-authentication
+      slug: homelab-authentication
     attrs:
-      name: homelab-flow-authentication
+      name: homelab-authentication
       title: Sign in with your passkey
       designation: authentication
       authentication: require_unauthenticated
