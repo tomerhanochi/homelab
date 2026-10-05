@@ -15,18 +15,6 @@ spec:
         repository: ghcr.io/tailscale/k8s-operator
         digest: sha256:3c8958c42fb3c46068e8553e11b944f2133b4671d4f36c86adc11f206746bf34  # v1.102.4
 
-      podSecurityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
-
-      securityContext:
-        readOnlyRootFilesystem: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
-
     proxyConfig:
       image:
         repository: ghcr.io/tailscale/tailscale
