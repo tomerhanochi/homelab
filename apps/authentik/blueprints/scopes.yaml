@@ -3,15 +3,6 @@ version: 1
 metadata:
   name: homelab-scopes
 entries:
-  - model: authentik_providers_oauth2.scopemapping
-    identifiers:
-      name: homelab-scope-groups
-    attrs:
-      scope_name: groups
-      description: "Group membership"
-      expression: |
-        return [group.name for group in request.user.ak_groups.all()]
-
   # Authentik hard codes "email_verified": False in their builtin email scope, see:
   # https://github.com/goauthentik/authentik/blob/184bd7e9/blueprints/system/providers-oauth2.yaml#L17-L28
   # Some apps don't like that, so we use a fake, internal email and mark it as verified.
