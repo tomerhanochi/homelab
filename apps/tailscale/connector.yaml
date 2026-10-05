@@ -1,0 +1,11 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: default
+  namespace: tailscale
+spec:
+  subnetRouter:
+    advertiseRoutes:
+      - 192.168.68.63/32
+      - 192.168.68.64/32

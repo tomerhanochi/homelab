@@ -20,3 +20,5 @@ resources:
   - kavita.yaml
   - qbittorrent.yaml
   - filebrowser.yaml
+  - tailscale-operator.yaml
+  - tailscale.yaml
