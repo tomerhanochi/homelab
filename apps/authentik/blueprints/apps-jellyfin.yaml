@@ -24,7 +24,6 @@ entries:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
-        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-groups]]
         - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
   - model: authentik_core.application
     id: application
