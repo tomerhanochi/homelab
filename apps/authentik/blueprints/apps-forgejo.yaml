@@ -44,7 +44,7 @@ entries:
     id: entitlement-admin
     identifiers:
       app: !KeyOf application
-      name: user
+      name: admin
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf entitlement-user
