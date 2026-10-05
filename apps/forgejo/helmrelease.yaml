@@ -57,18 +57,16 @@ spec:
               name: forgejo-database-credentials
               key: password
 
-      # OIDC login via authentik. The source name "authentik" sets the callback
-      # path /user/oauth2/authentik/... (must match the provider's redirect URI).
       oauth:
         - name: authentik
           provider: openidConnect
           autoDiscoverUrl: https://sso.tomerhanochi.com/application/o/forgejo/.well-known/openid-configuration
           existingSecret: forgejo-oauth
-          scopes: openid email profile groups
-          groupClaimName: groups
-          adminGroup: forgejo-admins
-          requiredClaimName: groups
-          requiredClaimValue: forgejo-users
+          scopes: openid email profile entitlements
+          groupClaimName: roles
+          adminGroup: admin
+          requiredClaimName: roles
+          requiredClaimValue: user
 
       config:
         service:
