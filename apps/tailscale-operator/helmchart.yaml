@@ -1,0 +1,14 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: tailscale
+  namespace: tailscale
+spec:
+  interval: 5m0s
+  chart: tailscale-operator
+  reconcileStrategy: ChartVersion
+  sourceRef:
+    kind: HelmRepository
+    name: tailscale
+  version: '1.102.4'
