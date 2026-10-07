@@ -38,8 +38,7 @@ spec:
         oidc_issuer_url = "https://sso.tomerhanochi.com/application/o/filebrowser/"
         redirect_url = "https://files.tomerhanochi.com/oauth2/callback"
         upstreams = [ "http://filebrowser.filebrowser.svc:8080" ]
-        scope = "openid profile email groups"
-        allowed_groups = [ "filebrowser-users" ]
+        scope = "openid profile email"
         email_domains = [ "*" ]
         cookie_secure = true
         skip_provider_button = true
