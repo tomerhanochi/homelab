@@ -1,0 +1,12 @@
+[Unit]
+Description=Mount wd-005t-02
+After=network.target
+
+[Mount]
+What=/dev/disk/by-label/wd-005t-02
+Where=/var/mnt/wd-005t-02
+Type=xfs
+Options=defaults,nofail
+
+[Install]
+WantedBy=multi-user.target

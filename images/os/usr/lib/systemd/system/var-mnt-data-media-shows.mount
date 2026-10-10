@@ -1,0 +1,12 @@
+[Unit]
+Description=Bind mount media/shows from wd-005t-02
+RequiresMountsFor=/var/mnt/wd-005t-02
+
+[Mount]
+What=/var/mnt/wd-005t-02/media/shows
+Where=/var/mnt/data/media/shows
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target

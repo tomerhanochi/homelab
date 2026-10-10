@@ -1,0 +1,12 @@
+[Unit]
+Description=Bind mount media/books from wd-005t-01
+RequiresMountsFor=/var/mnt/wd-005t-01
+
+[Mount]
+What=/var/mnt/wd-005t-01/media/books
+Where=/var/mnt/data/media/books
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target
