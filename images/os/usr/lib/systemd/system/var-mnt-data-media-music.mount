@@ -1,0 +1,12 @@
+[Unit]
+Description=Bind mount media/music from wd-005t-02
+RequiresMountsFor=/var/mnt/wd-005t-02
+
+[Mount]
+What=/var/mnt/wd-005t-02/media/music
+Where=/var/mnt/data/media/music
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target

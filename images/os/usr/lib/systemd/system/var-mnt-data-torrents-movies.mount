@@ -1,0 +1,12 @@
+[Unit]
+Description=Bind mount torrents/movies from wd-005t-01
+RequiresMountsFor=/var/mnt/wd-005t-01
+
+[Mount]
+What=/var/mnt/wd-005t-01/torrents/movies
+Where=/var/mnt/data/torrents/movies
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target
