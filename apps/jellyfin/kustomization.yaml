@@ -6,8 +6,8 @@ resources:
   - namespace.yaml
   - helmrepository.yaml
   - helmrelease.yaml
-  - persistentvolume.yaml
-  - pvc.yaml
+  - persistentvolumes
+  - persistentvolumeclaims
   - networkpolicies
 
 labels:

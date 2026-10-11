@@ -59,19 +59,31 @@ spec:
         size: 5Gi
         storageClass: ""
         type: pvc
-      # Shared media library via a statically-provisioned hostPath PV/PVC
-      # (see persistentvolume.yaml).
+      # Each library directory has its own hostPath PV/PVC (see persistentvolumes/).
       media:
-        enabled: true
-        type: pvc
-        existingClaim: jellyfin-media
-        # Read-write so the library metadata savers can write NFO, artwork,
-        # subtitles, lyrics and trickplay images alongside the media.
-        accessMode: ReadWriteOnce
+        enabled: false
       cache:
         enabled: true
         type: emptyDir
         accessMode: ReadWriteOnce
+
+    volumes:
+      - name: shows
+        persistentVolumeClaim:
+          claimName: jellyfin-shows
+      - name: movies
+        persistentVolumeClaim:
+          claimName: jellyfin-movies
+      - name: music
+        persistentVolumeClaim:
+          claimName: jellyfin-music
+    volumeMounts:
+      - name: shows
+        mountPath: /media/shows
+      - name: movies
+        mountPath: /media/movies
+      - name: music
+        mountPath: /media/music
 
     # NetworkPolicies are managed via CiliumNetworkPolicy in networkpolicies/.
     networkPolicy:

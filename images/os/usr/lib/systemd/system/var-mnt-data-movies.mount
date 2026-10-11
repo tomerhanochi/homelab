@@ -1,0 +1,12 @@
+[Unit]
+Description=Bind mount movies from wd-005t-01
+RequiresMountsFor=/var/mnt/wd-005t-01
+
+[Mount]
+What=/var/mnt/wd-005t-01/movies
+Where=/var/mnt/data/movies
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target

@@ -1,0 +1,24 @@
+---
+# Statically-provisioned hostPath PV. The host directory is read-only in Kavita.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kavita-library
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: /var/mnt/data/books/media
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - control-plane
