@@ -2,11 +2,15 @@ FROM quay.io/bootc-devel/fedora-bootc-44-minimal:20260715-142243@sha256:17a7230c
 
 RUN \
   --mount=type=tmpfs,target=/var \
+  --mount=type=tmpfs,target=/run \
+  --mount=type=tmpfs,target=/tmp \
   --mount=type=bind,source=scripts/install-packages.sh,target=/install-packages.sh,relabel=private,ro=true \
   /install-packages.sh
 
 RUN \
   --mount=type=tmpfs,target=/var \
+  --mount=type=tmpfs,target=/run \
+  --mount=type=tmpfs,target=/tmp \
   --mount=type=bind,source=scripts/install-k3s.sh,target=/install-k3s.sh,relabel=private,ro=true \
   /install-k3s.sh
 
