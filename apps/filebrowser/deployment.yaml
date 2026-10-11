@@ -73,7 +73,13 @@ spec:
               containerPort: 8080
           volumeMounts:
             - name: data
-              mountPath: /srv
+              mountPath: /srv/shows
+            - name: movies
+              mountPath: /srv/movies
+            - name: music
+              mountPath: /srv/music
+            - name: books
+              mountPath: /srv/books
             - name: config
               mountPath: /database
             - name: tmp
@@ -99,7 +105,16 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: filebrowser-data
+            claimName: filebrowser-shows
+        - name: movies
+          persistentVolumeClaim:
+            claimName: filebrowser-movies
+        - name: music
+          persistentVolumeClaim:
+            claimName: filebrowser-music
+        - name: books
+          persistentVolumeClaim:
+            claimName: filebrowser-books
         - name: config
           persistentVolumeClaim:
             claimName: filebrowser-config
