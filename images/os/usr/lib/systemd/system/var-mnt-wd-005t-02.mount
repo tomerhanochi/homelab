@@ -1,6 +1,5 @@
 [Unit]
 Description=Mount wd-005t-02
-After=network.target
 
 [Mount]
 What=/dev/disk/by-label/wd-005t-02
