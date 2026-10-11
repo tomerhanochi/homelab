@@ -32,7 +32,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |-
-            type=raw,value={{commit_date 'YYYY.MM.DD.HHmmss'}}
+            type=raw,value={{commit_date 'YYYY-MM-DDTHH-mm-ss'}}
             type=sha,format=long
       - name: Build OCI image
         id: build
