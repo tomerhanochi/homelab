@@ -2,9 +2,6 @@
 name: Create and publish a Docker image
 
 "on":
-  push:
-    tags:
-      - v*
   workflow_dispatch:
 
 env:
@@ -29,14 +26,17 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set date-based version
+        id: version
+        shell: bash
+        run: echo "value=$(date -u +'%Y.%m.%d.%H%M%S')" >> "$GITHUB_OUTPUT"
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |-
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=${{ steps.version.outputs.value }}
             type=sha,format=long
       - name: Build OCI image
         id: build
