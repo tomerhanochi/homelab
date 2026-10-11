@@ -1,19 +1,4 @@
 ---
-# The browsable data tree (downloads + media).
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: filebrowser-data
-  namespace: filebrowser
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: ""
-  volumeName: filebrowser-data
-  resources:
-    requests:
-      storage: 1Ti
----
 # filebrowser's own state (the SQLite database). Kept on its own volume so it is
 # never exposed in the file UI.
 apiVersion: v1

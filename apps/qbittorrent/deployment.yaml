@@ -35,8 +35,12 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
-            - name: data
-              mountPath: /data
+            - name: shows
+              mountPath: /data/torrents/shows
+            - name: movies
+              mountPath: /data/torrents/movies
+            - name: music
+              mountPath: /data/torrents/music
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -58,6 +62,12 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: qbittorrent-config
-        - name: data
+        - name: shows
           persistentVolumeClaim:
-            claimName: qbittorrent-data
+            claimName: qbittorrent-shows
+        - name: movies
+          persistentVolumeClaim:
+            claimName: qbittorrent-movies
+        - name: music
+          persistentVolumeClaim:
+            claimName: qbittorrent-music
