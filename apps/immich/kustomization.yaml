@@ -6,10 +6,18 @@ resources:
   - namespace.yaml
   - postgres-cluster-credentials.sops.yaml
   - postgres-cluster.yaml
-  - config.sops.yaml
   - pv.yaml
   - pvc.yaml
   - ocirepository.yaml
   - helmrelease.yaml
   - route.yaml
   - networkpolicies
+
+secretGenerator:
+  - name: immich-config
+    namespace: immich
+    type: Opaque
+    files:
+      - immich-config.yaml=config.sops.yaml
+    options:
+      disableNameSuffixHash: true

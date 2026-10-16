@@ -1,51 +1,31 @@
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: immich-config
-  namespace: immich
-type: Opaque
-stringData:
-  immich-config.yaml: |
-    {
-      "machineLearning": {
-        "enabled": false,
-        "clip": {
-          "enabled": false
-        },
-        "facialRecognition": {
-          "enabled": false
-        },
-        "ocr": {
-          "enabled": false
-        },
-        "duplicateDetection": {
-          "enabled": false
-        }
-      },
-      "nightlyTasks": {
-        "clusterNewFaces": false
-      },
-      "oauth": {
-        "enabled": true,
-        "autoLaunch": true,
-        "autoRegister": true,
-        "buttonText": "Log in with Authentik",
-        "clientId": "immich",
-        "clientSecret": "d90245ee273d4e45bb185b1f7e709a0ad96780a64701cb29ae3cb5ffaddff307",
-        "issuerUrl": "https://sso.tomerhanochi.com/application/o/immich/",
-        "scope": "openid email profile entitlements",
-        "signingAlgorithm": "RS256"
-      },
-      "passwordLogin": {
-        "enabled": false
-      },
-      "storageTemplate": {
-        "enabled": true,
-        "hashVerificationEnabled": true,
-        "template": "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}"
-      },
-      "server": {
-        "externalDomain": "https://photos.tomerhanochi.com"
-      }
-    }
+machineLearning:
+  enabled: false
+  clip:
+    enabled: false
+  facialRecognition:
+    enabled: false
+  ocr:
+    enabled: false
+  duplicateDetection:
+    enabled: false
+nightlyTasks:
+  clusterNewFaces: false
+oauth:
+  enabled: true
+  autoLaunch: true
+  autoRegister: true
+  buttonText: "Log in with Authentik"
+  clientId: "immich"
+  clientSecret: "d90245ee273d4e45bb185b1f7e709a0ad96780a64701cb29ae3cb5ffaddff307"
+  issuerUrl: "https://sso.tomerhanochi.com/application/o/immich/"
+  scope: "openid email profile entitlements"
+  signingAlgorithm: "RS256"
+passwordLogin:
+  enabled: false
+storageTemplate:
+  enabled: true
+  hashVerificationEnabled: true
+  template: "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}"
+server:
+  externalDomain: "https://photos.tomerhanochi.com"
