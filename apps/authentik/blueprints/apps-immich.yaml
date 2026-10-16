@@ -3,14 +3,6 @@ version: 1
 metadata:
   name: homelab-apps-immich
 entries:
-  - model: authentik_providers_oauth2.scopemapping
-    identifiers:
-      name: homelab-scope-immich-role
-    attrs:
-      scope_name: immich_role
-      expression: |
-        entitlements = [entitlement.name for entitlement in request.user.app_entitlements(provider.application)]
-        return {"immich_role": "admin" if "admin" in entitlements else "user"}
   - model: authentik_providers_oauth2.oauth2provider
     id: provider
     identifiers:
@@ -33,7 +25,6 @@ entries:
         - matching_mode: strict
           url: app.immich:///oauth-callback
       property_mappings:
-        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-immich-role]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]

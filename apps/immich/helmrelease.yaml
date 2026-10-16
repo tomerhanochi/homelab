@@ -103,3 +103,16 @@ spec:
           existingClaim: immich-photos
           globalMounts:
             - path: /data
+        # Keep original uploads and library files together on the photos disk.
+        # Generated files and auxiliary data use the node's regular PVC storage.
+        generated:
+          existingClaim: immich-generated
+          globalMounts:
+            - path: /data/thumbs
+              subPath: thumbs
+            - path: /data/encoded-video
+              subPath: encoded-video
+            - path: /data/profile
+              subPath: profile
+            - path: /data/backups
+              subPath: backups
