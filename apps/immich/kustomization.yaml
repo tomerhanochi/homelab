@@ -11,7 +11,7 @@ resources:
   - pvc.yaml
   - redis-deployment.yaml
   - redis-service.yaml
-  - deployment.yaml
-  - service.yaml
+  - ocirepository.yaml
+  - helmrelease.yaml
   - route.yaml
   - networkpolicies

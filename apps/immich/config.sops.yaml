@@ -6,7 +6,7 @@ metadata:
   namespace: immich
 type: Opaque
 stringData:
-  immich.json: |
+  immich-config.yaml: |
     {
       "machineLearning": {
         "enabled": false,

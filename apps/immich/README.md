@@ -1,5 +1,6 @@
 # Immich
 
+Deployed with the Immich Helm chart through a Flux HelmRelease.
 Served at https://photos.tomerhanochi.com with native Authentik OIDC for web
 and mobile. Like Jellyfin, permissions use Authentik application entitlements:
 `homelab-users` receive `user`; `homelab-admins` receive `user` and `admin`.
@@ -48,5 +49,6 @@ The OAuth client secret is identical in `config.sops.yaml` and the Authentik
 client secret file; update both together when rotating it. Flux is already
 configured to decrypt these files.
 
-Configuration is supplied through a Secret-mounted JSON file, so changes to
+Configuration is supplied through the chart's existing configuration Secret
+(`immich-config.yaml`, containing JSON, which is valid YAML), so changes to
 settings belong in that file. Restart the Immich deployment after changing it.

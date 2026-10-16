@@ -13,5 +13,5 @@ spec:
     - photos.tomerhanochi.com
   rules:
     - backendRefs:
-        - name: immich
+        - name: immich-server
           port: 2283
