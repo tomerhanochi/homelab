@@ -1,0 +1,45 @@
+machineLearning:
+    enabled: ENC[AES256_GCM,data:CYgb78M=,iv:Rye176S/D2cdMhJttL4rygt+6LeTsedEX+whgwrEGqk=,tag:lhI7OGOMHfC7rBNCYQ9wVQ==,type:bool]
+    clip:
+        enabled: ENC[AES256_GCM,data:J2DjPOc=,iv:AyHS3bEZnUKkOXhiYcQG11BRK9GV/pOTnlWa7OOcpQw=,tag:GNq8uqEmpeFECyvQGNAhNw==,type:bool]
+    facialRecognition:
+        enabled: ENC[AES256_GCM,data:pjOIoNs=,iv:hoLp/esVdqzI701gQ8gV6UkhIGfEDgrVJfHMqV7CPSI=,tag:v1F+IQNavi8kP0MDWJA3VQ==,type:bool]
+    ocr:
+        enabled: ENC[AES256_GCM,data:5q1rXLc=,iv:OJel9ZJlQ6pHZ7bfBVVNA2irCmVAjEZYl/+gsTxPVCc=,tag:ZGO4jIPFbYw/gXMpEgJwgg==,type:bool]
+    duplicateDetection:
+        enabled: ENC[AES256_GCM,data:0uzSMlM=,iv:77LULhCmsQIzCxr2Vt60sPg046Fy5bXAsQJ1u2dj55U=,tag:0aDAd3sv8EOBLIzgtbPpEA==,type:bool]
+nightlyTasks:
+    clusterNewFaces: ENC[AES256_GCM,data:N2ElG24=,iv:48aA4tWAPrmlE/F1Ud07xAFCkVgdbt1K6kOGiw6Cezw=,tag:pelTdcPZ8nVmYWr3XR0iHQ==,type:bool]
+oauth:
+    enabled: ENC[AES256_GCM,data:bVlpaw==,iv:L4UFsRC8j+EiCKpYi9Rqc5uQYhvlIvvyatMRVXPvPQI=,tag:RPnn6eAZEmkL2MLgiZNvPA==,type:bool]
+    autoLaunch: ENC[AES256_GCM,data:hGcaAw==,iv:bhZU3cgHTc2q3iE9ZdkLhez303fLwjJ1bv6jFBolEUo=,tag:/+GQSsSlWZieKjmF12SXaA==,type:bool]
+    autoRegister: ENC[AES256_GCM,data:Fdm7cw==,iv:Y1fyvhs+92mHyFRqfnbYHlvTRjMSuym8c43zWvTpRX8=,tag:7Rd+48ZPP9RC7YaTDDArKQ==,type:bool]
+    buttonText: ENC[AES256_GCM,data:ad2oQU1PkRWLHFNS0scYIJ7Uru3R,iv:A23MCMLzVEuafPfN7yTuNaNWlxxbvu3rh4K1nzcTk2o=,tag:6+4EtflVZQgHftmxClvDIg==,type:str]
+    clientId: ENC[AES256_GCM,data:xoVbg+A2,iv:IKFqlhGp7Gaqq70vTyYOqFDBFXuuRQLtd08oqr1hmCE=,tag:CCEkGgHkjaNI4WTA40Sn3w==,type:str]
+    clientSecret: ENC[AES256_GCM,data:c9luCYfXtWBkSNm7e7Z2pcmlyXrqJ8oKFLKf6vZgieUPva7XC6o2+drdbSVXqtDxVt/6uQ1XhisNvrRkZ1F7hQ==,iv:IMECzYmXvgzVEVPzCMMVq59G1S23k9yXPz2J7oeHJEw=,tag:sjRu1QeVjPw7l4Q0CJRW1Q==,type:str]
+    issuerUrl: ENC[AES256_GCM,data:FBa5uAizszF7g0zmLLj2QDxE2EskFMvVW5ALk6M7zJvv0Y0pBMEZRDtaBce8/JWo6/4=,iv:7EYyB7O3TSBR/s1bao15uEbWyitnbI5XTfwMGcPqkHw=,tag:5ouefo2mwVJV2lDa/Oernw==,type:str]
+    scope: ENC[AES256_GCM,data:i8Ev8HUhh6DyxJzcqxs0Vww1SLU4m5aLVptje2anW2yt,iv:Un36M5Og2Dje6BNCt7AKjPhUMsbAXrGPi1UA8QedUp4=,tag:cOQD/kNh+lxJxdp3z4CKYA==,type:str]
+    signingAlgorithm: ENC[AES256_GCM,data:OWbGTb4=,iv:bbL9wtIvWaiPPGMTtgedJ+QOgPnErb+lYlAIAHrFLOo=,tag:inGxamqQ3CmE5qeJZ0Rq9A==,type:str]
+passwordLogin:
+    enabled: ENC[AES256_GCM,data:sbbA7Qw=,iv:bJpBJG5cKWCtTz98DQlal78i4A10lmv5xCEmof2ehQs=,tag:FcGcBSskZUdG068bW69tDA==,type:bool]
+storageTemplate:
+    enabled: ENC[AES256_GCM,data:Hk3fxw==,iv:QYTk/9dRJI4fzxh2Cv3wxGDLam5Xg40QhHU3hWtgsZU=,tag:gzfb9aHXup7AbPpIb+vlbQ==,type:bool]
+    hashVerificationEnabled: ENC[AES256_GCM,data:W6BePw==,iv:/+JqhdkkOVxuJXTJwMuj5tHdJVSTZCNIw6XCzXp4AzE=,tag:4J1X919xNK89xId/AoFQOA==,type:bool]
+    template: ENC[AES256_GCM,data:FvNTplgIPmH8oCUXnQcmLtHuN03f706QDuWTWPq3lmbXCKbI53o=,iv:7Vzl9D5yXg3xKlrM8emrCOjNejPdhQ2Hr4z7LkIFVTE=,tag:7mqQwzqKHVPW6AwYP8TVvg==,type:str]
+server:
+    externalDomain: ENC[AES256_GCM,data:4vj1hD/5mUw0LSGH5qI7liCLVQFAFsTRbAZdM6h8hQ==,iv:atMvUxNuAue6xMdSM7eNTN3INGyxou7s8s+WIRnwl+k=,tag:nMKKFpby+i2Nf98lVN7NZw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBTZ3RXNHFZS3ZhYU4zZ1FS
+            Tk9aVGluc2ZsUHhQeHR6SGpINFlxaENtNVJJCi9qOFVZRlRieE04OGs0Z09YOU5i
+            SWNMQ09PRnhSUFBBY0R1aW9IVEcrYzQKLS0tIGFkbWZVaXVXQzlVNzNlTGR4MEpY
+            VGxwOWRoWW9CbTkvRWVobFFROSt5YTQKzwJ2v1ZSdX6eWdG0fE1dmAOpvoc8BUV6
+            XnnbKj/fMPCPWPaoeMwrvAW5milb7fc0xVxO48SLKO5pTdMgHhTXFw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1jjpauwwlhgtvk8k75cdulk3eweu3et8v3fn4clr8gm7sergvj3vsachhh4
+    lastmodified: "2026-10-16T13:46:29Z"
+    mac: ENC[AES256_GCM,data:e9bVp41Z++QILtrHUiFRfl8NV2YUG0rD0lMIa58NH8q/m3OJfo37siMy+PRVXTpFQ70xRUpBSZfgwEARAJ9n73hWw+ar4+HKHy1kD5WYDk+CgnHGT3Paibr62ymK/KTxeUFLdyqOYdl2Tqc2toFbELaDhFTJvBVjsyD7T8m/YhI=,iv:MEBrNxeZnEYIq+ObaYbxWqkmm8c2yC7d4nOo8om5KDo=,tag:3UQpryllKmfqSG11ebqcjA==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type)$
+    version: 3.13.3

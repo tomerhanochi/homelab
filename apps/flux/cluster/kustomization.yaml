@@ -18,6 +18,7 @@ resources:
   - headlamp.yaml
   - jellyfin.yaml
   - kavita.yaml
+  - immich.yaml
   - qbittorrent.yaml
   - filebrowser.yaml
   - tailscale-operator.yaml

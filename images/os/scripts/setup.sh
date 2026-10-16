@@ -10,6 +10,7 @@ systemctl enable \
   var-mnt-data-books.mount \
   var-mnt-data-movies.mount \
   var-mnt-data-music.mount \
+  var-mnt-data-photos.mount \
   var-mnt-data-shows.mount \
   'var-mnt-wd\x2d005t\x2d01.mount' \
   'var-mnt-wd\x2d005t\x2d02.mount' \

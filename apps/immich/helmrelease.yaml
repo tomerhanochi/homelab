@@ -1,0 +1,118 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: immich
+  namespace: immich
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: immich
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              tag: v3.3.3
+            env:
+              TZ: Asia/Jerusalem
+              DB_HOSTNAME: immich-database-rw.immich.svc
+              DB_DATABASE_NAME: immich
+              DB_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-database-credentials
+                    key: username
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-database-credentials
+                    key: password
+              DB_VECTOR_EXTENSION: vectorchord
+    immich:
+      existingConfiguration: immich-config
+      configurationKind: Secret
+      persistence:
+        library:
+          existingClaim: immich-photos
+      metrics:
+        enabled: false
+    valkey:
+      enabled: true
+      defaultPodOptions:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+          seccompProfile:
+            type: RuntimeDefault
+      controllers:
+        main:
+          containers:
+            main:
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 64Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+    machine-learning:
+      enabled: false
+    server:
+      controllers:
+        main:
+          replicas: 1
+          strategy: Recreate
+          containers:
+            main:
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                limits:
+                  cpu: 2000m
+                  memory: 2Gi
+              probes:
+                startup:
+                  spec:
+                    failureThreshold: 60
+      defaultPodOptions:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+          seccompProfile:
+            type: RuntimeDefault
+      persistence:
+        data:
+          existingClaim: immich-photos
+          globalMounts:
+            - path: /data
+        # Keep original uploads and library files together on the photos disk.
+        # Generated files and auxiliary data use the node's regular PVC storage.
+        generated:
+          existingClaim: immich-generated
+          globalMounts:
+            - path: /data/thumbs
+              subPath: thumbs
+            - path: /data/encoded-video
+              subPath: encoded-video
+            - path: /data/profile
+              subPath: profile
+            - path: /data/backups
+              subPath: backups

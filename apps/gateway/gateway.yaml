@@ -121,3 +121,17 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: filebrowser
+    - name: immich
+      hostname: photos.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: immich-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: immich

@@ -1,0 +1,12 @@
+[Unit]
+Description=Bind mount photos from wd-005t-02
+RequiresMountsFor=/var/mnt/wd-005t-02
+
+[Mount]
+What=/var/mnt/wd-005t-02/photos
+Where=/var/mnt/data/photos
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target
