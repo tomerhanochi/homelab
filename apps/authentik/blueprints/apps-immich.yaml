@@ -9,7 +9,8 @@ entries:
     attrs:
       scope_name: immich_role
       expression: |
-        return {"immich_role": "admin" if request.user.ak_groups.filter(name="homelab-admins").exists() else "user"}
+        entitlements = [entitlement.name for entitlement in request.user.app_entitlements(provider.application)]
+        return {"immich_role": "admin" if "admin" in entitlements else "user"}
   - model: authentik_providers_oauth2.oauth2provider
     id: provider
     identifiers:
@@ -35,6 +36,7 @@ entries:
         - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-immich-role]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
         - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
   - model: authentik_core.application
     id: application
@@ -45,13 +47,28 @@ entries:
       provider: !KeyOf provider
       meta_launch_url: https://photos.tomerhanochi.com
       policy_engine_mode: any
+  - model: authentik_core.applicationentitlement
+    id: entitlement-user
+    identifiers:
+      app: !KeyOf application
+      name: user
+  - model: authentik_core.applicationentitlement
+    id: entitlement-admin
+    identifiers:
+      app: !KeyOf application
+      name: admin
   - model: authentik_policies.policybinding
     identifiers:
-      target: !KeyOf application
+      target: !KeyOf entitlement-user
       group: !Find [authentik_core.group, [name, homelab-users]]
       order: 0
   - model: authentik_policies.policybinding
     identifiers:
-      target: !KeyOf application
+      target: !KeyOf entitlement-user
       group: !Find [authentik_core.group, [name, homelab-admins]]
-      order: 1
+      order: 0
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-admin
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0

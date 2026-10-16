@@ -34,7 +34,7 @@ stringData:
         "clientId": "immich",
         "clientSecret": "d90245ee273d4e45bb185b1f7e709a0ad96780a64701cb29ae3cb5ffaddff307",
         "issuerUrl": "https://sso.tomerhanochi.com/application/o/immich/",
-        "scope": "openid email profile immich_role",
+        "scope": "openid email profile entitlements immich_role",
         "signingAlgorithm": "RS256"
       },
       "passwordLogin": {

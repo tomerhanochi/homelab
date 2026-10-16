@@ -1,8 +1,10 @@
 # Immich
 
 Served at https://photos.tomerhanochi.com with native Authentik OIDC for web
-and mobile. Members of `homelab-users` and `homelab-admins` can sign in;
-`homelab-admins` receive the Immich admin role. Password login is disabled.
+and mobile. Like Jellyfin, permissions use Authentik application entitlements:
+`homelab-users` receive `user`; `homelab-admins` receive `user` and `admin`.
+The OAuth role mapping derives Immich's scalar `immich_role` claim from these
+entitlements. Password login is disabled.
 Machine learning, smart search, facial recognition, OCR, and visual duplicate
 detection are disabled; no machine learning service is deployed.
 
