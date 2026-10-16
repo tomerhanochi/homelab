@@ -6,8 +6,8 @@ resources:
   - namespace.yaml
   - postgres-cluster-credentials.sops.yaml
   - postgres-cluster.yaml
-  - pv.yaml
-  - pvc.yaml
+  - persistentvolumes
+  - persistentvolumeclaims
   - ocirepository.yaml
   - helmrelease.yaml
   - route.yaml
