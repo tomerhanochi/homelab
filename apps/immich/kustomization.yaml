@@ -4,8 +4,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - postgres-cluster-credentials.sops.yaml
-  - postgres-cluster.yaml
+  - database
   - persistentvolumes
   - persistentvolumeclaims
   - ocirepository.yaml
