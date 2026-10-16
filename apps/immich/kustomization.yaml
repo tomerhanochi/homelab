@@ -9,8 +9,6 @@ resources:
   - config.sops.yaml
   - pv.yaml
   - pvc.yaml
-  - redis-deployment.yaml
-  - redis-service.yaml
   - ocirepository.yaml
   - helmrelease.yaml
   - route.yaml

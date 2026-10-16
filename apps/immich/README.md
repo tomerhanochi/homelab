@@ -1,6 +1,7 @@
 # Immich
 
-Deployed with the Immich Helm chart through a Flux HelmRelease.
+Deployed with the Immich Helm chart through a Flux HelmRelease, including
+its built-in Valkey service with ephemeral storage for queues and cache.
 Served at https://photos.tomerhanochi.com with native Authentik OIDC for web
 and mobile. Like Jellyfin, permissions use Authentik application entitlements:
 `homelab-users` receive `user`; `homelab-admins` receive `user` and `admin`.
