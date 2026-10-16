@@ -1,0 +1,57 @@
+---
+version: 1
+metadata:
+  name: homelab-apps-immich
+entries:
+  - model: authentik_providers_oauth2.scopemapping
+    identifiers:
+      name: homelab-scope-immich-role
+    attrs:
+      scope_name: immich_role
+      expression: |
+        return {"immich_role": "admin" if request.user.ak_groups.filter(name="homelab-admins").exists() else "user"}
+  - model: authentik_providers_oauth2.oauth2provider
+    id: provider
+    identifiers:
+      name: immich
+    attrs:
+      client_type: confidential
+      client_id: immich
+      client_secret: !Env IMMICH_CLIENT_SECRET
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      grant_types:
+        - authorization_code
+        - refresh_token
+      redirect_uris:
+        - matching_mode: strict
+          url: https://photos.tomerhanochi.com/auth/login
+        - matching_mode: strict
+          url: https://photos.tomerhanochi.com/user-settings
+        - matching_mode: strict
+          url: app.immich:///oauth-callback
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-immich-role]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
+  - model: authentik_core.application
+    id: application
+    identifiers:
+      slug: immich
+      name: Immich
+    attrs:
+      provider: !KeyOf provider
+      meta_launch_url: https://photos.tomerhanochi.com
+      policy_engine_mode: any
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf application
+      group: !Find [authentik_core.group, [name, homelab-users]]
+      order: 0
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf application
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 1

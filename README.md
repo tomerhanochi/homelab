@@ -30,6 +30,7 @@ repo.
 | **authentik** | OIDC provider (SSO): passkey-only registration, clients declared as blueprints |
 | **headlamp** | Kubernetes web console (SSO login) |
 | **jellyfin** | Media server |
+| **immich** | Photos and videos, Authentik SSO, machine learning disabled |
 | **forgejo** | Git forge |
 | **kavita** | Reading server (books/manga/comics) |
 | **qbittorrent** | Torrent client, egress via ProtonVPN (gluetun sidecar), SSO via oauth2-proxy |
