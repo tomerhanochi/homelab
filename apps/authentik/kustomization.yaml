@@ -32,6 +32,7 @@ configMapGenerator:
       - blueprints/apps-immich.yaml
       - blueprints/apps-kubectl.yaml
       - blueprints/apps-qbittorrent.yaml
+      - blueprints/apps-wealthfolio.yaml
     options:
       disableNameSuffixHash: true
 
@@ -51,6 +52,7 @@ secretGenerator:
       - IMMICH_CLIENT_SECRET=client-secrets/immich.sops.txt
       - QBITTORRENT_CLIENT_SECRET=client-secrets/qbittorrent.sops.txt
       - FILEBROWSER_CLIENT_SECRET=client-secrets/filebrowser.sops.txt
+      - WEALTHFOLIO_CLIENT_SECRET=client-secrets/wealthfolio.sops.txt
     options:
       disableNameSuffixHash: true
 

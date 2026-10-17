@@ -1,0 +1,23 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: wealthfolio
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 1m
+  timeout: 5m
+  path: ./apps/wealthfolio
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: homelab
+  dependsOn:
+    - name: authentik
+    - name: gateway
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
