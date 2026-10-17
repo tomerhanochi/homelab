@@ -135,3 +135,17 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: immich
+    - name: wealthfolio
+      hostname: wealth.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wealthfolio-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: wealthfolio

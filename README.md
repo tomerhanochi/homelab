@@ -35,6 +35,7 @@ repo.
 | **kavita** | Reading server (books/manga/comics) |
 | **qbittorrent** | Torrent client, egress via ProtonVPN (gluetun sidecar), SSO via oauth2-proxy |
 | **filebrowser** | Web file manager, SSO via oauth2-proxy |
+| **wealthfolio** | Personal finance and portfolio tracker (Authentik SSO) |
 
 ## Layout
 

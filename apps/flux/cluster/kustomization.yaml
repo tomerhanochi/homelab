@@ -21,5 +21,6 @@ resources:
   - immich.yaml
   - qbittorrent.yaml
   - filebrowser.yaml
+  - wealthfolio.yaml
   - tailscale-operator.yaml
   - tailscale.yaml

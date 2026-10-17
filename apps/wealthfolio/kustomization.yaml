@@ -1,0 +1,25 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - pvc.yaml
+  - route.yaml
+  - networkpolicies
+
+secretGenerator:
+  - name: wealthfolio-secrets
+    namespace: wealthfolio
+    type: Opaque
+    files:
+      - WF_SECRET_KEY=wealthfolio.sops.txt
+      - WF_OIDC_CLIENT_SECRET=../authentik/client-secrets/wealthfolio.sops.txt
+    options:
+      disableNameSuffixHash: true
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: wealthfolio
