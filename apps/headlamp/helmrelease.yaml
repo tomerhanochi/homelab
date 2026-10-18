@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: headlamp
-      version: 0.43.0
+      version: 0.46.0
       sourceRef:
         kind: HelmRepository
         name: headlamp
@@ -19,7 +19,7 @@ spec:
     image:
       registry: ghcr.io
       repository: headlamp-k8s/headlamp
-      tag: v0.43.0@sha256:5d03caa26df7a715079405df2949907160518750b9b62b6bf4de8d1a6142c541
+      tag: v0.46.0@sha256:8a0ef97527544baa2b35825940ddf4db6e2d09c30cd5aa31fd269ff604cc8b75
 
     config:
       baseURL: ""
@@ -27,6 +27,7 @@ spec:
       # kube-apiserver, which trusts the same authentik issuer; authorization is via
       # cluster RBAC bound to oidc: users/groups.
       oidc:
+        autoLogin: true
         secret:
           create: false
         externalSecret:
