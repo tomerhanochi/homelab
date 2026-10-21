@@ -1,0 +1,100 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slskd
+  namespace: slskd
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: slskd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slskd
+    spec:
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+        - name: prepare-download-directories
+          image: ghcr.io/slskd/slskd:0.26.0.65534-a97a425c@sha256:8bba79a86cca3668e1db8e1ec37d3822ca3f3fc3f0ed3081ab8365c12c4bcca7  # yamllint disable-line rule:line-length
+          command:
+            - sh
+            - -euc
+            - mkdir -p /downloads/incomplete
+          volumeMounts:
+            - name: music
+              mountPath: /downloads
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+      containers:
+        - name: slskd
+          image: ghcr.io/slskd/slskd:0.26.0.65534-a97a425c@sha256:8bba79a86cca3668e1db8e1ec37d3822ca3f3fc3f0ed3081ab8365c12c4bcca7  # yamllint disable-line rule:line-length
+          env:
+            - name: SLSKD_DOWNLOADS_DIR
+              value: /downloads
+            - name: SLSKD_INCOMPLETE_DIR
+              value: /downloads/incomplete
+            - name: SLSKD_REMOTE_CONFIGURATION
+              value: "false"
+            # The UI is reachable only through oauth2-proxy, which enforces
+            # Authentik access. Disable slskd's default slskd/slskd web login.
+            - name: SLSKD_NO_AUTH
+              value: "true"
+            # These values are set from an encrypted secret once provided.
+            - name: SLSKD_SLSK_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: slskd-soulseek
+                  key: username
+            - name: SLSKD_SLSK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: slskd-soulseek
+                  key: password
+          ports:
+            - name: http
+              containerPort: 5030
+            - name: soulseek
+              containerPort: 50300
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /app
+            - name: music
+              mountPath: /downloads
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: slskd-config
+        - name: music
+          persistentVolumeClaim:
+            claimName: slskd-music

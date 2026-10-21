@@ -1,0 +1,57 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: oauth2-proxy
+  namespace: slskd
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: oauth2-proxy
+      version: 10.7.0
+      sourceRef:
+        kind: HelmRepository
+        name: oauth2-proxy
+  values:
+    replicaCount: 1
+    image:
+      registry: quay.io
+      repository: oauth2-proxy/oauth2-proxy
+      tag: v7.15.3@sha256:10a1165743a192e1940b4708fb9647027185ce11a681a1c5519b442ff7f1f561  # yamllint disable-line rule:line-length
+    config:
+      existingSecret: slskd-oauth2
+      configFile: |-
+        provider = "oidc"
+        oidc_issuer_url = "https://sso.tomerhanochi.com/application/o/slskd/"
+        redirect_url = "https://slskd.tomerhanochi.com/oauth2/callback"
+        upstreams = [ "http://slskd.slskd.svc:5030" ]
+        scope = "openid profile email"
+        email_domains = [ "*" ]
+        cookie_secure = true
+        skip_provider_button = true
+        reverse_proxy = true
+    service:
+      type: ClusterIP
+      portNumber: 4180
+    securityContext:
+      enabled: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+    podSecurityContext:
+      seccompProfile:
+        type: RuntimeDefault
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
