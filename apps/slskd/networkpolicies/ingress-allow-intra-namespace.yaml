@@ -1,0 +1,19 @@
+---
+# Only same-namespace pods (including oauth2-proxy) can reach slskd's UI.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ingress-allow-intra-namespace
+  namespace: slskd
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: slskd
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: slskd
+      toPorts:
+        - ports:
+            - port: "5030"
+              protocol: TCP

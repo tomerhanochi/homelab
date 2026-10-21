@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slskd
+  namespace: slskd
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: slskd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slskd
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: slskd
+          image: ghcr.io/slskd/slskd:0.26.1@sha256:588af49abc3088d639c8f1174d3bfad6e92c093a275a593140e3ac9311ebf6c4  # yamllint disable-line rule:line-length
+          env:
+            - name: SLSKD_DOWNLOADS_DIR
+              value: /downloads
+            - name: SLSKD_INCOMPLETE_DIR
+              value: /downloads/incomplete
+            - name: SLSKD_REMOTE_CONFIGURATION
+              value: "false"
+            # The UI is reachable only through oauth2-proxy, which enforces
+            # Authentik access. Disable slskd's default slskd/slskd web login.
+            - name: SLSKD_NO_AUTH
+              value: "true"
+            # These values come from the encrypted Soulseek credentials Secret.
+            - name: SLSKD_SLSK_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: slskd-soulseek-credentials
+                  key: username
+            - name: SLSKD_SLSK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: slskd-soulseek-credentials
+                  key: password
+          ports:
+            - name: http
+              containerPort: 5030
+            - name: soulseek
+              containerPort: 50300
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /app
+            - name: music
+              mountPath: /downloads
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: slskd-config
+        - name: music
+          persistentVolumeClaim:
+            claimName: slskd-music

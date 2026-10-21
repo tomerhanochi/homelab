@@ -1,0 +1,21 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - helmchart.yaml
+  - helmrepository.yaml
+  - helmrelease.yaml
+
+secretGenerator:
+  # The OAuth2 client secret is shared with the Authentik blueprint.
+  - name: oauth2-proxy
+    namespace: slskd
+    type: Opaque
+    literals:
+      - client-id=slskd
+    files:
+      - client-secret=../../authentik/client-secrets/slskd.sops.txt
+      - cookie-secret=cookie-secret.sops.txt
+    options:
+      disableNameSuffixHash: true

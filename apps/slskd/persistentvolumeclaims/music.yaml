@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: slskd-music
+  namespace: slskd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: slskd-music
+  resources:
+    requests:
+      storage: 1Ti

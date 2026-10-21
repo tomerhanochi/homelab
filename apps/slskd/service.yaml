@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slskd
+  namespace: slskd
+spec:
+  selector:
+    app.kubernetes.io/name: slskd
+  ports:
+    - name: http
+      port: 5030
+      targetPort: 5030

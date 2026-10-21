@@ -121,6 +121,20 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: filebrowser
+    - name: slskd
+      hostname: soulseek.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: slskd-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: slskd
     - name: immich
       hostname: photos.tomerhanochi.com
       protocol: HTTPS
