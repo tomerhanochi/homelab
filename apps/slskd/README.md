@@ -1,11 +1,11 @@
 # slskd credentials
 
-Replace the encrypted Soulseek account placeholders with your own credentials:
+Replace the encrypted Soulseek account placeholders in
+`soulseek-credentials.sops.yaml` with your account credentials:
 
 ```sh
-sops apps/slskd/soulseek-username.sops.txt
-sops apps/slskd/soulseek-password.sops.txt
+sops apps/slskd/soulseek-credentials.sops.yaml
 ```
 
-Flux decrypts these files before building the Secret. Kustomize gives the Secret
-content hash, so changing either credential rolls the Deployment automatically.
+Flux decrypts this file before applying the Secret. Restart the Deployment after
+changing the credentials so slskd reads the updated values.

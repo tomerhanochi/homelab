@@ -6,22 +6,16 @@ resources:
   - namespace.yaml
   - persistentvolumes
   - persistentvolumeclaims
-  - pvc.yaml
+  - persistentvolumeconfigs
   - deployment.yaml
   - service.yaml
-  - oauth2-proxy-helmrepository.yaml
-  - oauth2-proxy-helmrelease.yaml
+  - oauth2-proxy
   - route.yaml
   - networkpolicies
+  - soulseek-credentials.sops.yaml
 
 secretGenerator:
-  # Replace the encrypted placeholder values with the Soulseek account
-  # credentials. The generated name hash rolls the Deployment after changes.
-  - name: slskd-soulseek
-    namespace: slskd
-    files:
-      - username=soulseek-username.sops.txt
-      - password=soulseek-password.sops.txt
+  # The OAuth2 client secret is shared with the Authentik blueprint.
   - name: slskd-oauth2
     namespace: slskd
     type: Opaque
@@ -29,7 +23,7 @@ secretGenerator:
       - client-id=slskd
     files:
       - client-secret=../authentik/client-secrets/slskd.sops.txt
-      - cookie-secret=oauth2-cookie-secret.sops.txt
+      - cookie-secret=oauth2-proxy/cookie-secret.sops.txt
     options:
       disableNameSuffixHash: true
 
