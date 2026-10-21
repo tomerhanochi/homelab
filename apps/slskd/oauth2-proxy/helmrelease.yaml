@@ -6,13 +6,9 @@ metadata:
   namespace: slskd
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: oauth2-proxy
-      version: 10.7.0
-      sourceRef:
-        kind: HelmRepository
-        name: oauth2-proxy
+  chartRef:
+    kind: HelmChart
+    name: oauth2-proxy
   values:
     replicaCount: 1
     image:
@@ -20,7 +16,7 @@ spec:
       repository: oauth2-proxy/oauth2-proxy
       tag: v7.15.3@sha256:10a1165743a192e1940b4708fb9647027185ce11a681a1c5519b442ff7f1f561  # yamllint disable-line rule:line-length
     config:
-      existingSecret: slskd-oauth2
+      existingSecret: oauth2-proxy
       configFile: |-
         provider = "oidc"
         oidc_issuer_url = "https://sso.tomerhanochi.com/application/o/slskd/"

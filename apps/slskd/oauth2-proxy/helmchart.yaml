@@ -1,0 +1,14 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: oauth2-proxy
+  namespace: slskd
+spec:
+  interval: 5m0s
+  chart: oauth2-proxy
+  reconcileStrategy: ChartVersion
+  sourceRef:
+    kind: HelmRepository
+    name: oauth2-proxy
+  version: '10.7.0'

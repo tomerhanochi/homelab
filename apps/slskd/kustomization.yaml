@@ -6,26 +6,12 @@ resources:
   - namespace.yaml
   - persistentvolumes
   - persistentvolumeclaims
-  - persistentvolumeconfigs
   - deployment.yaml
   - service.yaml
   - oauth2-proxy
   - route.yaml
   - networkpolicies
   - soulseek-credentials.sops.yaml
-
-secretGenerator:
-  # The OAuth2 client secret is shared with the Authentik blueprint.
-  - name: slskd-oauth2
-    namespace: slskd
-    type: Opaque
-    literals:
-      - client-id=slskd
-    files:
-      - client-secret=../authentik/client-secrets/slskd.sops.txt
-      - cookie-secret=oauth2-proxy/cookie-secret.sops.txt
-    options:
-      disableNameSuffixHash: true
 
 labels:
   - pairs:
