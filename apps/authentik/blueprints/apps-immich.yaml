@@ -3,6 +3,19 @@ version: 1
 metadata:
   name: homelab-apps-immich
 entries:
+  - model: authentik_providers_oauth2.scopemapping
+    identifiers:
+      name: homelab-scope-immich-role
+    attrs:
+      scope_name: entitlements
+      description: "Maps user entitlements to the immich_role claim."
+      expression: |
+        return {
+            "immich_role": [
+                entitlement.name
+                for entitlement in request.user.app_entitlements(provider.application)
+            ]
+        }
   - model: authentik_providers_oauth2.oauth2provider
     id: provider
     identifiers:
@@ -29,6 +42,7 @@ entries:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, entitlements]]
         - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-email]]
+        - !Find [authentik_providers_oauth2.scopemapping, [name, homelab-scope-immich-role]]
   - model: authentik_core.application
     id: application
     identifiers:
