@@ -19,7 +19,7 @@ entries:
         - refresh_token
       redirect_uris:
         - matching_mode: strict
-          url: https://slskd.tomerhanochi.com/oauth2/callback
+          url: https://soulseek.tomerhanochi.com/oauth2/callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
@@ -32,7 +32,7 @@ entries:
       name: slskd
     attrs:
       provider: !KeyOf provider
-      meta_launch_url: https://slskd.tomerhanochi.com
+      meta_launch_url: https://soulseek.tomerhanochi.com
       policy_engine_mode: any
   - model: authentik_policies.policybinding
     identifiers:

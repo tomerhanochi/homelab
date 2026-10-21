@@ -10,7 +10,7 @@ spec:
       namespace: gateway
       sectionName: slskd
   hostnames:
-    - slskd.tomerhanochi.com
+    - soulseek.tomerhanochi.com
   rules:
     - backendRefs:
         - name: oauth2-proxy

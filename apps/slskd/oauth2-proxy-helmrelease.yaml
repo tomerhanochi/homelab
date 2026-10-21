@@ -24,7 +24,7 @@ spec:
       configFile: |-
         provider = "oidc"
         oidc_issuer_url = "https://sso.tomerhanochi.com/application/o/slskd/"
-        redirect_url = "https://slskd.tomerhanochi.com/oauth2/callback"
+        redirect_url = "https://soulseek.tomerhanochi.com/oauth2/callback"
         upstreams = [ "http://slskd.slskd.svc:5030" ]
         scope = "openid profile email"
         email_domains = [ "*" ]
