@@ -17,8 +17,6 @@ spec:
     name: homelab
   dependsOn:
     - name: cloudnative-pg-operator
-    - name: gateway
-    - name: authentik
   decryption:
     provider: sops
     secretRef:
