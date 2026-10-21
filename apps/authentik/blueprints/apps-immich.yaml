@@ -7,7 +7,7 @@ entries:
     identifiers:
       name: homelab-scope-immich-role
     attrs:
-      scope_name: entitlements
+      scope_name: immich_role
       description: "Maps user entitlements to the immich_role claim."
       expression: |
         return {

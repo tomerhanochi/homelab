@@ -18,7 +18,7 @@ oauth:
     clientId: ENC[AES256_GCM,data:xoVbg+A2,iv:IKFqlhGp7Gaqq70vTyYOqFDBFXuuRQLtd08oqr1hmCE=,tag:CCEkGgHkjaNI4WTA40Sn3w==,type:str]
     clientSecret: ENC[AES256_GCM,data:c9luCYfXtWBkSNm7e7Z2pcmlyXrqJ8oKFLKf6vZgieUPva7XC6o2+drdbSVXqtDxVt/6uQ1XhisNvrRkZ1F7hQ==,iv:IMECzYmXvgzVEVPzCMMVq59G1S23k9yXPz2J7oeHJEw=,tag:sjRu1QeVjPw7l4Q0CJRW1Q==,type:str]
     issuerUrl: ENC[AES256_GCM,data:FBa5uAizszF7g0zmLLj2QDxE2EskFMvVW5ALk6M7zJvv0Y0pBMEZRDtaBce8/JWo6/4=,iv:7EYyB7O3TSBR/s1bao15uEbWyitnbI5XTfwMGcPqkHw=,tag:5ouefo2mwVJV2lDa/Oernw==,type:str]
-    scope: ENC[AES256_GCM,data:i8Ev8HUhh6DyxJzcqxs0Vww1SLU4m5aLVptje2anW2yt,iv:Un36M5Og2Dje6BNCt7AKjPhUMsbAXrGPi1UA8QedUp4=,tag:cOQD/kNh+lxJxdp3z4CKYA==,type:str]
+    scope: ENC[AES256_GCM,data:4OLvsgI98NJf2wCGq1kZ/ul1SVhI1piXo6UAVdd756qALzEC2Kg2pBsu3Le7,iv:oFJ5CsjKBkDFsMZCiMgQOiGYNIa/zdqs8jod6z0C5Lw=,tag:g8ClsVFnFvsjSgc5vZFtxA==,type:str]
     signingAlgorithm: ENC[AES256_GCM,data:OWbGTb4=,iv:bbL9wtIvWaiPPGMTtgedJ+QOgPnErb+lYlAIAHrFLOo=,tag:inGxamqQ3CmE5qeJZ0Rq9A==,type:str]
 passwordLogin:
     enabled: ENC[AES256_GCM,data:sbbA7Qw=,iv:bJpBJG5cKWCtTz98DQlal78i4A10lmv5xCEmof2ehQs=,tag:FcGcBSskZUdG068bW69tDA==,type:bool]
@@ -39,7 +39,7 @@ sops:
             XnnbKj/fMPCPWPaoeMwrvAW5milb7fc0xVxO48SLKO5pTdMgHhTXFw==
             -----END AGE ENCRYPTED FILE-----
           recipient: age1jjpauwwlhgtvk8k75cdulk3eweu3et8v3fn4clr8gm7sergvj3vsachhh4
-    lastmodified: "2026-10-16T13:46:29Z"
-    mac: ENC[AES256_GCM,data:e9bVp41Z++QILtrHUiFRfl8NV2YUG0rD0lMIa58NH8q/m3OJfo37siMy+PRVXTpFQ70xRUpBSZfgwEARAJ9n73hWw+ar4+HKHy1kD5WYDk+CgnHGT3Paibr62ymK/KTxeUFLdyqOYdl2Tqc2toFbELaDhFTJvBVjsyD7T8m/YhI=,iv:MEBrNxeZnEYIq+ObaYbxWqkmm8c2yC7d4nOo8om5KDo=,tag:3UQpryllKmfqSG11ebqcjA==,type:str]
+    lastmodified: "2026-10-21T20:47:21Z"
+    mac: ENC[AES256_GCM,data:soLbdH0+WV5OhBHMxN9oYgJFKiwBo4NS3Py6nyHHVDy8TssPydKMhGy2s0aoAwJapAV0J8JU9sW3D8/6PFIH2t7JFbt4JRU6NOBu+deo5x9oIGi+L3VY9qjF10DmdgxUPmGCEdunT4k4U1rTO3OY3sMokwkO9ApQdEN+yNT9xNw=,iv:jWX7x+dt/zPYrLh2HB8wBrL00RJWJ92svDNliA/WVr0=,tag:BHXmUkPgw7PGmKsS11dlHw==,type:str]
     unencrypted_regex: ^(apiVersion|metadata|kind|type)$
     version: 3.13.3
