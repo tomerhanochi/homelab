@@ -20,7 +20,7 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: prepare-download-directories
-          image: ghcr.io/slskd/slskd:0.26.0.65534-a97a425c@sha256:8bba79a86cca3668e1db8e1ec37d3822ca3f3fc3f0ed3081ab8365c12c4bcca7  # yamllint disable-line rule:line-length
+          image: ghcr.io/slskd/slskd:0.26.1@sha256:588af49abc3088d639c8f1174d3bfad6e92c093a275a593140e3ac9311ebf6c4  # yamllint disable-line rule:line-length
           command:
             - sh
             - -euc
@@ -40,7 +40,7 @@ spec:
               type: RuntimeDefault
       containers:
         - name: slskd
-          image: ghcr.io/slskd/slskd:0.26.0.65534-a97a425c@sha256:8bba79a86cca3668e1db8e1ec37d3822ca3f3fc3f0ed3081ab8365c12c4bcca7  # yamllint disable-line rule:line-length
+          image: ghcr.io/slskd/slskd:0.26.1@sha256:588af49abc3088d639c8f1174d3bfad6e92c093a275a593140e3ac9311ebf6c4  # yamllint disable-line rule:line-length
           env:
             - name: SLSKD_DOWNLOADS_DIR
               value: /downloads
