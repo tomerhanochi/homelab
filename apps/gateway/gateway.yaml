@@ -122,7 +122,7 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: filebrowser
     - name: slskd
-      hostname: slskd.tomerhanochi.com
+      hostname: soulseek.tomerhanochi.com
       protocol: HTTPS
       port: 443
       tls:
