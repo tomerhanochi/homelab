@@ -135,6 +135,20 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: slskd
+    - name: tagr
+      hostname: music.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: tagr-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: tagr
     - name: immich
       hostname: photos.tomerhanochi.com
       protocol: HTTPS
