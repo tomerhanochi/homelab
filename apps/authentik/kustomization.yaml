@@ -26,6 +26,7 @@ configMapGenerator:
       - blueprints/flow-authentication.yaml
       - blueprints/apps-filebrowser.yaml
       - blueprints/apps-slskd.yaml
+      - blueprints/apps-tagr.yaml
       - blueprints/apps-forgejo.yaml
       - blueprints/apps-headlamp.yaml
       - blueprints/apps-jellyfin.yaml
@@ -54,6 +55,7 @@ secretGenerator:
       - QBITTORRENT_CLIENT_SECRET=client-secrets/qbittorrent.sops.txt
       - FILEBROWSER_CLIENT_SECRET=client-secrets/filebrowser.sops.txt
       - SLSKD_CLIENT_SECRET=client-secrets/slskd.sops.txt
+      - TAGR_CLIENT_SECRET=client-secrets/tagr.sops.txt
       - WEALTHFOLIO_CLIENT_SECRET=client-secrets/wealthfolio.sops.txt
     options:
       disableNameSuffixHash: true

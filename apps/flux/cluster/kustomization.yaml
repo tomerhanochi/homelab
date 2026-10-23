@@ -22,6 +22,7 @@ resources:
   - qbittorrent.yaml
   - filebrowser.yaml
   - slskd.yaml
+  - tagr.yaml
   - wealthfolio.yaml
   - tailscale-operator.yaml
   - tailscale.yaml
