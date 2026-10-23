@@ -11,7 +11,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /var/mnt/data/music/torrents
+    path: /var/mnt/data/music
     type: Directory
   nodeAffinity:
     required:
