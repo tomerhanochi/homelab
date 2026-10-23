@@ -1,0 +1,20 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - helmchart.yaml
+  - helmrepository.yaml
+  - helmrelease.yaml
+
+secretGenerator:
+  - name: oauth2-proxy
+    namespace: tagr
+    type: Opaque
+    literals:
+      - client-id=tagr
+    files:
+      - client-secret=../../authentik/client-secrets/tagr.sops.txt
+      - cookie-secret=cookie-secret.sops.txt
+    options:
+      disableNameSuffixHash: true
