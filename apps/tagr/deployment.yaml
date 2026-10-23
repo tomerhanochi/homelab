@@ -17,50 +17,29 @@ spec:
         app.kubernetes.io/name: tagr
     spec:
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
       containers:
         - name: tagr
-          image: ghcr.io/suitux/tagr:latest
-          envFrom:
-            - secretRef:
-                name: tagr-config
+          image: ghcr.io/wow-signal-dev/metadata-remote:latest
           env:
-            - name: NODE_ENV
-              value: production
-            - name: DATABASE_URL
-              value: file:/data/tagr.db
-            - name: AUTH_URL
-              value: https://music.tomerhanochi.com
             - name: PUID
               value: "1000"
             - name: PGID
               value: "1000"
-            - name: TAGR_INSIGHTS
-              value: "false"
           ports:
             - name: http
-              containerPort: 3000
+              containerPort: 8338
           volumeMounts:
-            - name: config
-              mountPath: /data
             - name: music
               mountPath: /music
           securityContext:
-            # Tagr's entrypoint creates the PUID/PGID account, fixes /data
-            # ownership, and then drops privileges with su-exec.
-            runAsNonRoot: false
-            runAsUser: 0
-            runAsGroup: 0
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-              add:
-                - CHOWN
-                - DAC_OVERRIDE
-                - FOWNER
-                - SETGID
-                - SETUID
             seccompProfile:
               type: RuntimeDefault
           resources:
@@ -71,9 +50,6 @@ spec:
               cpu: 1000m
               memory: 1Gi
       volumes:
-        - name: config
-          persistentVolumeClaim:
-            claimName: tagr-data
         - name: music
           persistentVolumeClaim:
             claimName: tagr-music

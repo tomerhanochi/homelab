@@ -21,7 +21,7 @@ spec:
         provider = "oidc"
         oidc_issuer_url = "https://sso.tomerhanochi.com/application/o/tagr/"
         redirect_url = "https://music.tomerhanochi.com/oauth2/callback"
-        upstreams = [ "http://tagr.tagr.svc:3000" ]
+        upstreams = [ "http://tagr.tagr.svc:8338" ]
         scope = "openid profile email"
         email_domains = [ "*" ]
         cookie_secure = true
