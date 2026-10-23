@@ -73,7 +73,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: tagr-config
+            claimName: tagr-data
         - name: music
           persistentVolumeClaim:
             claimName: tagr-music
