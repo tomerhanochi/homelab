@@ -20,6 +20,8 @@ entries:
       redirect_uris:
         - matching_mode: strict
           url: https://books.tomerhanochi.com/oauth2-callback
+        - matching_mode: strict
+          url: bookorbit://oauth2-callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
