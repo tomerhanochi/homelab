@@ -164,7 +164,7 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: wealthfolio
     - name: books
-      hostname: books.homelab.tomerhanochi.com
+      hostname: books.tomerhanochi.com
       protocol: HTTPS
       port: 443
       tls:

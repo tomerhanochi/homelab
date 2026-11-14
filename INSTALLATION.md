@@ -172,7 +172,7 @@ kubectl get certificate -A       # all Ready=True
 
 ### BookOrbit first-run setup
 
-Open `https://books.homelab.tomerhanochi.com` and create the administrator with
+Open `https://books.tomerhanochi.com` and create the administrator with
 `sops -d apps/bookorbit/secrets.sops.yaml` (use the `SETUP_BOOTSTRAP_TOKEN` value).
 In Settings → OIDC / SSO, add an enabled provider with slug `authentik`, issuer
 `https://sso.tomerhanochi.com/application/o/bookorbit/`, client ID `bookorbit`,

@@ -19,7 +19,7 @@ entries:
         - refresh_token
       redirect_uris:
         - matching_mode: strict
-          url: https://books.homelab.tomerhanochi.com/oauth2-callback
+          url: https://books.tomerhanochi.com/oauth2-callback
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
@@ -31,7 +31,7 @@ entries:
       name: BookOrbit
     attrs:
       provider: !KeyOf provider
-      meta_launch_url: https://books.homelab.tomerhanochi.com
+      meta_launch_url: https://books.tomerhanochi.com
       policy_engine_mode: any
   - model: authentik_policies.policybinding
     identifiers:

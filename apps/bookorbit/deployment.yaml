@@ -27,9 +27,9 @@ spec:
             - name: NODE_ENV
               value: production
             - name: APP_URL
-              value: https://books.homelab.tomerhanochi.com
+              value: https://books.tomerhanochi.com
             - name: CLIENT_URL
-              value: https://books.homelab.tomerhanochi.com
+              value: https://books.tomerhanochi.com
             - name: POSTGRES_HOST
               value: bookorbit-database-rw
             - name: POSTGRES_USER

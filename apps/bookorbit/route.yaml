@@ -10,7 +10,7 @@ spec:
       namespace: gateway
       sectionName: books
   hostnames:
-    - books.homelab.tomerhanochi.com
+    - books.tomerhanochi.com
   rules:
     - backendRefs:
         - name: bookorbit
