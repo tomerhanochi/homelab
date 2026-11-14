@@ -169,3 +169,16 @@ flux get kustomizations          # all Ready=True
 kubectl get pods -A              # all Running
 kubectl get certificate -A       # all Ready=True
 ```
+
+### BookOrbit first-run setup
+
+Open `https://books.tomerhanochi.com` and create the administrator with
+`sops -d apps/bookorbit/secrets.sops.yaml` (use the `SETUP_BOOTSTRAP_TOKEN` value).
+In Settings → OIDC / SSO, add an enabled provider with slug `authentik`, issuer
+`https://sso.tomerhanochi.com/application/o/bookorbit/`, client ID `bookorbit`,
+and the client secret from `sops -d apps/authentik/client-secrets/bookorbit.sops.txt`.
+Use scopes `openid profile email`, enable auto-provisioning as desired, and enable
+local account linking if the administrator username matches the Authentik username.
+Test and save the provider before considering disabling local authentication.
+Create a library pointing to `/books`; it mounts the existing Kavita books
+directory read-only.

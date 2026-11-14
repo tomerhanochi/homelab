@@ -23,5 +23,6 @@ resources:
   - filebrowser.yaml
   - slskd.yaml
   - wealthfolio.yaml
+  - bookorbit.yaml
   - tailscale-operator.yaml
   - tailscale.yaml
