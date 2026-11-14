@@ -4,9 +4,9 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - persistentvolumeclaims
   - deployment.yaml
   - service.yaml
-  - pvc.yaml
   - route.yaml
   - networkpolicies
 

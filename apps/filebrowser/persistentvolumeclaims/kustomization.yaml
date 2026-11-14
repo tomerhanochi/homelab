@@ -7,3 +7,4 @@ resources:
   - movies.yaml
   - music.yaml
   - shows.yaml
+  - config.yaml

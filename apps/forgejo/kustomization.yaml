@@ -4,8 +4,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - postgres-cluster.yaml
-  - postgres-cluster-credentials.sops.yaml
+  - database
   - ocirepository.yaml
   - helmrelease.yaml
   - route.yaml
