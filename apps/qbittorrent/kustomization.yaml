@@ -6,32 +6,12 @@ resources:
   - namespace.yaml
   - persistentvolumes
   - persistentvolumeclaims
-  - pvc.yaml
   - vpn-secret.sops.yaml
   - deployment.yaml
   - service.yaml
-  - oauth2-proxy-helmrepository.yaml
-  - oauth2-proxy-helmrelease.yaml
+  - oauth2-proxy
   - route.yaml
   - networkpolicies
-
-# oauth2-proxy credentials. client-id is a non-secret literal; client-secret is
-# shared with authentik (single source of truth) and cookie-secret is app-local,
-# both SOPS-encrypted and decrypted by Flux before build. disableNameSuffixHash
-# keeps the name static so the HelmRelease's config.existingSecret ref stays valid.
-# NOTE: the cross-directory file ref requires kustomize LoadRestrictionsNone, which
-# Flux's kustomize-controller uses by default.
-secretGenerator:
-  - name: qbittorrent-oauth2
-    namespace: qbittorrent
-    type: Opaque
-    literals:
-      - client-id=qbittorrent
-    files:
-      - client-secret=../authentik/client-secrets/qbittorrent.sops.txt
-      - cookie-secret=oauth2-cookie-secret.sops.txt
-    options:
-      disableNameSuffixHash: true
 
 labels:
   - pairs:
