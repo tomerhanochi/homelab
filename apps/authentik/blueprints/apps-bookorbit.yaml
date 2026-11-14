@@ -36,6 +36,31 @@ entries:
       provider: !KeyOf provider
       meta_launch_url: https://books.tomerhanochi.com
       policy_engine_mode: any
+  - model: authentik_core.applicationentitlement
+    id: entitlement-user
+    identifiers:
+      app: !KeyOf application
+      name: user
+  - model: authentik_core.applicationentitlement
+    id: entitlement-admin
+    identifiers:
+      app: !KeyOf application
+      name: admin
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-user
+      group: !Find [authentik_core.group, [name, homelab-users]]
+      order: 0
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-user
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf entitlement-admin
+      group: !Find [authentik_core.group, [name, homelab-admins]]
+      order: 0
   - model: authentik_policies.policybinding
     identifiers:
       target: !KeyOf application
