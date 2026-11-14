@@ -13,17 +13,6 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: bookorbit-db
-  namespace: bookorbit
-spec:
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: bookorbit-books
   namespace: bookorbit
 spec:

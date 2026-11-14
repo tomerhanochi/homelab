@@ -14,6 +14,8 @@ spec:
   sourceRef:
     kind: GitRepository
     name: homelab
+  dependsOn:
+    - name: cloudnative-pg-operator
   decryption:
     provider: sops
     secretRef:

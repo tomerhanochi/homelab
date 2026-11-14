@@ -31,11 +31,16 @@ spec:
             - name: CLIENT_URL
               value: https://books.homelab.tomerhanochi.com
             - name: POSTGRES_HOST
-              value: 127.0.0.1
+              value: bookorbit-database-rw
             - name: POSTGRES_USER
               value: bookorbit
             - name: POSTGRES_DB
               value: bookorbit
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bookorbit-database-app
+                  key: password
             - name: OIDC_ALLOW_LOCAL_ISSUERS
               value: "true"
           envFrom:
@@ -54,36 +59,10 @@ spec:
               memory: 512Mi
             limits:
               memory: 2Gi
-        - name: postgres
-          image: pgvector/pgvector:pg18
-          env:
-            - name: POSTGRES_USER
-              value: bookorbit
-            - name: POSTGRES_DB
-              value: bookorbit
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: bookorbit-secrets
-                  key: POSTGRES_PASSWORD
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          volumeMounts:
-            - name: db
-              mountPath: /var/lib/postgresql/data
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              memory: 1Gi
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: bookorbit-data
-        - name: db
-          persistentVolumeClaim:
-            claimName: bookorbit-db
         - name: books
           persistentVolumeClaim:
             claimName: bookorbit-books
