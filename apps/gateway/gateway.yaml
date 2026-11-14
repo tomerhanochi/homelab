@@ -163,3 +163,17 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: wealthfolio
+    - name: bookorbit
+      hostname: books.homelab.tomerhanochi.com
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: bookorbit-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: bookorbit
