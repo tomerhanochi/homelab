@@ -4,3 +4,7 @@ kind: Kustomization
 
 resources:
   - default-deny.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: cilium
