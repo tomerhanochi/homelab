@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookorbit-books
+  namespace: bookorbit
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: ""
+  volumeName: bookorbit-books
+  resources:
+    requests:
+      storage: 1Ti

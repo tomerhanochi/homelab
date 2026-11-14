@@ -39,7 +39,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: bookorbit-database-app
+                  name: bookorbit-database-credentials
                   key: password
             - name: OIDC_ALLOW_LOCAL_ISSUERS
               value: "true"
@@ -51,6 +51,7 @@ spec:
               mountPath: /data
             - name: books
               mountPath: /books
+              readOnly: true
             - name: tmp
               mountPath: /tmp
           resources:
@@ -66,5 +67,6 @@ spec:
         - name: books
           persistentVolumeClaim:
             claimName: bookorbit-books
+            readOnly: true
         - name: tmp
           emptyDir: {}

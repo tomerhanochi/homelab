@@ -180,5 +180,5 @@ and the client secret from `sops -d apps/authentik/client-secrets/bookorbit.sops
 Use scopes `openid profile email`, enable auto-provisioning as desired, and enable
 local account linking if the administrator username matches the Authentik username.
 Test and save the provider before considering disabling local authentication.
-Create a library pointing to `/books`; this is a new persistent volume, separate
-from the existing Kavita library.
+Create a library pointing to `/books`; it mounts the existing Kavita books
+directory read-only.

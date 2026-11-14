@@ -20,6 +20,8 @@ spec:
     initdb:
       database: bookorbit
       owner: bookorbit
+      secret:
+        name: bookorbit-database-credentials
       postInitApplicationSQL:
         - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
         - CREATE EXTENSION IF NOT EXISTS pg_trgm;
