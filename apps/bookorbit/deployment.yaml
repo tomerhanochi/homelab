@@ -17,6 +17,13 @@ spec:
         app.kubernetes.io/name: bookorbit
     spec:
       terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: bookorbit
           image: ghcr.io/bookorbit/bookorbit:3.8.0
@@ -54,6 +61,11 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           resources:
             requests:
               cpu: 100m
